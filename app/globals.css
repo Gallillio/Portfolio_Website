@@ -2,20 +2,187 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer utilities {
+  .transition-height {
+    transition-property: height, opacity;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @keyframes expand {
+    0% {
+      transform: scale(0.95);
+      opacity: 0.9;
+    }
+    70% {
+      transform: scale(1.01);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-expand {
+    animation: expand 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes contract {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.98);
+      opacity: 0.95;
+    }
+  }
+
+  .animate-contract {
+    animation: contract 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Add the animation for fade-in used by the hidden joke */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out forwards;
   }
 }
 
+/* Custom tab button styles */
+[data-state="active"].custom-tab {
+  @apply bg-black text-green-500;
+}
+
+.custom-tab {
+  @apply px-4 py-2 transition-all duration-300 ease-in-out relative overflow-hidden;
+}
+
+.custom-tab::before {
+  content: "";
+  @apply absolute bottom-0 left-0 w-full h-0.5 bg-green-500 transform scale-x-0 transition-transform duration-300 ease-in-out;
+}
+
+.custom-tab:hover::before {
+  @apply scale-x-100;
+}
+
+.custom-tab:hover {
+  @apply text-green-400 bg-green-500/10;
+}
+
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #22c55e;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #16a34a;
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #22c55e #111;
+}
+
+/* Apply custom scrollbar to all scrollable areas by default */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #22c55e #111;
+}
+
+html::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+html::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 3px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: #22c55e;
+  border-radius: 3px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: #16a34a;
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 142.1 76.2% 36.3%;
+  --primary-foreground: 355.7 100% 97.3%;
+  --secondary: 220 14.3% 95.9%;
+  --secondary-foreground: 220 8.9% 46.1%;
+  --muted: 220 14.3% 95.9%;
+  --muted-foreground: 220 8.9% 46.1%;
+  --accent: 220 14.3% 95.9%;
+  --accent-foreground: 220 8.9% 46.1%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 142.1 76.2% 36.3%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 20% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 20% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 142.1 70.6% 45.3%;
+  --primary-foreground: 144.9 80.4% 10%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 142.4 71.8% 29.2%;
+}
+
+* {
+  @apply border-border;
+}
+
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-background text-foreground;
+}
+
+html {
+  @apply dark;
 }
