@@ -116,7 +116,7 @@ export default function Projects() {
                   </a>
                 </Button>
               )}
-              {project.demo && (
+              {project.demo && project.demo_available ? (
                 <Button
                   variant="outline"
                   size="sm"
@@ -128,6 +128,19 @@ export default function Projects() {
                     <ExternalLink size={16} className="mr-2" />
                     Demo
                   </a>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-green-500 text-green-400 bg-black opacity-50 cursor-not-allowed"
+                  title="This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                  asChild
+                >
+                  <span>
+                    <ExternalLink size={16} className="mr-2" />
+                    Demo (Unavailable)
+                  </span>
                 </Button>
               )}
             </CardFooter>

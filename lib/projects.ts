@@ -9,6 +9,7 @@ export const projects: Project[] = [
     image: "/placeholder.svg?height=300&width=400",
     github: "https://github.com/your-username/gptube",
     demo: "https://your-gptube-demo.com",
+    demo_available: false,
   },
   {
     title: "My Portfolio Website",
@@ -18,15 +19,17 @@ export const projects: Project[] = [
     image: "/placeholder.svg?height=300&width=400",
     github: "https://github.com/Gallillio/Portfolio_Website",
     demo: "https://your-portfolio-demo.com",
+    demo_available: true,
   },
   {
     title: "Real-Time Facial Emotion Classification",
     description:
-      "Developed a real-time facial emotion classification system by leveraging transfer learning techniques to fine-tune MobileNetV2, ResNet50, and VGG models, as well as creating a custom CNN model from scratch.",
+      "Developed a real-time facial emotion classification system using transfer learning (MobileNetV2, ResNet50, VGG) and a custom CNN, achieving 83% accuracy on FER-2013 dataset using fine-tuned MobileNetV2 model.",
     technologies: ["OpenCV", "CNN", "MobileNetV2", "VGG", "ResNet50", "Data Augmentation"],
     image: "/placeholder.svg?height=300&width=400",
-    github: "https://github.com/your-username/facial-emotion-classification",
+    github: "https://github.com/Gallillio/Realtime_Face_Emotion_Recognition",
     demo: "https://your-emotion-classification-demo.com",
+    demo_available: false,
   },
   {
     title: "AI Chatbot Assistant",

@@ -18,5 +18,6 @@ export interface Project {
   image?: string
   github?: string
   demo?: string
+  demo_available?: boolean
 }
 
