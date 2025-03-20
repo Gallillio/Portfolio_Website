@@ -12,7 +12,8 @@ export const skillLogos: { [key: string]: string } = {
 
   // Web & Application Development
   "Python": "https://img.icons8.com/color/96/python.png",
-  "JavaScript/TypeScript": "https://img.icons8.com/color/96/javascript.png",
+  "JavaScript": "https://img.icons8.com/color/96/javascript.png",
+  "TypeScript": "https://img.icons8.com/color/96/typescript.png",
   "ReactJS": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg",
   "NextJS": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
   "Node.js": "https://img.icons8.com/color/96/nodejs.png",
@@ -26,14 +27,16 @@ export const skillLogos: { [key: string]: string } = {
   "C#": "https://img.icons8.com/color/96/c-sharp-logo.png",
   "Unity": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg",
   // "XR Development": "https://img.icons8.com/color/96/vr-glasses.png",
-  "TailwindCSS": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg",
+  "Tailwind": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg",
 
   // DevOps & Tools
   "Git": "https://img.icons8.com/color/96/git.png",
   "Docker": "https://img.icons8.com/color/96/docker.png",
   "Postman": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg",
   "Vercel": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vercel/vercel-original.svg",
+  "V0": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/v0.png",
   "Linux": "https://img.icons8.com/color/96/linux.png",
+  "Agile/Scrum": "https://www.edureka.co/blog/wp-content/uploads/2019/07/ScrumLogo-293x300.png",
 
   // Design & Collaboration
   "Figma": "https://img.icons8.com/color/96/figma.png",

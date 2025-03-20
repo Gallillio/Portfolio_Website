@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, Trophy, Star, Languages } from "lucide-react"
+import { BookOpen, Trophy, Star, Languages, ExternalLink } from "lucide-react"
 import { personalAchievements } from "@/lib/profile-data"
 
 // Map of icon strings to Lucide components
@@ -24,7 +24,21 @@ export default function MyAchievements() {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <div>
-                <CardTitle className="text-green-400">{achievement.title}</CardTitle>
+                <CardTitle className="text-green-400">
+                  {achievement.title}
+                  {achievement.link && (
+                    <a 
+                      href={achievement.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center ml-2 text-green-400 hover:text-green-300 mt-2"
+                      // title={achievement.linkText}
+                    >
+                      <ExternalLink className="h-5 w-5 text-yellow-400 hover:text-yellow-300 transition duration-200" />
+                      <span className="ml-1 text-sm text-yellow-400 hover:text-yellow-300 transition duration-200">{achievement.linkText}</span>
+                    </a>
+                  )}
+                </CardTitle>
                 <CardDescription className="text-green-300/80 whitespace-pre-line mt-1 text-base">
                   {achievement.description.split('\n')[0]}
                   {achievement.description.split('\n').length > 1 && (

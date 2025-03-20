@@ -26,8 +26,8 @@ export const skills: SkillsData = {
     "IBM Cloud"
   ],
   "Web & Application Development": [
-    "Python",
-    "JavaScript/TypeScript",
+    "JavaScript",
+    "TypeScript",
     "ReactJS",
     "NextJS",
     "Node.js",
@@ -40,8 +40,7 @@ export const skills: SkillsData = {
     "OpenAPI",
     "C#",
     "Unity",
-    "XR Development",
-    "TailwindCSS"
+    "Tailwind"
   ],
   "DevOps & Tools": [
     "Git",
@@ -186,35 +185,12 @@ export interface PersonalAchievement {
   icon: "trophy" | "star" | "book" | "languages"  // Using string literals for icon types
   year: string
   category: string
+  link?: string  // Optional link to external resource
+  linkText?: string
 }
 
 // Personal achievements data
 export const personalAchievements: PersonalAchievement[] = [
-  {
-    id: "japanese-proficiency",
-    title: "Japanese Language Proficiency",
-    description: "Achieved JLPT N4 level in Japanese Language during my studies at Human Academy",
-    icon: "languages",
-    year: "Jan. 2025",
-    category: "Language",
-  },
-  {
-    id: "ges-Awards",
-    title: "Startup GESAwards",
-    description: `My startup GPTube won Top 3 finalist in the GESAwards Africa.
-    Representing Egypt and North Africa internationally`,
-    icon: "star",
-    year: "Dec. 2024",
-    category: "Entrepreneurship",
-  },
-  {
-    id: "times-higher-education-eslsca",
-    title: "Awarded The Times Highest Higher Education",
-    description: "Recognized for innovative contributions in educational technology in The Arab Summit of Universities in Dubai University",
-    icon: "trophy",
-    year: "Dec. 2024",
-    category: "Award",
-  },
   {
     id: "elsevier-publication",
     title: "Published Journal of Elsevier's Procedia",
@@ -223,6 +199,37 @@ export const personalAchievements: PersonalAchievement[] = [
     icon: "book",
     year: "Sep. 2024",
     category: "Publication",
+    link: "https://www.sciencedirect.com/science/article/pii/S1877050924029806",
+    linkText: "View Paper"
+  },
+  {
+    id: "times-higher-education-eslsca",
+    title: "Awarded The Times Highest Higher Education",
+    description: "Recognized for innovative contributions in educational technology in The Arab Summit of Universities in Dubai University",
+    icon: "trophy",
+    year: "Dec. 2024",
+    category: "Award",
+    link: "https://theawardsarabworld.com/2024/en/page/2024",
+    linkText: "View Blog Post"
+  },
+  {
+    id: "ges-Awards",
+    title: "Awarded Top 3 Finalist in GESAwards Africa",
+    description: `My startup GPTube won Top 3 finalist in the GESAwards Africa.
+    Representing Egypt and North Africa internationally`,
+    icon: "star",
+    year: "Dec. 2024",
+    category: "Entrepreneurship",
+    link: "https://www.linkedin.com/posts/ghana-society-for-education-technology_gesawards2024-edtech-innovation-activity-7265332297669746689-uv6Z?utm",
+    linkText: "View LinkedIn Post"
+  },
+  {
+    id: "japanese-proficiency",
+    title: "Japanese Language Proficiency",
+    description: "Achieved JLPT N4 level in Japanese Language during my studies at Human Academy",
+    icon: "languages",
+    year: "Jan. 2025",
+    category: "Language",
   },
 ];
 

@@ -21,7 +21,7 @@ const iconMap = {
 } as const;
 
 type TimelineItem = 
-  | { type: 'achievement'; date: string; title: string; subtitle: string; category: string | undefined; targetTab: string; icon: ReactNode }
+  | { type: 'achievement'; date: string; title: string; subtitle: string; category: string | undefined; targetTab: string; icon: ReactNode; link?: string }
   | { type: 'experience'; title: string; company: string; period: string; description: string; targetTab: string }
   | { type: 'education'; degree: string; institution: string; year: string; focus: string; location: string; targetTab: string }
   | { type: 'freelance'; title: string; description: string; period: string; technologies: string[]; targetTab: string }
@@ -264,6 +264,7 @@ export default function About() {
                                     fill
                                     className="object-contain"
                                     sizes="24px"
+                                    style={{ filter: ['ExpressJS', 'Django', 'Flask', 'Vercel', 'Node.js'].includes(skill) ? 'invert(0.6)' : 'none' }}
                                   />
                                 </div>
                               )}
@@ -285,13 +286,11 @@ export default function About() {
         <TabsContent value="timeline" className="mt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6 pb-12">
-              <div className="relative max-w-5xl mx-auto">
-                {/* Main vertical line with segments */}
+              {/* Hide on mobile, show on desktop */}
+              <div className="hidden md:block relative max-w-5xl mx-auto">
+                {/* Main vertical line with segments - Desktop */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-0.5">
-                  {/* Gradient overlay for continuity */}
                   <div className="absolute inset-0 bg-gradient-to-b from-green-500/20 via-green-500 to-green-500/20"></div>
-                  
-                  {/* Winding line segments */}
                   <div className="absolute h-full w-full">
                     <svg className="h-full w-40 -ml-[76px]" preserveAspectRatio="none" viewBox="0 0 40 100">
                       <path
@@ -306,7 +305,7 @@ export default function About() {
                 </div>
                 
                 <div className="space-y-20">
-                  {/* Map through experiences, education, and achievements dynamically */}
+                  {/* Desktop Timeline Items */}
                   {(([
                     ...personalAchievements.map(achievement => ({
                       type: 'achievement' as const,
@@ -315,7 +314,8 @@ export default function About() {
                       subtitle: achievement.description.split('\n')[0],
                       category: achievement.category,
                       icon: iconMap[achievement.icon],
-                      targetTab: 'my-achievements'
+                      targetTab: 'my-achievements',
+                      link: achievement.link
                     })),
                     ...experiences.map(exp => ({
                       type: 'experience' as const,
@@ -338,19 +338,16 @@ export default function About() {
                       type: 'freelance' as const,
                       title: project.title,
                       description: project.description,
-                      period: project.period, // We need to add this to the FreelanceProject interface
+                      period: project.period,
                       technologies: project.technologies,
                       targetTab: 'freelance'
                     }))
                   ] as const) as TimelineItem[]).sort((a, b) => {
                     const parseDate = (dateStr: string) => {
-                      // Extract the first date from the period (before the hyphen if it exists)
                       const firstDate = dateStr.split('-')[0].trim();
                       try {
-                        // Parse dates in the format "MMM. YYYY"
                         return parse(firstDate, 'MMM. yyyy', new Date());
                       } catch {
-                        // If parsing fails, return the earliest possible date
                         return new Date(0);
                       }
                     };
@@ -387,11 +384,24 @@ export default function About() {
                               className="text-left group/title"
                             >
                               <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
-                                <span className="group-hover/title:underline decoration-green-500 decoration-2">
+                                <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
                                   {item.type === 'achievement' ? item.title
                                     : item.type === 'experience' ? item.title
                                     : item.type === 'freelance' ? item.title
                                     : item.degree}
+                                  {item.type === 'achievement' && (item as any).link && (
+                                    <a 
+                                      href={(item as any).link}
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                                      onClick={(e) => e.stopPropagation()}
+                                      title="View Paper"
+                                    >
+                                      <ExternalLink className="h-5 w-5" />
+                                      <span className="ml-1 text-sm">View Paper</span>
+                                    </a>
+                                  )}
                                 </span>
                                 <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                   {item.type === 'achievement' ? item.subtitle
@@ -431,11 +441,24 @@ export default function About() {
                               className="text-left group/title"
                             >
                               <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
-                                <span className="group-hover/title:underline decoration-green-500 decoration-2">
+                                <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
                                   {item.type === 'achievement' ? item.title
                                     : item.type === 'experience' ? item.title
                                     : item.type === 'freelance' ? item.title
                                     : item.degree}
+                                  {item.type === 'achievement' && (item as any).link && (
+                                    <a 
+                                      href={(item as any).link}
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                                      onClick={(e) => e.stopPropagation()}
+                                      title="View Paper"
+                                    >
+                                      <ExternalLink className="h-5 w-5" />
+                                      <span className="ml-1 text-sm">View Paper</span>
+                                    </a>
+                                  )}
                                 </span>
                                 <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                   {item.type === 'achievement' ? item.subtitle
@@ -448,6 +471,121 @@ export default function About() {
                           </div>
                         </>
                       )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Show on mobile, hide on desktop */}
+              <div className="md:hidden">
+                <div className="space-y-8">
+                  {(([
+                    ...personalAchievements.map(achievement => ({
+                      type: 'achievement' as const,
+                      date: achievement.year,
+                      title: achievement.title,
+                      subtitle: achievement.description.split('\n')[0],
+                      category: achievement.category,
+                      icon: iconMap[achievement.icon],
+                      targetTab: 'my-achievements',
+                      link: achievement.link
+                    })),
+                    ...experiences.map(exp => ({
+                      type: 'experience' as const,
+                      title: exp.title,
+                      company: exp.company,
+                      period: exp.period,
+                      description: exp.description,
+                      targetTab: 'experience'
+                    })),
+                    ...education.map(edu => ({
+                      type: 'education' as const,
+                      degree: edu.degree,
+                      institution: edu.institution,
+                      year: edu.year,
+                      focus: edu.focus,
+                      location: edu.location,
+                      targetTab: 'education'
+                    })),
+                    ...freelanceProjects.map(project => ({
+                      type: 'freelance' as const,
+                      title: project.title,
+                      description: project.description,
+                      period: project.period,
+                      technologies: project.technologies,
+                      targetTab: 'freelance'
+                    }))
+                  ] as const) as TimelineItem[])
+                  .sort((a, b) => {
+                    const parseDate = (dateStr: string) => {
+                      const firstDate = dateStr.split('-')[0].trim();
+                      try {
+                        return parse(firstDate, 'MMM. yyyy', new Date());
+                      } catch {
+                        return new Date(0);
+                      }
+                    };
+
+                    const getDate = (item: TimelineItem) => {
+                      if (item.type === 'achievement') return parseDate(item.date);
+                      if (item.type === 'experience') return parseDate(item.period);
+                      if (item.type === 'freelance') return parseDate(item.period);
+                      return parseDate(item.year);
+                    };
+
+                    return getDate(b).getTime() - getDate(a).getTime();
+                  })
+                  .map((item, index) => (
+                    <div key={index} className="relative pl-6 border-l-2 border-green-500">
+                      <div className="absolute left-[-5px] top-2 w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="mb-2">
+                        <div className="flex flex-wrap items-center gap-2 mb-2">
+                          <span className="text-green-300/70 font-mono text-sm">
+                            {item.type === 'achievement' ? item.date 
+                              : item.type === 'experience' ? item.period 
+                              : item.type === 'freelance' ? item.period
+                              : item.year}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 rounded border border-green-500/30 text-green-400/70 bg-green-500/10">
+                            {item.type === 'achievement' ? item.category 
+                              : item.type === 'experience' ? 'Professional Experience' 
+                              : item.type === 'freelance' ? 'Freelance Project'
+                              : 'Education'}
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => navigateToTab(item.targetTab)}
+                          className="text-left group/title w-full"
+                        >
+                          <h3 className="text-lg font-bold text-green-400 group-hover:text-green-300">
+                            <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center flex-wrap">
+                              {item.type === 'achievement' ? item.title
+                                : item.type === 'experience' ? item.title
+                                : item.type === 'freelance' ? item.title
+                                : item.degree}
+                              {item.type === 'achievement' && (item as any).link && (
+                                <a 
+                                  href={(item as any).link}
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300"
+                                  onClick={(e) => e.stopPropagation()}
+                                  title="View Paper"
+                                >
+                                  <ExternalLink className="h-5 w-5" />
+                                  <span className="ml-1 text-sm">View Paper</span>
+                                </a>
+                              )}
+                            </span>
+                            <span className="block text-base font-normal text-green-300/80 mt-1">
+                              {item.type === 'achievement' ? item.subtitle
+                                : item.type === 'experience' ? item.company
+                                : item.type === 'freelance' ? item.description
+                                : item.institution}
+                            </span>
+                          </h3>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

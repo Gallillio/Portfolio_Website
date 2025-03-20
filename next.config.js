@@ -9,6 +9,12 @@ const nextConfig = {
                 pathname: '/**',
             },
         ],
+        domains: [
+            'img.icons8.com',
+            'cdn.jsdelivr.net',
+            'registry.npmmirror.com',
+            'www.edureka.co',
+        ],
     },
 }
 
