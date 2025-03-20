@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { skills, experiences, education, freelanceProjects, personalAchievements, getSkillsAsCategories } from "@/lib/profile-data"
+import { experiences, education, freelanceProjects, personalAchievements, getSkillsAsCategories } from "@/lib/profile-data"
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"

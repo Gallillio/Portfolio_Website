@@ -12,7 +12,7 @@ import MyAchievements from "./my-achievements"
 import YourAchievements from "./your-achievements"
 import AchievementNotification from "./achievement-notification"
 import { executeCommand } from "@/lib/commands"
-import { Maximize2, Minimize2 } from "lucide-react"
+import { Maximize2, Minimize2, Menu, X, ChevronRight } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command } from '@/lib/types'
 
@@ -25,6 +25,7 @@ function TerminalContent() {
   const [isMinimized, setIsMinimized] = useState(false)
   const [secretJokeRevealed, setSecretJokeRevealed] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
@@ -35,6 +36,8 @@ function TerminalContent() {
     markCommandExecuted,
     downloadCV
   } = useAchievements()
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
 
   // Initial setup on component mount
   useEffect(() => {
@@ -286,6 +289,113 @@ function TerminalContent() {
     }, 500);
   };
 
+  // Toggle mobile menu
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(prev => !prev);
+  }
+
+  // Close mobile menu when a tab is selected
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setMobileMenuOpen(false);
+  }
+
+  // Handle clicking on "help" in the mobile menu
+  const handleHelpClick = () => {
+    setActiveTab("terminal");
+    setMobileMenuOpen(false);
+    
+    // Use a short timeout to ensure the terminal tab is active before setting the command
+    setTimeout(() => {
+      if (terminalInputRef.current) {
+        terminalInputRef.current.setValue("help");
+        terminalInputRef.current.focus();
+      }
+    }, 50);
+  };
+
+  // Close mobile menu when clicking outside or scrolling
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        mobileMenuOpen && 
+        mobileMenuRef.current && 
+        hamburgerButtonRef.current && 
+        !mobileMenuRef.current.contains(event.target as Node) && 
+        !hamburgerButtonRef.current.contains(event.target as Node)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    // Direct wheel event handler
+    const handleWheel = () => {
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    // Direct touch move handler for mobile devices
+    const handleTouchMove = () => {
+      if (mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    // Track touch position to detect scrolling
+    let touchStartY = 0;
+    
+    const handleTouchStart = (e: Event) => {
+      const touchEvent = e as unknown as TouchEvent;
+      touchStartY = touchEvent.touches[0].clientY;
+    };
+    
+    const handleTouchEnd = (e: Event) => {
+      if (!mobileMenuOpen) return;
+      
+      const touchEvent = e as unknown as TouchEvent;
+      const touchEndY = touchEvent.changedTouches[0].clientY;
+      const diff = Math.abs(touchEndY - touchStartY);
+      
+      // If user scrolled more than 5px vertically, close the menu
+      if (diff > 5) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    // Add all necessary event listeners
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('wheel', handleWheel, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchstart', handleTouchStart as EventListener, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd as EventListener, { passive: true });
+    
+    // Add all event listeners to scrollable areas
+    const scrollableAreas = document.querySelectorAll('.overflow-y-auto, .overflow-auto');
+    scrollableAreas.forEach(area => {
+      area.addEventListener('wheel', handleWheel, { passive: true });
+      area.addEventListener('touchmove', handleTouchMove, { passive: true });
+      area.addEventListener('touchstart', handleTouchStart as EventListener, { passive: true });
+      area.addEventListener('touchend', handleTouchEnd as EventListener, { passive: true });
+    });
+    
+    return () => {
+      // Clean up all event listeners
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('wheel', handleWheel);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchstart', handleTouchStart as EventListener);
+      document.removeEventListener('touchend', handleTouchEnd as EventListener);
+      
+      scrollableAreas.forEach(area => {
+        area.removeEventListener('wheel', handleWheel);
+        area.removeEventListener('touchmove', handleTouchMove);
+        area.removeEventListener('touchstart', handleTouchStart as EventListener);
+        area.removeEventListener('touchend', handleTouchEnd as EventListener);
+      });
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <>
       <div
@@ -419,52 +529,115 @@ function TerminalContent() {
         {!isMinimized && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto">
-              <TabsList className="bg-transparent border-none rounded-none h-auto">
-                <TabsTrigger
-                  value="terminal"
-                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+              {/* Terminal-style Navigation Bar */}
+              <div className="flex items-center flex-1">
+                <div className="p-2 flex items-center text-green-500 hover:text-green-400">
+                  <span className="font-mono text-sm opacity-80">portfolio@Gallillio:~</span>
+                  <span className="text-green-400 mx-1">$</span>
+                  <span className="text-green-400">cd</span>
+                  <span className="mx-1">/</span>
+                  <span className="text-green-300">{activeTab}</span>
+                  <span className="terminal-cursor"></span>
+                </div>
+              </div>
+
+              {/* Desktop Navigation Menu */}
+              <div className="hidden md:block">
+                <TabsList className="bg-transparent border-none rounded-none h-auto flex items-center">
+                  {[
+                    { id: "terminal", label: "Terminal", desc: "Command line interface" },
+                    { id: "projects", label: "Projects", desc: "View my work" },
+                    { id: "about", label: "About", desc: "My background" },
+                    { id: "contact", label: "Contact", desc: "Get in touch" },
+                    { id: "my-achievements", label: "My Achievements", desc: "My accomplishments" },
+                    { id: "your-achievements", label: "Your Achievements", desc: "Your unlocked achievements" }
+                  ].map((item) => (
+                    <TabsTrigger
+                      key={item.id}
+                      value={item.id}
+                      className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-l border-green-500 min-w-fit group relative"
+                    >
+                      {item.label}
+                      <span className="absolute left-1/2 -translate-x-1/2 -top-8 bg-gray-900 text-green-400 text-xs px-2 py-1 rounded border border-green-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                        cd /{item.id}
+                      </span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
+
+              {/* Mobile Hamburger Menu */}
+              <div className="md:hidden flex items-center">
+                <button 
+                  ref={hamburgerButtonRef}
+                  onClick={toggleMobileMenu}
+                  className="p-2 flex items-center text-green-500 hover:text-green-400 focus:outline-none"
+                  aria-label="Toggle navigation menu"
                 >
-                  Terminal
-                </TabsTrigger>
-                <TabsTrigger
-                  value="projects"
-                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
-                >
-                  Projects
-                </TabsTrigger>
-                <TabsTrigger
-                  value="about"
-                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
-                >
-                  {isMobile ? "About" : "About / Experience"}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="contact"
-                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
-                >
-                  {isMobile ? "Contact" : "Contact / CV"}
-                </TabsTrigger>
-                <TabsTrigger
-                  value="my-achievements"
-                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
-                >
-                  {isMobile ? "My Achiev." : "My Achievements / Publications"}
-                </TabsTrigger>
-              </TabsList>
-              <TabsList className="bg-transparent border-none rounded-none h-auto ml-auto flex-grow">
-                <TabsTrigger
-                  value="your-achievements"
-                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none w-full flex justify-end pr-6"
-                >
-                  {isMobile ? "Your Achiev." : "Your Achievements"}
-                </TabsTrigger>
-              </TabsList>
+                  {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+              </div>
             </div>
 
-            <TabsContent value="terminal" className="p-0 m-0">
+            {/* Mobile Menu Dropdown - Terminal Style */}
+            {mobileMenuOpen && (
+              <div 
+                ref={mobileMenuRef}
+                className="md:hidden absolute top-[2.5rem] left-0 w-full z-50 bg-gray-900 border-b border-green-500 font-mono text-sm shadow-lg shadow-black/50"
+              >
+                <div className="p-2 bg-black text-green-500 text-xs border-b border-green-500/50">
+                  <span className="opacity-80">portfolio@Gallillio:~</span> <span className="text-green-400">$</span> ls -la /pages
+                </div>
+                <div className="flex flex-col">
+                  {[
+                    { id: "terminal", label: "terminal", desc: "Command line interface" },
+                    { id: "projects", label: "projects", desc: "View my work" },
+                    { id: "about", label: "about", desc: "My background" },
+                    { id: "contact", label: "contact", desc: "Get in touch" },
+                    { id: "my-achievements", label: "my-achievements", desc: "My accomplishments" },
+                    { id: "your-achievements", label: "your-achievements", desc: "Your unlocked achievements" }
+                  ].map((item, index) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabChange(item.id)}
+                      className={`mobile-menu-item text-left px-4 py-3 flex items-center border-b border-green-500/30 transition-colors cursor-pointer ${
+                        activeTab === item.id 
+                          ? "bg-black text-green-400" 
+                          : "text-green-500 hover:bg-gray-800"
+                      }`}
+                      style={{
+                        animationDelay: `${index * 70}ms`,
+                        animation: "fadeInDown 0.3s ease-out forwards"
+                      }}
+                    >
+                      <ChevronRight size={14} className="mr-2" />
+                      <span className="mr-2 opacity-70">{activeTab === item.id ? ">" : "$"}</span>
+                      <span className="text-green-400">cd</span>
+                      <span className="mx-1">/</span>
+                      <span className={activeTab === item.id ? "text-green-300" : ""}>{item.label}</span>
+                      <span className="ml-2 text-green-500/50 text-xs hidden sm:inline">{item.desc}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="p-3 bg-black text-green-500/70 text-xs border-t border-green-500/30">
+                  Type <span 
+                    className="text-green-400 cursor-pointer hover:text-green-300 underline decoration-dotted underline-offset-2"
+                    onClick={handleHelpClick}
+                  >help</span> in terminal for available commands
+                </div>
+              </div>
+            )}
+
+            {/* Tab Content Sections */}
+            <TabsContent 
+              value="terminal" 
+              className="p-0 m-0"
+              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+            >
               <div
                 className={`${contentHeight} overflow-y-auto overflow-x-auto bg-black p-4 font-mono text-green-500 cursor-text custom-scrollbar transition-height duration-700 ease-in-out`}
                 onClick={focusInput}
+                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <TerminalOutput history={history} onCommandClick={handleCommandClick} />
                 <div ref={outputEndRef} />
@@ -472,32 +645,67 @@ function TerminalContent() {
               </div>
             </TabsContent>
 
-            <TabsContent value="projects" className="p-0 m-0">
-              <div className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}>
+            <TabsContent 
+              value="projects" 
+              className="p-0 m-0"
+              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+            >
+              <div 
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+              >
                 <Projects />
               </div>
             </TabsContent>
 
-            <TabsContent value="about" className="p-0 m-0">
-              <div className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}>
+            <TabsContent 
+              value="about" 
+              className="p-0 m-0"
+              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+            >
+              <div 
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+              >
                 <About />
               </div>
             </TabsContent>
 
-            <TabsContent value="contact" className="p-0 m-0">
-              <div className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}>
+            <TabsContent 
+              value="contact" 
+              className="p-0 m-0"
+              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+            >
+              <div 
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+              >
                 <Contact />
               </div>
             </TabsContent>
 
-            <TabsContent value="my-achievements" className="p-0 m-0">
-              <div className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}>
+            <TabsContent 
+              value="my-achievements" 
+              className="p-0 m-0"
+              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+            >
+              <div 
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+              >
                 <MyAchievements />
               </div>
             </TabsContent>
 
-            <TabsContent value="your-achievements" className="p-0 m-0">
-              <div className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}>
+            <TabsContent 
+              value="your-achievements" 
+              className="p-0 m-0"
+              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+            >
+              <div 
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
+              >
                 <YourAchievements />
               </div>
             </TabsContent>
@@ -530,12 +738,12 @@ function TerminalContent() {
                 </p>
                 {isClosing ? (
                   <p className="text-xl text-green-300">
-                    "I would tell you an exit joke, but there's no escape..."
+                    &ldquo;I would tell you an exit joke, but there&apos;s no escape...&rdquo;
                   </p>
                 ) : (
                   <p className="text-xl text-green-300">
-                    "I would tell you a joke about being minimized,
-                    <br />but I'm afraid it would be <span className="text-green-400">too small</span> to understand."
+                    &ldquo;I would tell you a joke about being minimized,
+                    <br />but I&apos;m afraid it would be <span className="text-green-400">too small</span> to understand.&rdquo;
                   </p>
                 )}
               </div>
@@ -556,14 +764,14 @@ function TerminalContent() {
                   </>
                 ) : (
                   <>
-                    Fun fact: If you count all the pixels in this message, you'll get  
+                    Fun fact: If you count all the pixels in this message, you&apos;ll get  
                     <span 
                       className="text-green-400 cursor-pointer hover:text-green-300 transition-colors relative inline-block"
                       onClick={handleSecretClick}
                       title="Click me for a surprise"
                     > 42</span>, the answer to life, the universe and everything.
                     <br />
-                    (Not really, but wouldn't that be neat?)
+                    (Not really, but wouldn&apos;t that be neat?)
                   </>
                 )}
               </p>

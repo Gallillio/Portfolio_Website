@@ -330,7 +330,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
 
     // Return whether any new achievements were unlocked
     return anyNewlyUnlocked;
-  }, [state, achievementProgress, achievementsList, setLastUnlockedAchievement]);
+  }, [state, achievementProgress, setLastUnlockedAchievement]);
 
   // Check for achievement unlocks whenever state changes
   useEffect(() => {

@@ -46,10 +46,16 @@ commandRegistry.register("skills", "View my technical skills", async () => {
     ""
   ]
 
-  skills.forEach((skill) => {
-    skillsOutput.push(`┌─ ${skill.name}`)
-    const progressBar = "█".repeat(Math.floor(skill.level / 5)) + "░".repeat(20 - Math.floor(skill.level / 5))
-    skillsOutput.push(`│  Progress: [${progressBar}] ${skill.level}%`)
+  // Loop through each skill category and its skills
+  Object.entries(skills).forEach(([category, skillList]) => {
+    skillsOutput.push(`┌─ ${category}`)
+    skillsOutput.push(`│`)
+    
+    // Display each skill in the category
+    skillList.forEach(skill => {
+      skillsOutput.push(`│  • ${skill}`)
+    })
+    
     skillsOutput.push("└────────────────────────────────────")
     skillsOutput.push("")
   })

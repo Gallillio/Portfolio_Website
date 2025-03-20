@@ -18,6 +18,32 @@ export const ScrollToTop = () => {
     scrollableContainersRef.current = scrollableElements;
   };
 
+  // Reset visibility when tabs change
+  useEffect(() => {
+    const handleTabChange = () => {
+      setIsVisible(false);
+      setCurrentScrollableElement(null);
+    };
+
+    // Listen for tab changes
+    window.addEventListener('switch-terminal-tab', handleTabChange);
+    
+    // Also listen for clicks on tab triggers
+    const handleTabClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('[role="tab"]')) {
+        handleTabChange();
+      }
+    };
+    
+    document.addEventListener('click', handleTabClick);
+    
+    return () => {
+      window.removeEventListener('switch-terminal-tab', handleTabChange);
+      document.removeEventListener('click', handleTabClick);
+    };
+  }, []);
+
   // Toggle visibility based on scroll position
   useEffect(() => {
     // Initial detection of scrollable containers
