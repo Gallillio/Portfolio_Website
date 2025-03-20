@@ -8,7 +8,7 @@ import { skills, experiences, education, freelanceProjects, personalAchievements
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"
-import { Github, ExternalLink, BookOpen, Trophy, Star, Languages } from "lucide-react"
+import { Github, ExternalLink, BookOpen, Trophy, Star, Languages, ChevronDown, ChevronUp } from "lucide-react"
 import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
 import { skillLogos } from "@/lib/skill-logos"
@@ -40,7 +40,9 @@ export default function About() {
     }
     return "skills";
   })
+  // const [activeTab, setActiveTab] = useState<string>("skills")
   const [isBioExpanded, setIsBioExpanded] = useState(false)
+  const [expandedExperiences, setExpandedExperiences] = useState<Set<number>>(new Set())
   const bioRef = useRef<HTMLDivElement>(null)
 
   // Mark this tab as visited for the site explorer achievement - only once
@@ -51,11 +53,21 @@ export default function About() {
     }
   }, [visitTab, hasMarkedVisit])
 
+  // Load saved tab from localStorage after initial render
+  useEffect(() => {
+    const savedTab = localStorage.getItem('aboutActiveTab');
+    const validTabs = ['skills', 'timeline', 'experience', 'education', 'freelance', 'languages'];
+    if (savedTab && validTabs.includes(savedTab)) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
   // Save the active tab to localStorage whenever it changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('aboutActiveTab', activeTab);
     }
+    // localStorage.setItem('aboutActiveTab', activeTab);
   }, [activeTab]);
 
   // Function to navigate to a specific tab
@@ -107,6 +119,18 @@ export default function About() {
     } else {
       setIsBioExpanded(true)
     }
+  }
+
+  const toggleExperience = (index: number) => {
+    setExpandedExperiences(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(index)) {
+        newSet.delete(index)
+      } else {
+        newSet.add(index)
+      }
+      return newSet
+    })
   }
 
   return (
@@ -248,7 +272,6 @@ export default function About() {
                                 {skill}
                               </span>
                             </div>
-                            <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-400 group-hover:w-full transition-all duration-300 transform -translate-x-1/2"></div>
                           </div>
                         </div>
                       ))}
@@ -371,7 +394,7 @@ export default function About() {
                                     : item.type === 'freelance' ? item.title
                                     : item.degree}
                                 </span>
-                                <span className="block text-base font-normal text-green-300/80 mt-0.5 group-hover/title:underline decoration-green-500/50 decoration-1">
+                                <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                   {item.type === 'achievement' ? item.subtitle
                                     : item.type === 'experience' ? item.company
                                     : item.type === 'freelance' ? item.description
@@ -415,7 +438,7 @@ export default function About() {
                                     : item.type === 'freelance' ? item.title
                                     : item.degree}
                                 </span>
-                                <span className="block text-base font-normal text-green-300/80 mt-0.5 group-hover/title:underline decoration-green-500/50 decoration-1">
+                                <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                   {item.type === 'achievement' ? item.subtitle
                                     : item.type === 'experience' ? item.company
                                     : item.type === 'freelance' ? item.description
@@ -452,13 +475,56 @@ export default function About() {
                         <span className="hidden sm:block text-green-500/50 group-hover:text-green-400/50 transition-colors duration-200">•</span>
                         <span className="text-green-300/70 font-mono group-hover:text-green-300/90 transition-colors duration-200">{exp.period}</span>
                       </div>
-                      <div className="text-green-300/90 leading-relaxed space-y-2">
-                        {exp.description.split('\n').map((paragraph, i) => (
-                          <p key={i} className="pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200">
-                            {paragraph}
-                          </p>
-                        ))}
+                      <div className="text-green-300/90 leading-relaxed">
+                        {/* Summary - first line or two */}
+                        <p className="pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200">
+                          {exp.description.split('\n')[0]}
+                        </p>
+                        
+                        {/* Full description with bullet points */}
+                        <div 
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedExperiences.has(index) 
+                              ? 'max-h-[1000px] opacity-100 mt-2' 
+                              : 'max-h-0 opacity-0'
+                          }`}
+                        >
+                          <div className="space-y-2">
+                            {exp.description.split('\n').slice(1).map((paragraph, i) => (
+                              <p 
+                                key={i} 
+                                className="pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200"
+                                style={{
+                                  transform: expandedExperiences.has(index) ? 'translateX(0)' : 'translateX(-10px)',
+                                  opacity: expandedExperiences.has(index) ? 1 : 0,
+                                  transition: 'all 0.3s ease-in-out',
+                                  transitionDelay: `${i * 50}ms`
+                                }}
+                              >
+                                {paragraph}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
                       </div>
+                      
+                      {/* Learn More button */}
+                      <button
+                        onClick={() => toggleExperience(index)}
+                        className="mt-3 px-3 py-1.5 text-green-400 hover:text-green-300 transition-all duration-200 flex items-center gap-2 text-sm border border-green-500/30 hover:border-green-400 rounded-md bg-green-500/5 hover:bg-green-500/10"
+                      >
+                        {expandedExperiences.has(index) ? (
+                          <>
+                            Show Less
+                            <ChevronUp size={14} className="transition-transform duration-200" />
+                          </>
+                        ) : (
+                          <>
+                            Learn More
+                            <ChevronDown size={14} className="transition-transform duration-200" />
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 ))}

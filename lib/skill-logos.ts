@@ -25,7 +25,7 @@ export const skillLogos: { [key: string]: string } = {
   "OpenAPI": "https://img.icons8.com/color/96/api-settings.png",
   "C#": "https://img.icons8.com/color/96/c-sharp-logo.png",
   "Unity": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unity/unity-original.svg",
-  "XR Development": "https://img.icons8.com/color/96/vr-glasses.png",
+  // "XR Development": "https://img.icons8.com/color/96/vr-glasses.png",
   "TailwindCSS": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg",
 
   // DevOps & Tools

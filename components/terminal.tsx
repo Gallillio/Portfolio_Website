@@ -18,16 +18,7 @@ import type { Command } from '@/lib/types'
 
 function TerminalContent() {
   const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>([])
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    // Try to get the saved tab from localStorage on initial render
-    if (typeof window !== 'undefined') {
-      const savedTab = localStorage.getItem('terminalActiveTab');
-      // Validate that the saved tab is a valid option
-      const validTabs = ['terminal', 'projects', 'about', 'contact', 'my-achievements', 'your-achievements'];
-      return savedTab && validTabs.includes(savedTab) ? savedTab : "terminal";
-    }
-    return "terminal";
-  })
+  const [activeTab, setActiveTab] = useState<string>("terminal")
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [animationClass, setAnimationClass] = useState("")
   const [isMobile, setIsMobile] = useState(false)
@@ -50,7 +41,13 @@ function TerminalContent() {
     // Set initial mobile state and fullscreen
     const initialIsMobile = window.innerWidth < 768
     setIsMobile(initialIsMobile)
-    // We no longer set fullscreen automatically on mobile
+
+    // Load saved tab from localStorage after initial render
+    const savedTab = localStorage.getItem('terminalActiveTab');
+    const validTabs = ['terminal', 'projects', 'about', 'contact', 'my-achievements', 'your-achievements'];
+    if (savedTab && validTabs.includes(savedTab)) {
+      setActiveTab(savedTab);
+    }
   }, [])
 
   // Add listener for custom tab switching events from other components

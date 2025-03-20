@@ -35,21 +35,5 @@ export const projects: Project[] = [
     image: "/placeholder.svg?height=300&width=400",
     github: "https://github.com/",
   },
-  {
-    title: "Blockchain Voting System",
-    description:
-      "A secure and transparent voting system built on blockchain technology to ensure integrity and auditability.",
-    technologies: ["Solidity", "Ethereum", "Web3.js", "React"],
-    image: "/placeholder.svg?height=300&width=400",
-    github: "https://github.com/",
-    demo: "https://demo.example.com/blockchain-voting",
-  },
-  {
-    title: "Real-time Collaboration Tool",
-    description: "A platform for teams to collaborate on documents and projects in real-time with version control.",
-    technologies: ["Socket.io", "React", "Node.js", "MongoDB"],
-    image: "/placeholder.svg?height=300&width=400",
-    github: "https://github.com/",
-  },
 ]
 
