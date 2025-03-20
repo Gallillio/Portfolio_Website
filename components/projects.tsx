@@ -15,6 +15,7 @@ export default function Projects() {
   const { clickProjectDemo, viewProject, visitTab } = useAchievements()
   const [viewedProjects, setViewedProjects] = useState<Set<string>>(new Set())
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
+  const [isMobile, setIsMobile] = useState<boolean>(false)
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -30,6 +31,20 @@ export default function Projects() {
       viewProject(projectId);
     });
   }, [viewedProjects, viewProject])
+
+  // Check window size for mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 767);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Call it initially to set the state
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const filteredProjects =
     filter === "all" ? projects : projects.filter((project) => project.technologies.includes(filter))
@@ -130,18 +145,24 @@ export default function Projects() {
                   </a>
                 </Button>
               ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-green-500 text-green-400 bg-black opacity-50 cursor-not-allowed"
-                  title="This project is only available by cloning the GitHub repo and not hosted unfortunately."
-                  asChild
-                >
-                  <span>
+                <div className="relative group">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-green-500 text-green-400 bg-black opacity-50 cursor-not-allowed"
+                  >
                     <ExternalLink size={16} className="mr-2" />
-                    Demo (Unavailable)
-                  </span>
-                </Button>
+                    Demo
+                  </Button>
+                  {/* Custom Tooltip */}
+                  <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${isMobile ? 'w-28' : 'w-64'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                    <div className="bg-gray-900 border border-green-500 p-2 rounded-md shadow-lg text-xs text-green-400">
+                      <p className="text-center">This project is only available by cloning the GitHub repo and not hosted unfortunately.</p>
+                      {/* Triangle Pointer */}
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-r border-b border-green-500 transform rotate-45"></div>
+                    </div>
+                  </div>
+                </div>
               )}
             </CardFooter>
           </Card>
