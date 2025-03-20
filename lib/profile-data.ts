@@ -1,13 +1,77 @@
-export const skills = [
-  { name: "JavaScript/TypeScript", level: 90 },
-  { name: "React/Next.js", level: 85 },
-  { name: "Python", level: 80 },
-  { name: "Machine Learning", level: 75 },
-  { name: "Node.js", level: 85 },
-  { name: "SQL/NoSQL", level: 70 },
-  { name: "DevOps/CI/CD", level: 65 },
-  { name: "Cloud Services (AWS/GCP)", level: 75 },
-]
+// Define types for the skills structure
+export type SkillCategory = {
+  name: string;
+  skills: string[];
+};
+
+export type SkillsData = {
+  [key: string]: string[];
+};
+
+// Main skills data
+export const skills: SkillsData = {
+  "AI & Machine Learning": [
+    "NLP",
+    "Computer Vision",
+    "Deep Learning",
+    "Machine Learning",
+    "TensorFlow",
+    "OpenCV",
+    "LangChain",
+    "PowerBI"
+  ],
+  "Cloud & AI Platforms": [
+    "Microsoft Azure",
+    "IBM Watsonx",
+    "IBM Cloud"
+  ],
+  "Web & Application Development": [
+    "Python",
+    "JavaScript/TypeScript",
+    "ReactJS",
+    "NextJS",
+    "Node.js",
+    "ExpressJS",
+    "FastAPI",
+    "Django",
+    "Flask",
+    "MongoDB",
+    "REST APIs",
+    "OpenAPI",
+    "C#",
+    "Unity",
+    "XR Development",
+    "TailwindCSS"
+  ],
+  "DevOps & Tools": [
+    "Git",
+    "Docker",
+    "Postman",
+    "Vercel",
+    "V0",
+    "Linux",
+    "Agile/Scrum"
+  ],
+  "Design & Collaboration": [
+    "Figma",
+    "Jira",
+    "Trello",
+    "Slack"
+  ]
+};
+
+// Helper function to get skills as an array of categories
+export const getSkillsAsCategories = (): SkillCategory[] => {
+  return Object.entries(skills).map(([name, skills]) => ({
+    name,
+    skills
+  }));
+};
+
+// Helper function to get all skills as a flat array
+export const getAllSkills = (): string[] => {
+  return Object.values(skills).flat();
+};
 
 // Experience data
 export const experiences = [

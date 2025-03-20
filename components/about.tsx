@@ -4,13 +4,14 @@ import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { skills, experiences, education, freelanceProjects, personalAchievements } from "@/lib/profile-data"
+import { skills, experiences, education, freelanceProjects, personalAchievements, getSkillsAsCategories } from "@/lib/profile-data"
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"
 import { Github, ExternalLink, BookOpen, Trophy, Star, Languages } from "lucide-react"
 import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
+import { skillLogos } from "@/lib/skill-logos"
 
 // Map of icon strings to Lucide components
 const iconMap = {
@@ -217,14 +218,41 @@ export default function About() {
         <TabsContent value="skills" className="mt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
-              <div className="space-y-4">
-                {skills.map((skill, index) => (
-                  <div key={index} className="group hover:translate-x-1 transition-all duration-300 ease-in-out">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-green-400 group-hover:text-green-300 transition-colors duration-200">{skill.name}</span>
-                      <span className="text-green-300 group-hover:text-green-400 transition-colors duration-200">{skill.level}&apos;%</span>
+              <div className="space-y-8">
+                {getSkillsAsCategories().map((category, categoryIndex) => (
+                  <div key={categoryIndex} className="space-y-4">
+                    <h3 className="text-lg font-bold text-green-400 border-b border-green-500/30 pb-2">
+                      {category.name}
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                      {category.skills.map((skill, skillIndex) => (
+                        <div
+                          key={skillIndex}
+                          className="group relative p-4 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1"
+                        >
+                          <div className="absolute inset-0 bg-green-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="relative z-10">
+                            <div className="flex items-center justify-center gap-2">
+                              {skillLogos[skill] && (
+                                <div className="w-6 h-6 relative flex-shrink-0">
+                                  <Image
+                                    src={skillLogos[skill]}
+                                    alt={`${skill} logo`}
+                                    fill
+                                    className="object-contain"
+                                    sizes="24px"
+                                  />
+                                </div>
+                              )}
+                              <span className="text-green-400 group-hover:text-green-300 transition-colors duration-200 text-sm font-mono">
+                                {skill}
+                              </span>
+                            </div>
+                            <div className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-green-400 group-hover:w-full transition-all duration-300 transform -translate-x-1/2"></div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <Progress value={skill.level} className="h-2 bg-gray-800 group-hover:bg-gray-700 transition-colors duration-200" indicatorClassName="bg-green-500 group-hover:bg-green-400 transition-colors duration-200" />
                   </div>
                 ))}
               </div>
