@@ -529,54 +529,67 @@ function TerminalContent() {
         {!isMinimized && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto">
-              {/* Terminal-style Navigation Bar */}
-              <div className="flex items-center flex-1">
-                <div className="p-2 flex items-center text-green-500 hover:text-green-400">
-                  <span className="font-mono text-sm opacity-80">portfolio@Gallillio:~</span>
-                  <span className="text-green-400 mx-1">$</span>
-                  <span className="text-green-400">cd</span>
-                  <span className="mx-1">/</span>
-                  <span className="text-green-300">{activeTab}</span>
-                  <span className="terminal-cursor"></span>
-                </div>
-              </div>
-
-              {/* Desktop Navigation Menu */}
-              <div className="hidden md:block">
-                <TabsList className="bg-transparent border-none rounded-none h-auto flex items-center">
-                  {[
-                    { id: "terminal", label: "Terminal", desc: "Command line interface" },
-                    { id: "projects", label: "Projects", desc: "View my work" },
-                    { id: "about", label: "About", desc: "My background" },
-                    { id: "contact", label: "Contact", desc: "Get in touch" },
-                    { id: "my-achievements", label: "My Achievements", desc: "My accomplishments" },
-                    { id: "your-achievements", label: "Your Achievements", desc: "Your unlocked achievements" }
-                  ].map((item) => (
-                    <TabsTrigger
-                      key={item.id}
-                      value={item.id}
-                      className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-l border-green-500 min-w-fit group relative"
-                    >
-                      {item.label}
-                      <span className="absolute left-1/2 -translate-x-1/2 -top-8 bg-gray-900 text-green-400 text-xs px-2 py-1 rounded border border-green-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                        cd /{item.id}
-                      </span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
-
-              {/* Mobile Hamburger Menu */}
+              {/* Mobile/Tablet Hamburger Menu */}
               <div className="md:hidden flex items-center">
                 <button 
                   ref={hamburgerButtonRef}
                   onClick={toggleMobileMenu}
-                  className="p-2 flex items-center text-green-500 hover:text-green-400 focus:outline-none"
+                  className="p-2 flex items-center text-green-500 hover:text-green-400 focus:outline-none ml-1"
                   aria-label="Toggle navigation menu"
                 >
                   {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                  <span className="font-mono text-sm ml-2">
+                    /{activeTab} <span className="terminal-cursor"></span>
+                  </span>
                 </button>
               </div>
+
+              {/* Desktop Tabs */}
+              <div className="hidden md:block">
+                <TabsList className="bg-transparent border-none rounded-none h-auto">
+                  <TabsTrigger
+                    value="terminal"
+                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                  >
+                    Terminal
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="projects"
+                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                  >
+                    Projects
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="about"
+                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                  >
+                    About / Experience
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="contact"
+                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                  >
+                    Contact / CV
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="my-achievements"
+                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                  >
+                    My Achievements / Publications
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Your Achievements Tab */}
+              <TabsList className="bg-transparent border-none rounded-none h-auto ml-auto flex-grow">
+                <TabsTrigger
+                  value="your-achievements"
+                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none w-full flex justify-end pr-6"
+                >
+                  <span className="hidden md:inline">Your Achievements</span>
+                  <span className="md:hidden">Your Achievements</span>
+                </TabsTrigger>
+              </TabsList>
             </div>
 
             {/* Mobile Menu Dropdown - Terminal Style */}
