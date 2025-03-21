@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { BookOpen, Trophy, Star, Languages, ExternalLink } from "lucide-react"
+import { BookOpen, Trophy, Star, Languages, ExternalLink, ShieldCheck } from "lucide-react"
 import { personalAchievements } from "@/lib/profile-data"
 
 // Map of icon strings to Lucide components
@@ -9,6 +9,7 @@ const iconMap = {
   star: <Star className="h-6 w-6" />,
   book: <BookOpen className="h-6 w-6" />,
   languages: <Languages className="h-6 w-6" />,
+  shieldCheck: <ShieldCheck className="h-6 w-6" />,
 } as const;
 
 export default function MyAchievements() {
@@ -32,7 +33,6 @@ export default function MyAchievements() {
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="inline-flex items-center ml-2 text-green-400 hover:text-green-300 mt-2"
-                      // title={achievement.linkText}
                     >
                       <ExternalLink className="h-5 w-5 text-yellow-400 hover:text-yellow-300 transition duration-200" />
                       <span className="ml-1 text-sm text-yellow-400 hover:text-yellow-300 transition duration-200">{achievement.linkText}</span>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { projects } from "@/lib/projects"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,6 +8,9 @@ import { Github, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAchievements } from "@/lib/achievements-context"
+import Image from "next/image"
+import Slideshow from "@/components/ui/Slideshow"
+import ImageModal from "@/lib/image-modal"
 
 export default function Projects() {
   const [filter, setFilter] = useState<string>("all")
@@ -16,6 +19,9 @@ export default function Projects() {
   const [viewedProjects, setViewedProjects] = useState<Set<string>>(new Set())
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
   const [isMobile, setIsMobile] = useState<boolean>(false)
+  const [isTablet, setIsTablet] = useState<boolean>(false)
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
+  const [selectedImage, setSelectedImage] = useState<string>("")
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -32,10 +38,12 @@ export default function Projects() {
     });
   }, [viewedProjects, viewProject])
 
-  // Check window size for mobile
+  // Check window size for mobile and tablet
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 767);
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
     };
 
     window.addEventListener('resize', handleResize);
@@ -45,6 +53,13 @@ export default function Projects() {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  // Close modal if isMobile becomes true
+  useEffect(() => {
+    if (isMobile && isModalOpen) {
+      closeModal();
+    }
+  }, [isMobile, isModalOpen]);
 
   const filteredProjects =
     filter === "all" ? projects : projects.filter((project) => project.technologies.includes(filter))
@@ -61,6 +76,22 @@ export default function Projects() {
   const handleDemoClick = () => {
     clickProjectDemo()
   }
+
+  const handleImageClick = (imageSrc: string) => {
+    if (isMobile && isModalOpen) {
+      // If on mobile and the modal is already open, close it
+      closeModal();
+    } else if (!isMobile) {
+      // If not on mobile, open the modal
+      setSelectedImage(imageSrc);
+      setIsModalOpen(true);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage("");
+  };
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono custom-scrollbar">
@@ -99,15 +130,11 @@ export default function Projects() {
           >
             <CardHeader>
               <CardTitle className="text-green-400">{project.title}</CardTitle>
-              <CardDescription className="text-green-300/70">{project.description}</CardDescription>
+              <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-40 mb-4 overflow-hidden rounded-md bg-black/50 flex items-center justify-center">
-                {/* {project.image ? (
-                  <Image src={project.image || "/placeholder.svg"} alt={project.title} layout="fill" objectFit="cover" />
-                ) : (
-                  <Code size={48} className="text-green-500/30" />
-                )} */}
+                <Slideshow images={project.images} onImageClick={handleImageClick} />
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
                 {project.technologies.map((tech, techIndex) => (
@@ -119,17 +146,37 @@ export default function Projects() {
             </CardContent>
             <CardFooter className="flex justify-between">
               {project.github && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-green-500 text-green-400 bg-black hover:bg-green-500/20"
-                  asChild
-                >
-                  <a href={project.github} target="_blank" rel="noopener noreferrer">
-                    <Github size={16} className="mr-2" />
-                    Code
-                  </a>
-                </Button>
+                <div className="relative group">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`border-green-500 text-green-400 bg-black ${project.codeAvailable ? '' : 'opacity-50 cursor-not-allowed'}`}
+                    asChild
+                    disabled={!project.codeAvailable}
+                  >
+                    {project.codeAvailable ? (
+                      <a href={project.github} target="_blank" rel="noopener noreferrer">
+                        <Github size={16} className="mr-2" />
+                        Code
+                      </a>
+                    ) : (
+                      <span className="text-gray-500">
+                        <Github size={16} className="mr-2" />
+                        Code
+                      </span>
+                    )}
+                  </Button>
+                  {/* Tooltip for Code Availability */}
+                  {!project.codeAvailable && (
+                    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${isMobile || isTablet ? 'w-28' : 'w-64'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                      <div className="bg-gray-900 border border-green-500 p-2 rounded-md shadow-lg text-xs text-green-400">
+                        <p className="text-center">Sorry, the code is confidential and not public.</p>
+                        {/* Triangle Pointer */}
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-r border-b border-green-500 transform rotate-45"></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
               {project.demo && project.demo_available ? (
                 <Button
@@ -149,19 +196,21 @@ export default function Projects() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-green-500 text-green-400 bg-black opacity-50 cursor-not-allowed"
+                    className="border-green-500 text-gray-500 bg-black opacity-50 cursor-not-allowed"
                   >
                     <ExternalLink size={16} className="mr-2" />
                     Demo
                   </Button>
-                  {/* Custom Tooltip */}
-                  <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${isMobile ? 'w-28' : 'w-64'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
-                    <div className="bg-gray-900 border border-green-500 p-2 rounded-md shadow-lg text-xs text-green-400">
-                      <p className="text-center">This project is only available by cloning the GitHub repo and not hosted unfortunately.</p>
-                      {/* Triangle Pointer */}
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-r border-b border-green-500 transform rotate-45"></div>
+                  {/* Custom Tooltip for demo availability */}
+                  {!project.demo_available && (
+                    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${isMobile ? 'w-28' : 'w-64'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
+                      <div className="bg-gray-900 border border-green-500 p-2 rounded-md shadow-lg text-xs text-green-400">
+                        <p className="text-center">This project is only available by cloning the GitHub repo and not hosted unfortunately.</p>
+                        {/* Triangle Pointer */}
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-r border-b border-green-500 transform rotate-45"></div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </CardFooter>
@@ -177,6 +226,8 @@ export default function Projects() {
           </Button>
         </div>
       )}
+
+      <ImageModal isOpen={isModalOpen} imageSrc={selectedImage} onClose={closeModal} />
     </div>
   )
 }

@@ -15,9 +15,10 @@ export interface Project {
   title: string
   description: string
   technologies: string[]
-  image?: string
+  images: { src: string; alt: string }[]
   github?: string
   demo?: string
   demo_available?: boolean
+  codeAvailable?: boolean
 }
 

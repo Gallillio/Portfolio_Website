@@ -12,6 +12,7 @@ import { useAchievements } from "@/lib/achievements-context"
 import { links } from "@/lib/profile-data"
 import { useForm, ValidationError } from '@formspree/react'
 import ThankYouPopup from "./thank-you-popup"
+import Image from "next/image"
 
 export default function Contact() {
   const [formState, setFormState] = useState({
@@ -244,28 +245,13 @@ export default function Contact() {
                     asChild
                   >
                     <a href={links.credly} target="_blank" rel="noopener noreferrer" aria-label="Credly">
-                      {/* Icon source: Icons8 - https://img.icons8.com */}
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        width="20" 
-                        height="20" 
-                        viewBox="0 0 100 100" 
-                        fill="none"
-                        className="text-green-500"
-                      >
-                        <path 
-                          d="M50 95C74.8528 95 95 74.8528 95 50C95 25.1472 74.8528 5 50 5C25.1472 5 5 25.1472 5 50C5 74.8528 25.1472 95 50 95Z" 
-                          stroke="currentColor" 
-                          strokeWidth="4"
-                        />
-                        <path 
-                          d="M66.6665 33.3335L43.9998 56.0002L33.3332 45.3335" 
-                          stroke="currentColor" 
-                          strokeWidth="6" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      <Image 
+                        src="https://images.icon-icons.com/3911/PNG/512/credly_logo_icon_247258.png" 
+                        alt="Credly Icon" 
+                        width={20} 
+                        height={20} 
+                        className="green-logo"
+                      />
                     </a>
                   </Button>
                 </div>

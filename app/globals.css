@@ -222,3 +222,8 @@ html {
   vertical-align: middle;
   margin-left: 4px;
 }
+
+.green-logo {
+  filter: brightness(0) saturate(100%) invert(54%) sepia(78%) saturate(559%)
+    hue-rotate(90deg) brightness(100%) contrast(100%);
+}

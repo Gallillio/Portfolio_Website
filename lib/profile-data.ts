@@ -78,6 +78,7 @@ export const experiences = [
     title: "AI Engineer",
     company: "Intelligent Systems (I-Sys)",
     period: "Feb. 2025 - Present",
+    technologies: ["IBM Watsonx", "IBM Cloud", "Docker", "Kubernetes", "OpenAPI Specification (OAS)", "LLMs", "Data Pipelines"],
     description:
       ` • Collaborated the deployment of Watsonx-powered self-service robots, kiosk avatars, and omni-channel conversational AI systems that enhance customer engagement across our partner Telecommunication and banking companies Vodaphone and Bank Misr
       
@@ -90,6 +91,7 @@ export const experiences = [
     title: "AI Developer Intern",
     company: "Environ Adapt",
     period: "Aug. 2024 - Oct. 2024",
+    technologies: ["TensorFlow", "OpenCV", "Keras", "Deep Neural Networks", "Image Processing", "Data Science"],
     description:
       `• Using Tensorflow and OpenCV to create Siamese Networks that was used in an image recognition model to distinguish between identical trash bales and bales viewed from different angles, automating a previously manual task and significantly reducing company costs in storage and payments by thousands of Egyptian pounds.
       
@@ -100,10 +102,11 @@ export const experiences = [
     title: "AI Developer Intern",
     company: "Ecole Supérieure Libre des Sciences Commerciales Appliquées (ESLSCA University)",
     period: "Feb. 2024 - Apr. 2024",
+    technologies: ["Microsoft Azure", "Langchain", "OpenAI Function Calling", "Vector Database", "RAG"],
     description: 
     ` • Developed a project, earning ESLSCA University The Times Highest Higher Education Award 2024 in Technological/Digital Innovation at the Arab Summit of Universities, Dubai.
      
-    • Used Langchain Framework and OpenAI Function Calling to build a GPT-powered chatbot that guides prospective students, provides real-time updates, and automates document processing and verification.
+    • Used Langchain Framework and OpenAI Function Calling to build a GPT-powered (using Azure OpenAI) chatbot that guides prospective students, provides real-time updates, and automates document processing and verification.
      
     • Streamlined admissions by reducing processing times, enhancing communication, and reallocating staff for personalized support, boosting efficiency.
     
@@ -113,6 +116,7 @@ export const experiences = [
     title: "XR Developer",
     company: "GMind",
     period: "Jul. 2023 - Oct. 2023",
+    technologies: ["C#", "Unity", "Object-Oriented Programming (OOP)", "Game Development", "Game Design",],
     description: 
     `  • Used C# to implementing player mechanics and complex AI behavior of NPCs and player interactions.
     
@@ -160,14 +164,14 @@ export const freelanceProjects: FreelanceProject[] = [
     github: "https://github.com/Gallillio/MERN-IIG_HEC_Company_Website",
     demo: "https://www.iig.land/"
   },
-  // {
-  //   title: "AAAAAA",
-  //   description: "AI-powered YouTube video summarizer and Q&A platform. Achieved Top 3 finalist position in GESAwards Africa.",
-  //   technologies: ["Next.js", "OpenAI", "TypeScript", "TailwindCSS"],
-  //   period: "Nov. 2024",
-  //   github: "https://github.com/yourusername/gptube",
-  //   demo: "https://gptube.ai"
-  // },
+  {
+    title: "SelZeky Company Profile Website",
+    description: "A website for SelZeky Company Profile. With a clean and modern design, it showcases the company's services, Recruitment, and a blog section.",
+    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
+    period: "Mar. 2025 - Present (In Progress)",
+    github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
+    demo: "https://www.selzeky.com/"
+  },
 ];
 
 // Add links data
@@ -182,7 +186,7 @@ export interface PersonalAchievement {
   id: string
   title: string
   description: string
-  icon: "trophy" | "star" | "book" | "languages"  // Using string literals for icon types
+  icon: "trophy" | "star" | "book" | "languages" | "shieldCheck"  // Using string literals for icon types
   year: string
   category: string
   link?: string  // Optional link to external resource
@@ -203,9 +207,24 @@ export const personalAchievements: PersonalAchievement[] = [
     linkText: "View Paper"
   },
   {
+    id: "azure-ai-engineer-associate",
+    title: "Microsoft Certified: Azure AI Engineer Associate",
+    description: `Certified Microsoft Azure AI Engineer.
+    Studied for these 3 courses:
+    - Microsoft Azure Fundamentals
+    - Microsoft Azure AI Fundamentals
+    - Designing and Implementing a Microsoft Azure AI Solution`,
+    icon: "shieldCheck",
+    year: "Apr. 2025",
+    category: "Certification",
+    link: "http://SorryStillstudyingfortheexam.com",
+    linkText: "View Certification"
+  },
+  {
     id: "times-higher-education-eslsca",
     title: "Awarded The Times Highest Higher Education",
-    description: "Recognized for innovative contributions in educational technology in The Arab Summit of Universities in Dubai University",
+    description: `Recognized for innovative contributions in educational technology 
+    For my work on My University's Chatbot Project. Awarded in The Arab Summit of Universities in Dubai University`,
     icon: "trophy",
     year: "Dec. 2024",
     category: "Award",

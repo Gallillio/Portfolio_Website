@@ -7,7 +7,7 @@ import { experiences, education, freelanceProjects, personalAchievements, getSki
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"
-import { Github, ExternalLink, BookOpen, Trophy, Star, Languages, ChevronDown, ChevronUp } from "lucide-react"
+import { Github, ExternalLink, BookOpen, Trophy, ShieldCheck, Star, Languages, ChevronDown, ChevronUp, Check, Filter } from "lucide-react"
 import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
 import { skillLogos } from "@/lib/skill-logos"
@@ -18,6 +18,7 @@ const iconMap = {
   star: <Star className="h-6 w-6" />,
   book: <BookOpen className="h-6 w-6" />,
   languages: <Languages className="h-6 w-6" />,
+  shieldCheck: <ShieldCheck className="h-6 w-6" />,
 } as const;
 
 type TimelineItem = 
@@ -43,6 +44,47 @@ export default function About() {
   const [isBioExpanded, setIsBioExpanded] = useState(false)
   const [expandedExperiences, setExpandedExperiences] = useState<Set<number>>(new Set())
   const bioRef = useRef<HTMLDivElement>(null)
+
+  // Add new state for mobile detection
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // Add new state for timeline filters
+  const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(['achievement', 'experience', 'education', 'freelance']))
+
+  // Add filter options
+  const filterOptions = [
+    { id: 'achievement', label: 'My Achievements' },
+    { id: 'experience', label: 'Professional Experience' },
+    { id: 'education', label: 'Education' },
+    { id: 'freelance', label: 'Freelance Projects' },
+  ]
+
+  // Function to toggle filters
+  const toggleFilter = (filterId: string) => {
+    setSelectedFilters(prev => {
+      const newFilters = new Set(prev)
+      if (newFilters.has(filterId)) {
+        newFilters.delete(filterId)
+      } else {
+        newFilters.add(filterId)
+      }
+      // Ensure at least one filter is selected
+      if (newFilters.size === 0) {
+        newFilters.add(filterId)
+      }
+      return newFilters
+    })
+  }
+
+  // Effect to handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 700);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -286,142 +328,183 @@ export default function About() {
         <TabsContent value="timeline" className="mt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6 pb-12">
-              {/* Hide on mobile, show on desktop */}
-              <div className="hidden md:block relative max-w-5xl mx-auto">
-                {/* Main vertical line with segments - Desktop */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-0.5">
-                  <div className="absolute inset-0 bg-gradient-to-b from-green-500/20 via-green-500 to-green-500/20"></div>
-                  <div className="absolute h-full w-full">
-                    <svg className="h-full w-40 -ml-[76px]" preserveAspectRatio="none" viewBox="0 0 40 100">
-                      <path
-                        d="M20,0 C20,0 25,20 18,30 C12,40 28,50 20,60 C12,70 25,80 20,100"
-                        className="stroke-green-500"
-                        fill="none"
-                        strokeWidth="2"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </svg>
+              {/* Filter Button for Mobile */}
+              {isMobile ? (
+                <button 
+                  onClick={() => setModalOpen(true)} 
+                  className="flex items-center gap-2 mb-4 text-green-400 bg-green-500/10 hover:bg-green-500/20 rounded-md px-4 py-2 transition-all duration-200 shadow-md"
+                >
+                  <Filter className="h-5 w-5" />
+                  <span>Filter Timeline</span>
+                </button>
+              ) : (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Filter className="h-5 w-5 text-green-400" />
+                    <span className="text-green-400">Filter Timeline:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    {filterOptions.map((option) => (
+                      <button
+                        key={option.id}
+                        onClick={() => toggleFilter(option.id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md border transition-all duration-200 ${
+                          selectedFilters.has(option.id)
+                            ? 'border-green-500 bg-green-500/10 text-green-400'
+                            : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
+                        }`}
+                      >
+                        <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
+                          selectedFilters.has(option.id)
+                            ? 'border-green-500 bg-green-500'
+                            : 'border-green-500/50'
+                        }`}>
+                          {selectedFilters.has(option.id) && (
+                            <Check className="h-3 w-3 text-black" />
+                          )}
+                        </div>
+                        <span>{option.label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
-                
-                <div className="space-y-20">
-                  {/* Desktop Timeline Items */}
-                  {(([
-                    ...personalAchievements.map(achievement => ({
-                      type: 'achievement' as const,
-                      date: achievement.year,
-                      title: achievement.title,
-                      subtitle: achievement.description.split('\n')[0],
-                      category: achievement.category,
-                      icon: iconMap[achievement.icon],
-                      targetTab: 'my-achievements',
-                      link: achievement.link
-                    })),
-                    ...experiences.map(exp => ({
-                      type: 'experience' as const,
-                      title: exp.title,
-                      company: exp.company,
-                      period: exp.period,
-                      description: exp.description,
-                      targetTab: 'experience'
-                    })),
-                    ...education.map(edu => ({
-                      type: 'education' as const,
-                      degree: edu.degree,
-                      institution: edu.institution,
-                      year: edu.year,
-                      focus: edu.focus,
-                      location: edu.location,
-                      targetTab: 'education'
-                    })),
-                    ...freelanceProjects.map(project => ({
-                      type: 'freelance' as const,
-                      title: project.title,
-                      description: project.description,
-                      period: project.period,
-                      technologies: project.technologies,
-                      targetTab: 'freelance'
-                    }))
-                  ] as const) as TimelineItem[]).sort((a, b) => {
-                    const parseDate = (dateStr: string) => {
-                      const firstDate = dateStr.split('-')[0].trim();
-                      try {
-                        return parse(firstDate, 'MMM. yyyy', new Date());
-                      } catch {
-                        return new Date(0);
-                      }
-                    };
+              )}
 
-                    const getDate = (item: TimelineItem) => {
-                      if (item.type === 'achievement') return parseDate(item.date);
-                      if (item.type === 'experience') return parseDate(item.period);
-                      if (item.type === 'freelance') return parseDate(item.period);
-                      return parseDate(item.year);
-                    };
-
-                    return getDate(b).getTime() - getDate(a).getTime();
-                  }).map((item, index) => (
-                    <div key={index} className={`relative flex w-full items-center min-h-[4rem] group`}>
-                      {index % 2 === 1 ? (
-                        <>
-                          <div className="w-[48%] text-right pr-[15%] transition-all duration-300 ease-in-out group-hover:-translate-x-2">
-                            <div className="flex items-center justify-end gap-2 mb-1">
-                              <span className="text-green-300/70 font-mono text-sm transition-colors duration-300 group-hover:text-green-400/90">
-                                {item.type === 'achievement' ? item.date 
-                                  : item.type === 'experience' ? item.period 
-                                  : item.type === 'freelance' ? item.period
-                                  : item.year}
-                              </span>
-                              <span className="text-xs px-2 py-0.5 rounded border border-green-500/30 text-green-400/70 bg-green-500/10">
-                                {item.type === 'achievement' ? item.category 
-                                  : item.type === 'experience' ? 'Professional Experience' 
-                                  : item.type === 'freelance' ? 'Freelance Project'
-                                  : 'Education'}
-                              </span>
-                            </div>
-                            <button 
-                              onClick={() => navigateToTab(item.targetTab)}
-                              className="text-left group/title"
-                            >
-                              <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
-                                <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
-                                  {item.type === 'achievement' ? item.title
-                                    : item.type === 'experience' ? item.title
-                                    : item.type === 'freelance' ? item.title
-                                    : item.degree}
-                                  {item.type === 'achievement' && (item as any).link && (
-                                    <a 
-                                      href={(item as any).link}
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
-                                      onClick={(e) => e.stopPropagation()}
-                                      title="View Paper"
-                                    >
-                                      <ExternalLink className="h-5 w-5" />
-                                      <span className="ml-1 text-sm">View Paper</span>
-                                    </a>
-                                  )}
-                                </span>
-                                <span className="block text-base font-normal text-green-300/80 mt-0.5">
-                                  {item.type === 'achievement' ? item.subtitle
-                                    : item.type === 'experience' ? item.company
-                                    : item.type === 'freelance' ? item.description
-                                    : item.institution}
-                                </span>
-                              </h3>
-                            </button>
+              {/* Modal for Mobile Filters */}
+              {modalOpen && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center">
+                  <div className="bg-gray-800 p-6 rounded-lg w-11/12 max-w-md relative">
+                    <h3 className="text-green-400 mb-4 font-bold flex items-center justify-between">
+                      <span>Filter Timeline</span>
+                      <button 
+                        onClick={() => setModalOpen(false)} 
+                        className="text-green-400 hover:text-green-300" 
+                        aria-label="Close modal"
+                      >
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </h3>
+                    <div className="flex flex-col gap-4">
+                      {filterOptions.map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            toggleFilter(option.id);
+                            // setModalOpen(false); // Close modal after selection
+                          }}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-md border transition-all duration-200 ${
+                            selectedFilters.has(option.id)
+                              ? 'border-green-500 bg-green-500/10 text-green-400'
+                              : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
+                          }`}
+                        >
+                          <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
+                            selectedFilters.has(option.id)
+                              ? 'border-green-500 bg-green-500'
+                              : 'border-green-500/50'
+                          }`}>
+                            {selectedFilters.has(option.id) && (
+                              <Check className="h-3 w-3 text-black" />
+                            )}
                           </div>
-                          <div className="absolute left-1/2 w-4 h-4 bg-black border-2 border-green-500 rounded-full transform -translate-x-1/2 transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:border-green-400 z-10"></div>
-                          <div className="absolute left-[38%] top-1/2 h-0.5 bg-green-500 w-[12%] origin-right transition-all duration-300 ease-in-out group-hover:bg-green-400"></div>
-                          <div className="w-[48%]"></div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="w-[48%]"></div>
-                          <div className="absolute left-1/2 w-4 h-4 bg-black border-2 border-green-500 rounded-full transform -translate-x-1/2 transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:border-green-400 z-10"></div>
-                          <div className="absolute left-1/2 top-1/2 h-0.5 bg-green-500 w-[12%] origin-left transition-all duration-300 ease-in-out group-hover:bg-green-400"></div>
-                          <div className="w-[48%] pl-[15%] transition-all duration-300 ease-in-out group-hover:translate-x-2">
+                          <span>{option.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Timeline Items */}
+              <div className="relative max-w-5xl mx-auto">
+                {isMobile ? (
+                  // Mobile Timeline Design
+                  <div className="relative pl-8"> {/* Added padding-left for the line */}
+                    {/* Vertical Line with segments - Mobile */}
+                    <div className="absolute left-2 top-0 bottom-0 w-0.5">
+                      <div className="absolute inset-0 bg-gradient-to-b from-green-500/20 via-green-500 to-green-500/20"></div>
+                      <div className="absolute h-full w-full">
+                        <svg className="h-full w-40 -ml-[76px]" preserveAspectRatio="none" viewBox="0 0 40 100">
+                          <path
+                            d="M20,0 C20,0 25,20 18,30 C12,40 28,50 20,60 C12,70 25,80 20,100"
+                            className="stroke-green-500"
+                            fill="none"
+                            strokeWidth="2"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Mobile Timeline Items */}
+                    <div className="space-y-8">
+                      {(([
+                        ...personalAchievements.map(achievement => ({
+                          type: 'achievement' as const,
+                          date: achievement.year,
+                          title: achievement.title,
+                          subtitle: achievement.description.split('\n')[0],
+                          category: achievement.category,
+                          icon: iconMap[achievement.icon],
+                          targetTab: 'my-achievements',
+                          link: achievement.link
+                        })),
+                        ...experiences.map(exp => ({
+                          type: 'experience' as const,
+                          title: exp.title,
+                          company: exp.company,
+                          period: exp.period,
+                          description: exp.description,
+                          targetTab: 'experience'
+                        })),
+                        ...education.map(edu => ({
+                          type: 'education' as const,
+                          degree: edu.degree,
+                          institution: edu.institution,
+                          year: edu.year,
+                          focus: edu.focus,
+                          location: edu.location,
+                          targetTab: 'education'
+                        })),
+                        ...freelanceProjects.map(project => ({
+                          type: 'freelance' as const,
+                          title: project.title,
+                          description: project.description,
+                          period: project.period,
+                          technologies: project.technologies,
+                          targetTab: 'freelance'
+                        }))
+                      ] as const) as TimelineItem[])
+                      .filter(item => selectedFilters.has(item.type))
+                      .sort((a, b) => {
+                        const parseDate = (dateStr: string) => {
+                          const firstDate = dateStr.split('-')[0].trim();
+                          try {
+                            return parse(firstDate, 'MMM. yyyy', new Date());
+                          } catch {
+                            return new Date(0);
+                          }
+                        };
+
+                        const getDate = (item: TimelineItem) => {
+                          if (item.type === 'achievement') return parseDate(item.date);
+                          if (item.type === 'experience') return parseDate(item.period);
+                          if (item.type === 'freelance') return parseDate(item.period);
+                          return parseDate(item.year);
+                        };
+
+                        return getDate(b).getTime() - getDate(a).getTime();
+                      })
+                      .map((item, index) => (
+                        <div key={index} className="relative group">
+                          {/* Circle and Horizontal Line */}
+                          <div className="absolute left-[-30px] top-4 w-3 h-3 bg-black border-2 border-green-500 rounded-full transform transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:border-green-400"></div>
+                          <div className="absolute left-[-16px] top-[21px] w-6 h-0.5 bg-green-500 origin-left transition-all duration-300 ease-in-out group-hover:bg-green-400"></div>
+
+                          {/* Content */}
+                          <div className="pl-4 transition-all duration-300 ease-in-out group-hover:translate-x-2">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-green-300/70 font-mono text-sm transition-colors duration-300 group-hover:text-green-400/90">
                                 {item.type === 'achievement' ? item.date 
@@ -469,126 +552,204 @@ export default function About() {
                               </h3>
                             </button>
                           </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Show on mobile, hide on desktop */}
-              <div className="md:hidden">
-                <div className="space-y-8">
-                  {(([
-                    ...personalAchievements.map(achievement => ({
-                      type: 'achievement' as const,
-                      date: achievement.year,
-                      title: achievement.title,
-                      subtitle: achievement.description.split('\n')[0],
-                      category: achievement.category,
-                      icon: iconMap[achievement.icon],
-                      targetTab: 'my-achievements',
-                      link: achievement.link
-                    })),
-                    ...experiences.map(exp => ({
-                      type: 'experience' as const,
-                      title: exp.title,
-                      company: exp.company,
-                      period: exp.period,
-                      description: exp.description,
-                      targetTab: 'experience'
-                    })),
-                    ...education.map(edu => ({
-                      type: 'education' as const,
-                      degree: edu.degree,
-                      institution: edu.institution,
-                      year: edu.year,
-                      focus: edu.focus,
-                      location: edu.location,
-                      targetTab: 'education'
-                    })),
-                    ...freelanceProjects.map(project => ({
-                      type: 'freelance' as const,
-                      title: project.title,
-                      description: project.description,
-                      period: project.period,
-                      technologies: project.technologies,
-                      targetTab: 'freelance'
-                    }))
-                  ] as const) as TimelineItem[])
-                  .sort((a, b) => {
-                    const parseDate = (dateStr: string) => {
-                      const firstDate = dateStr.split('-')[0].trim();
-                      try {
-                        return parse(firstDate, 'MMM. yyyy', new Date());
-                      } catch {
-                        return new Date(0);
-                      }
-                    };
-
-                    const getDate = (item: TimelineItem) => {
-                      if (item.type === 'achievement') return parseDate(item.date);
-                      if (item.type === 'experience') return parseDate(item.period);
-                      if (item.type === 'freelance') return parseDate(item.period);
-                      return parseDate(item.year);
-                    };
-
-                    return getDate(b).getTime() - getDate(a).getTime();
-                  })
-                  .map((item, index) => (
-                    <div key={index} className="relative pl-6 border-l-2 border-green-500">
-                      <div className="absolute left-[-5px] top-2 w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="mb-2">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="text-green-300/70 font-mono text-sm">
-                            {item.type === 'achievement' ? item.date 
-                              : item.type === 'experience' ? item.period 
-                              : item.type === 'freelance' ? item.period
-                              : item.year}
-                          </span>
-                          <span className="text-xs px-2 py-0.5 rounded border border-green-500/30 text-green-400/70 bg-green-500/10">
-                            {item.type === 'achievement' ? item.category 
-                              : item.type === 'experience' ? 'Professional Experience' 
-                              : item.type === 'freelance' ? 'Freelance Project'
-                              : 'Education'}
-                          </span>
                         </div>
-                        <button 
-                          onClick={() => navigateToTab(item.targetTab)}
-                          className="text-left group/title w-full"
-                        >
-                          <h3 className="text-lg font-bold text-green-400 group-hover:text-green-300">
-                            <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center flex-wrap">
-                              {item.type === 'achievement' ? item.title
-                                : item.type === 'experience' ? item.title
-                                : item.type === 'freelance' ? item.title
-                                : item.degree}
-                              {item.type === 'achievement' && (item as any).link && (
-                                <a 
-                                  href={(item as any).link}
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300"
-                                  onClick={(e) => e.stopPropagation()}
-                                  title="View Paper"
-                                >
-                                  <ExternalLink className="h-5 w-5" />
-                                  <span className="ml-1 text-sm">View Paper</span>
-                                </a>
-                              )}
-                            </span>
-                            <span className="block text-base font-normal text-green-300/80 mt-1">
-                              {item.type === 'achievement' ? item.subtitle
-                                : item.type === 'experience' ? item.company
-                                : item.type === 'freelance' ? item.description
-                                : item.institution}
-                            </span>
-                          </h3>
-                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  // Desktop Timeline Design
+                  <>
+                    {/* Main vertical line with segments */}
+                    <div className="absolute left-1/2 top-0 bottom-0 w-0.5">
+                      <div className="absolute inset-0 bg-gradient-to-b from-green-500/20 via-green-500 to-green-500/20"></div>
+                      <div className="absolute h-full w-full">
+                        <svg className="h-full w-40 -ml-[76px]" preserveAspectRatio="none" viewBox="0 0 40 100">
+                          <path
+                            d="M20,0 C20,0 25,20 18,30 C12,40 28,50 20,60 C12,70 25,80 20,100"
+                            className="stroke-green-500"
+                            fill="none"
+                            strokeWidth="2"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        </svg>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    
+                    <div className="space-y-20">
+                      {/* Timeline Items - Modified to use filters */}
+                      {(([
+                        ...personalAchievements.map(achievement => ({
+                          type: 'achievement' as const,
+                          date: achievement.year,
+                          title: achievement.title,
+                          subtitle: achievement.description.split('\n')[0],
+                          category: achievement.category,
+                          icon: iconMap[achievement.icon],
+                          targetTab: 'my-achievements',
+                          link: achievement.link
+                        })),
+                        ...experiences.map(exp => ({
+                          type: 'experience' as const,
+                          title: exp.title,
+                          company: exp.company,
+                          period: exp.period,
+                          description: exp.description,
+                          targetTab: 'experience',
+                          technologies: exp.technologies
+                        })),
+                        ...education.map(edu => ({
+                          type: 'education' as const,
+                          degree: edu.degree,
+                          institution: edu.institution,
+                          year: edu.year,
+                          focus: edu.focus,
+                          location: edu.location,
+                          targetTab: 'education'
+                        })),
+                        ...freelanceProjects.map(project => ({
+                          type: 'freelance' as const,
+                          title: project.title,
+                          description: project.description,
+                          period: project.period,
+                          technologies: project.technologies,
+                          targetTab: 'freelance'
+                        }))
+                      ] as const) as TimelineItem[])
+                      .filter(item => selectedFilters.has(item.type)) // Ensure filtering is applied
+                      .sort((a, b) => {
+                        const parseDate = (dateStr: string) => {
+                          const firstDate = dateStr.split('-')[0].trim();
+                          try {
+                            return parse(firstDate, 'MMM. yyyy', new Date());
+                          } catch {
+                            return new Date(0);
+                          }
+                        };
+
+                        const getDate = (item: TimelineItem) => {
+                          if (item.type === 'achievement') return parseDate(item.date);
+                          if (item.type === 'experience') return parseDate(item.period);
+                          if (item.type === 'freelance') return parseDate(item.period);
+                          return parseDate(item.year);
+                        };
+
+                        return getDate(b).getTime() - getDate(a).getTime();
+                      }).map((item, index) => (
+                        <div key={index} className={`relative flex w-full items-center min-h-[4rem] group`}>
+                          {index % 2 === 1 ? (
+                            <>
+                              <div className="w-[48%] text-right pr-[15%] transition-all duration-300 ease-in-out group-hover:-translate-x-2">
+                                <div className="flex items-center justify-end gap-2 mb-1">
+                                  <span className="text-green-300/70 font-mono text-sm transition-colors duration-300 group-hover:text-green-400/90">
+                                    {item.type === 'achievement' ? item.date 
+                                      : item.type === 'experience' ? item.period 
+                                      : item.type === 'freelance' ? item.period
+                                      : item.year}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 rounded border border-green-500/30 text-green-400/70 bg-green-500/10">
+                                    {item.type === 'achievement' ? item.category 
+                                      : item.type === 'experience' ? 'Professional Experience' 
+                                      : item.type === 'freelance' ? 'Freelance Project'
+                                      : 'Education'}
+                                  </span>
+                                </div>
+                                <button 
+                                  onClick={() => navigateToTab(item.targetTab)}
+                                  className="text-left group/title"
+                                >
+                                  <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
+                                    <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
+                                      {item.type === 'achievement' ? item.title
+                                        : item.type === 'experience' ? item.title
+                                        : item.type === 'freelance' ? item.title
+                                        : item.degree}
+                                      {item.type === 'achievement' && (item as any).link && (
+                                        <a 
+                                          href={(item as any).link}
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                                          onClick={(e) => e.stopPropagation()}
+                                          title="View Paper"
+                                        >
+                                          <ExternalLink className="h-5 w-5" />
+                                          <span className="ml-1 text-sm">View Paper</span>
+                                        </a>
+                                      )}
+                                    </span>
+                                    <span className="block text-base font-normal text-green-300/80 mt-0.5">
+                                      {item.type === 'achievement' ? item.subtitle
+                                        : item.type === 'experience' ? item.company
+                                        : item.type === 'freelance' ? item.description
+                                        : item.institution}
+                                    </span>
+                                  </h3>
+                                </button>
+                              </div>
+                              <div className="absolute left-1/2 w-4 h-4 bg-black border-2 border-green-500 rounded-full transform -translate-x-1/2 transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:border-green-400 z-10"></div>
+                              <div className="absolute left-[38%] top-1/2 h-0.5 bg-green-500 w-[12%] origin-right transition-all duration-300 ease-in-out group-hover:bg-green-400"></div>
+                              <div className="w-[48%]"></div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-[48%]"></div>
+                              <div className="absolute left-1/2 w-4 h-4 bg-black border-2 border-green-500 rounded-full transform -translate-x-1/2 transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:border-green-400 z-10"></div>
+                              <div className="absolute left-1/2 top-1/2 h-0.5 bg-green-500 w-[12%] origin-left transition-all duration-300 ease-in-out group-hover:bg-green-400"></div>
+                              <div className="w-[48%] pl-[15%] transition-all duration-300 ease-in-out group-hover:translate-x-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-green-300/70 font-mono text-sm transition-colors duration-300 group-hover:text-green-400/90">
+                                    {item.type === 'achievement' ? item.date 
+                                      : item.type === 'experience' ? item.period 
+                                      : item.type === 'freelance' ? item.period
+                                      : item.year}
+                                  </span>
+                                  <span className="text-xs px-2 py-0.5 rounded border border-green-500/30 text-green-400/70 bg-green-500/10">
+                                    {item.type === 'achievement' ? item.category 
+                                      : item.type === 'experience' ? 'Professional Experience' 
+                                      : item.type === 'freelance' ? 'Freelance Project'
+                                      : 'Education'}
+                                  </span>
+                                </div>
+                                <button 
+                                  onClick={() => navigateToTab(item.targetTab)}
+                                  className="text-left group/title"
+                                >
+                                  <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
+                                    <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
+                                      {item.type === 'achievement' ? item.title
+                                        : item.type === 'experience' ? item.title
+                                        : item.type === 'freelance' ? item.title
+                                        : item.degree}
+                                      {item.type === 'achievement' && (item as any).link && (
+                                        <a 
+                                          href={(item as any).link}
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                                          onClick={(e) => e.stopPropagation()}
+                                          title="View Paper"
+                                        >
+                                          <ExternalLink className="h-5 w-5" />
+                                          <span className="ml-1 text-sm">View Paper</span>
+                                        </a>
+                                      )}
+                                    </span>
+                                    <span className="block text-base font-normal text-green-300/80 mt-0.5">
+                                      {item.type === 'achievement' ? item.subtitle
+                                        : item.type === 'experience' ? item.company
+                                        : item.type === 'freelance' ? item.description
+                                        : item.institution}
+                                    </span>
+                                  </h3>
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -612,6 +773,16 @@ export default function About() {
                         <span className="hidden sm:block text-green-500/50 group-hover:text-green-400/50 transition-colors duration-200">•</span>
                         <span className="text-green-300/70 font-mono group-hover:text-green-300/90 transition-colors duration-200">{exp.period}</span>
                       </div>
+
+                      {/* Technologies Used Section */}
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {exp.technologies.map((tech, techIndex) => (
+                          <Badge key={techIndex} variant="outline" className="border-green-500 text-green-400 group-hover:border-green-400 group-hover:text-green-300 transition-colors duration-200">
+                            {tech}
+                          </Badge>
+                        ))}
+                      </div>
+
                       <div className="text-green-300/90 leading-relaxed">
                         {/* Summary - first line or two */}
                         <p className="pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200">
@@ -736,6 +907,12 @@ export default function About() {
                 {freelanceProjects.map((project, index) => (
                   <div key={index} className="border border-green-500 rounded-lg p-4 group hover:border-green-400 hover:scale-[1.02] hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 ease-in-out">
                     <h3 className="text-lg font-bold text-green-400 mb-2 group-hover:text-green-300 transition-colors duration-200">{project.title}</h3>
+                    
+                    {/* Displaying the period in a badge format */}
+                    <span className="text-xs text-green-300 border border-green-500/30 rounded-md px-2 py-1 mb-2 inline-block">
+                      - {project.period}
+                    </span>
+
                     <p className="text-green-300/90 mb-4 group-hover:text-green-300/80 transition-colors duration-200">{project.description}</p>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {project.technologies.map((tech, techIndex) => (

@@ -14,6 +14,8 @@ const nextConfig = {
             'cdn.jsdelivr.net',
             'registry.npmmirror.com',
             'www.edureka.co',
+            'images.icon-icons.com',
+            'i.pinimg.com',
         ],
     },
 }

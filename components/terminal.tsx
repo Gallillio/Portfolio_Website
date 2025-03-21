@@ -112,7 +112,7 @@ function TerminalContent() {
         output: [
           <AsciiArt key="ascii-art" />,
           "Welcome to my interactive portfolio terminal!",
-          'Type "help" to see available commands.',
+          'Type "help" to see available commands. Or simply select a tab from the menu above.',
           "",
         ],
         timestamp: new Date(),
@@ -575,7 +575,7 @@ function TerminalContent() {
                     value="my-achievements"
                     className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
                   >
-                    My Achievements / Publications
+                    My Achievements / Publications / Certifications
                   </TabsTrigger>
                 </TabsList>
               </div>
