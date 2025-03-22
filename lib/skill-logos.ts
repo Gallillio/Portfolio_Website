@@ -42,5 +42,13 @@ export const skillLogos: { [key: string]: string } = {
   "Figma": "https://img.icons8.com/color/96/figma.png",
   "Jira": "https://img.icons8.com/color/96/jira.png",
   "Trello": "https://img.icons8.com/color/96/trello.png",
-  "Slack": "https://img.icons8.com/color/96/slack.png"
+  "Slack": "https://img.icons8.com/color/96/slack.png",
+
+  // Courses' providers' logos
+  "Microsoft": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Microsoft_icon.svg/2048px-Microsoft_icon.svg.png",
+  "IBM": "https://img.icons8.com/color/96/ibm.png",
+  "New Horizons": "/new-horizons-logo.png",
+  "CompTIA": "https://images.seeklogo.com/logo-png/34/2/comptia-logo-png_seeklogo-348934.png",
+  "Amazon": "https://www.svgrepo.com/show/333504/aws.svg",
+  "DeepLearning.AI": "https://d3njjcbhbojbot.cloudfront.net/api/utilities/v1/imageproxy/http://coursera-university-assets.s3.amazonaws.com/b4/5cb90bb92f420b99bf323a0356f451/Icon.png?auto=format%2Ccompress&dpr=1&w=180&h=180",
 }; 

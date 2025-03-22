@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { experiences, education, freelanceProjects, personalAchievements, getSkillsAsCategories } from "@/lib/profile-data"
+import { experiences, education, freelanceProjects, personalAchievements, getSkillsAsCategories, courses } from "@/lib/profile-data"
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"
@@ -36,7 +36,7 @@ export default function About() {
     if (typeof window !== 'undefined') {
       const savedTab = localStorage.getItem('aboutActiveTab');
       // Validate that the saved tab is a valid option
-      const validTabs = ['skills', 'timeline', 'experience', 'education', 'freelance', 'languages'];
+      const validTabs = ['skills', 'timeline', 'experience', 'education', 'freelance', 'languages', 'courses'];
       return savedTab && validTabs.includes(savedTab) ? savedTab : "skills";
     }
     return "skills";
@@ -116,7 +116,7 @@ export default function About() {
   // Load saved tab from localStorage after initial render
   useEffect(() => {
     const savedTab = localStorage.getItem('aboutActiveTab');
-    const validTabs = ['skills', 'timeline', 'experience', 'education', 'freelance', 'languages'];
+    const validTabs = ['skills', 'timeline', 'experience', 'education', 'freelance', 'languages', 'courses'];
     if (savedTab && validTabs.includes(savedTab)) {
       setActiveTab(savedTab);
     }
@@ -295,6 +295,9 @@ export default function About() {
             </TabsTrigger>
             <TabsTrigger value="languages" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Languages
+            </TabsTrigger>
+            <TabsTrigger value="courses" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+              Courses
             </TabsTrigger>
           </TabsList>
         </div>
@@ -981,6 +984,63 @@ export default function About() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="courses" className="mt-4">
+          <Card className="bg-gray-900 border-green-500">
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                {/* Note about certifications */}
+                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
+                  <p className="text-green-300">
+                    Note: These are courses I've taken. For certifications, please visit the{" "}
+                    <button 
+                      onClick={() => navigateToTab('my-achievements')}
+                      className="text-yellow-400 hover:text-yellow-300 underline inline-flex items-center"
+                    >
+                      My Achievements / Publications / Certifications
+                      <ExternalLink className="h-4 w-4 ml-1" />
+                    </button>{" "}
+                    tab.
+                  </p>
+                </div>
+
+                {/* Courses Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {courses.map((course, index) => (
+                    <div 
+                      key={index}
+                      className="group relative p-4 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1"
+                    >
+                      <div className="absolute inset-0 bg-green-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative z-10 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-lg font-bold text-green-400 group-hover:text-green-300 transition-colors duration-200">
+                            {course.title}
+                          </h3>
+                          <img 
+                            src={skillLogos[course.provider]} 
+                            alt={`${course.provider} logo`} 
+                            className={`h-6 ${course.provider === 'CompTIA' ? 'h-14' : ''} 
+                            ${course.provider === 'Amazon' ? 'h-9 filter invert' : ''} 
+                            ${course.provider === 'New Horizons' ? 'h-8 filter invert' : ''}`}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-green-300/70 group-hover:text-green-300/90 transition-colors duration-200">
+                            {course.provider}
+                          </span>
+                          <span className="text-green-300/70 font-mono group-hover:text-green-300/90 transition-colors duration-200">
+                            {course.date}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>

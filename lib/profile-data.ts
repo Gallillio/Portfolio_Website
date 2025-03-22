@@ -258,3 +258,69 @@ export const personalAchievements: PersonalAchievement[] = [
   },
 ];
 
+// Course interface
+export interface Course {
+  title: string;
+  provider: string;
+  date: string;
+}
+
+// Courses data
+export const courses: Course[] = [
+  {
+    title: "Designing and Implementing a Microsoft Azure AI Solution",
+    provider: "Microsoft",
+    date: "Feb. 2025"
+  },
+  {
+    title: "Microsoft Azure AI Fundamentals",
+    provider: "Microsoft",
+    date: "Feb. 2025"
+  },
+  {
+    title: "Microsoft Azure Fundamentals",
+    provider: "Microsoft",
+    date: "Feb. 2025"
+  },
+  {
+    title: "Practitioner Watsonx Assistant",
+    provider: "IBM",
+    date: "Feb. 2025"
+  },
+  {
+    title: "Watsonx Orchestrate Intermediate",
+    provider: "IBM",
+    date: "Feb. 2025"
+  },
+  {
+    title: "Linux Adminstration",
+    provider: "New Horizons",
+    date: "Jul. 2023"
+  },
+  {
+    title: "Security +",
+    provider: "CompTIA",
+    date: "Apr. 2023"
+  },
+  {
+    title: "Cloud AWS Practitioner",
+    provider: "Amazon",
+    date: "Oct. 2022"
+  },
+  {
+    title: "Supervised Machine Learning",
+    provider: "DeepLearning.AI",
+    date: "Aug. 2022"
+  },
+  {
+    title: "Network +",
+    provider: "CompTIA",
+    date: "Aug. 2022"
+  },
+  {
+    title: "CompTIA A+",
+    provider: "CompTIA",
+    date: "Aug. 2022"
+  }
+];
+

@@ -134,7 +134,7 @@ export default function Projects() {
               <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-40 mb-4 overflow-hidden rounded-md bg-black/50 flex items-center justify-center">
+              <div className="h-40 mb-4 overflow-hidden rounded-md  flex items-center justify-center">
                 <Slideshow images={project.images} onImageClick={handleImageClick} />
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
@@ -147,6 +147,7 @@ export default function Projects() {
             </CardContent>
             <CardFooter className="flex justify-between">
               {project.github && (
+                // Code Button 
                 <Tooltip 
                   text="Sorry, the code is confidential and not public."
                   isMobile={isMobile}
@@ -175,35 +176,33 @@ export default function Projects() {
                 </Tooltip>
               )}
               
+              {/* Demo Button */}
               <Tooltip 
                 text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
                 isMobile={isMobile}
                 isTablet={isTablet}
                 showTooltip={!project.demo_available}
               >
-                {project.demo && project.demo_available ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-green-500 text-green-400 bg-black hover:bg-green-500/20 "
-                    asChild
-                    onClick={handleDemoClick}
-                  >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.demo_available ? '' : 'opacity-50 cursor-not-allowed'}`}
+                  asChild
+                  disabled={!project.demo_available}
+                  onClick={project.demo_available ? handleDemoClick : undefined}
+                >
+                  {project.demo && project.demo_available ? (
                     <a href={project.demo} target="_blank" rel="noopener noreferrer">
                       <ExternalLink size={16} className="mr-2" />
                       Demo
                     </a>
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="border-green-500 text-gray-500 bg-black opacity-50 cursor-not-allowed"
-                  >
-                    <ExternalLink size={16} className="mr-2" />
-                    Demo
-                  </Button>
-                )}
+                  ) : (
+                    <span className="text-gray-500">
+                      <ExternalLink size={16} className="mr-2" />
+                      Demo
+                    </span>
+                  )}
+                </Button>
               </Tooltip>
             </CardFooter>
           </Card>
