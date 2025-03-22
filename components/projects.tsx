@@ -11,6 +11,7 @@ import { useAchievements } from "@/lib/achievements-context"
 import Image from "next/image"
 import Slideshow from "@/components/ui/Slideshow"
 import ImageModal from "@/lib/image-modal"
+import { Tooltip } from "@/components/ui/tooltip"
 
 export default function Projects() {
   const [filter, setFilter] = useState<string>("all")
@@ -146,15 +147,20 @@ export default function Projects() {
             </CardContent>
             <CardFooter className="flex justify-between">
               {project.github && (
-                <div className="relative group">
+                <Tooltip 
+                  text="Sorry, the code is confidential and not public."
+                  isMobile={isMobile}
+                  isTablet={isTablet}
+                  showTooltip={!project.code_available}
+                >
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`border-green-500 text-green-400 bg-black ${project.codeAvailable ? '' : 'opacity-50 cursor-not-allowed'}`}
+                    className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.code_available ? '' : 'opacity-50 cursor-not-allowed'}`}
                     asChild
-                    disabled={!project.codeAvailable}
+                    disabled={!project.code_available}
                   >
-                    {project.codeAvailable ? (
+                    {project.code_available ? (
                       <a href={project.github} target="_blank" rel="noopener noreferrer">
                         <Github size={16} className="mr-2" />
                         Code
@@ -166,33 +172,29 @@ export default function Projects() {
                       </span>
                     )}
                   </Button>
-                  {/* Tooltip for Code Availability */}
-                  {!project.codeAvailable && (
-                    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${isMobile || isTablet ? 'w-28' : 'w-64'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
-                      <div className="bg-gray-900 border border-green-500 p-2 rounded-md shadow-lg text-xs text-green-400">
-                        <p className="text-center">Sorry, the code is confidential and not public.</p>
-                        {/* Triangle Pointer */}
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-r border-b border-green-500 transform rotate-45"></div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                </Tooltip>
               )}
-              {project.demo && project.demo_available ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-green-500 text-green-400 bg-black hover:bg-green-500/20"
-                  asChild
-                  onClick={handleDemoClick}
-                >
-                  <a href={project.demo} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink size={16} className="mr-2" />
-                    Demo
-                  </a>
-                </Button>
-              ) : (
-                <div className="relative group">
+              
+              <Tooltip 
+                text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                isMobile={isMobile}
+                isTablet={isTablet}
+                showTooltip={!project.demo_available}
+              >
+                {project.demo && project.demo_available ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-green-500 text-green-400 bg-black hover:bg-green-500/20 "
+                    asChild
+                    onClick={handleDemoClick}
+                  >
+                    <a href={project.demo} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink size={16} className="mr-2" />
+                      Demo
+                    </a>
+                  </Button>
+                ) : (
                   <Button
                     variant="outline"
                     size="sm"
@@ -201,18 +203,8 @@ export default function Projects() {
                     <ExternalLink size={16} className="mr-2" />
                     Demo
                   </Button>
-                  {/* Custom Tooltip for demo availability */}
-                  {!project.demo_available && (
-                    <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${isMobile ? 'w-28' : 'w-64'} opacity-0 group-hover:opacity-100 transition-opacity duration-200`}>
-                      <div className="bg-gray-900 border border-green-500 p-2 rounded-md shadow-lg text-xs text-green-400">
-                        <p className="text-center">This project is only available by cloning the GitHub repo and not hosted unfortunately.</p>
-                        {/* Triangle Pointer */}
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-r border-b border-green-500 transform rotate-45"></div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                )}
+              </Tooltip>
             </CardFooter>
           </Card>
         ))}

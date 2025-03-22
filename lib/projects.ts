@@ -16,7 +16,7 @@ export const projects: Project[] = [
     github: "https://github.com/Gallillio/RealTime_Facial_Emotion_Classification",
     demo: "You think I'm going to host a demo for this one? Hahaha",
     demo_available: false,
-    codeAvailable: true,
+    code_available: true,
   },
   {
     title: "Data Visualer and Analysis Tool",
@@ -33,7 +33,7 @@ export const projects: Project[] = [
     github: "https://github.com/Gallillio/Data_Science-Data_Visualizer_Tool?tab=readme-ov-file",
     demo: "https://your-portfolio-demo.com",
     demo_available: false,
-    codeAvailable: true,
+    code_available: true,
   },
   {
     title: "IIG-HEC Company Profile Website",
@@ -49,7 +49,7 @@ export const projects: Project[] = [
     github: "https://github.com/Gallillio/MERN-IIG_HEC_Company_Website",
     demo: "https://www.iig.land/",
     demo_available: true,
-    codeAvailable: true,
+    code_available: true,
   },
   {
     title: "GPTube",
@@ -62,7 +62,7 @@ export const projects: Project[] = [
     github: "https://github.com/Gallillio/GPTube",
     demo: "https://your-gptube-demo.com",
     demo_available: false,
-    codeAvailable: true,
+    code_available: true,
   },
   {
     title: "ESLSCA University Chatbot",
@@ -75,7 +75,7 @@ export const projects: Project[] = [
     github: "https://github.com/your-username/gptube",
     demo: "https://chatbot.eslsca.edu.eg/",
     demo_available: false,
-    codeAvailable: false,
+    code_available: false,
   },
   {
     title: "My Portfolio Website",
@@ -88,7 +88,7 @@ export const projects: Project[] = [
     github: "https://github.com/Gallillio/Portfolio_Website",
     demo: "https://gallillio.com",
     demo_available: true,
-    codeAvailable: true,
+    code_available: true,
   },
 ];
 

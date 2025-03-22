@@ -152,6 +152,8 @@ export interface FreelanceProject {
   period: string;
   github?: string;
   demo?: string;
+  demo_available?: boolean;
+  code_available?: boolean;
 }
 
 // Add freelance projects data
@@ -162,7 +164,9 @@ export const freelanceProjects: FreelanceProject[] = [
     technologies: ["JavaScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Firebase", "Vercel"],
     period: "Jun. 2023 - Dec. 2023",
     github: "https://github.com/Gallillio/MERN-IIG_HEC_Company_Website",
-    demo: "https://www.iig.land/"
+    demo: "https://www.iig.land/",
+    demo_available: true,
+    code_available: true,
   },
   {
     title: "SelZeky Company Profile Website",
@@ -170,7 +174,9 @@ export const freelanceProjects: FreelanceProject[] = [
     technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
     period: "Mar. 2025 - Present (In Progress)",
     github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
-    demo: "https://www.selzeky.com/"
+    demo: "https://www.selzeky.com/",
+    demo_available: false,
+    code_available: false,
   },
 ];
 

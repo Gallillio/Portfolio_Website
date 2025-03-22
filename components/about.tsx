@@ -11,6 +11,7 @@ import { Github, ExternalLink, BookOpen, Trophy, ShieldCheck, Star, Languages, C
 import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
 import { skillLogos } from "@/lib/skill-logos"
+import { Tooltip } from "@/components/ui/tooltip"
 
 // Map of icon strings to Lucide components
 const iconMap = {
@@ -46,7 +47,7 @@ export default function About() {
   const bioRef = useRef<HTMLDivElement>(null)
 
   // Add new state for mobile detection
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 700);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 767);
   const [modalOpen, setModalOpen] = useState(false);
 
   // Add new state for timeline filters
@@ -76,6 +77,24 @@ export default function About() {
       return newFilters
     })
   }
+
+  // Add isTablet state
+  const [isTablet, setIsTablet] = useState<boolean>(false);
+
+  // Check window size for tablet
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsTablet(width >= 768 && width < 1024); // Set isTablet based on window width
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Call it initially to set the state
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Effect to handle window resize
   useEffect(() => {
@@ -922,28 +941,43 @@ export default function About() {
                       ))}
                     </div>
                     <div className="flex gap-4">
-                      {project.github && (
+                      {/* Code Button */}
+                      <Tooltip 
+                        text="Sorry, the code is confidential and not public."
+                        isTablet={isTablet}
+                        isMobile={isMobile}
+                        showTooltip={!project.code_available}
+                      >
                         <a
                           href={project.github}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center text-green-400 hover:text-green-300 transition-colors duration-200"
+                          className={`flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md ${project.code_available ? '' : 'cursor-not-allowed opacity-50'}`}
+                          // style={{ pointerEvents: project.code_available ? 'auto' : 'none' }}
                         >
                           <Github size={16} className="mr-1" />
                           Code
                         </a>
-                      )}
-                      {project.demo && (
+                      </Tooltip>
+                      
+                      {/* Demo Button */}
+                      <Tooltip 
+                        text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                        isMobile={isMobile}
+                        isTablet={isTablet}
+                        showTooltip={!project.demo_available}
+                      >
                         <a
                           href={project.demo}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center text-green-400 hover:text-green-300 transition-colors duration-200"
+                          className={`flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md ${project.demo_available ? '' : 'cursor-not-allowed opacity-50'}`}
+                          // style={{ pointerEvents: project.demo_available ? 'auto' : 'none' }}
                         >
                           <ExternalLink size={16} className="mr-1" />
-                          Have a look for yourself!
+                          Check it out!
                         </a>
-                      )}
+                      </Tooltip>
                     </div>
                   </div>
                 ))}

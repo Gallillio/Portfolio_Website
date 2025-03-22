@@ -19,6 +19,6 @@ export interface Project {
   github?: string
   demo?: string
   demo_available?: boolean
-  codeAvailable?: boolean
+  code_available?: boolean
 }
 
