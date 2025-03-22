@@ -177,7 +177,11 @@ export default function Contact() {
               <CardContent className="space-y-4">
                 <div className="flex items-center">
                   <Mail className="mr-3 text-green-400" size={20} />
-                  <a href="mailto:ahmedgalal11045@gmail.com" className="text-green-300 hover:text-green-400">
+                  <a 
+                    href="mailto:ahmedgalal11045@gmail.com" 
+                    className="text-green-300 hover:text-green-400"
+                    onClick={() => sendContact()}
+                  >
                     AhmedGalal11045@gmail.com
                   </a>
                 </div>

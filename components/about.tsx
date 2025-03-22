@@ -105,6 +105,24 @@ export default function About() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Listen for navigation messages from the terminal
+  useEffect(() => {
+    const handleSectionNavigation = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'navigate-about-section') {
+        const sectionId = event.data.sectionId;
+        console.log('About component received navigation request to section:', sectionId);
+        if (sectionId && typeof sectionId === 'string') {
+          setActiveTab(sectionId);
+        }
+      }
+    };
+
+    window.addEventListener('message', handleSectionNavigation);
+    return () => {
+      window.removeEventListener('message', handleSectionNavigation);
+    };
+  }, []);
+
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
     if (!hasMarkedVisit) {
@@ -547,9 +565,9 @@ export default function About() {
                                     : item.type === 'experience' ? item.title
                                     : item.type === 'freelance' ? item.title
                                     : item.degree}
-                                  {item.type === 'achievement' && (item as any).link && (
+                                  {item.type === 'achievement' && item.link && (
                                     <a 
-                                      href={(item as any).link}
+                                      href={item.link}
                                       target="_blank" 
                                       rel="noopener noreferrer"
                                       className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
@@ -681,9 +699,9 @@ export default function About() {
                                         : item.type === 'experience' ? item.title
                                         : item.type === 'freelance' ? item.title
                                         : item.degree}
-                                      {item.type === 'achievement' && (item as any).link && (
+                                      {item.type === 'achievement' && item.link && (
                                         <a 
-                                          href={(item as any).link}
+                                          href={item.link}
                                           target="_blank" 
                                           rel="noopener noreferrer"
                                           className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
@@ -738,9 +756,9 @@ export default function About() {
                                         : item.type === 'experience' ? item.title
                                         : item.type === 'freelance' ? item.title
                                         : item.degree}
-                                      {item.type === 'achievement' && (item as any).link && (
+                                      {item.type === 'achievement' && item.link && (
                                         <a 
-                                          href={(item as any).link}
+                                          href={item.link}
                                           target="_blank" 
                                           rel="noopener noreferrer"
                                           className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
@@ -992,7 +1010,7 @@ export default function About() {
                 {/* Note about certifications */}
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
                   <p className="text-green-300">
-                    Note: These are courses I've taken. For certifications, please visit the{" "}
+                    Note: These are courses I&apos;ve taken. For certifications, please visit{" "}
                     <button 
                       onClick={() => navigateToTab('my-achievements')}
                       className="text-yellow-400 hover:text-yellow-300 underline inline-flex items-center"
@@ -1000,7 +1018,6 @@ export default function About() {
                       My Achievements / Publications / Certifications
                       <ExternalLink className="h-4 w-4 ml-1" />
                     </button>{" "}
-                    tab.
                   </p>
                 </div>
 
@@ -1017,11 +1034,14 @@ export default function About() {
                           <h3 className="text-lg font-bold text-green-400 group-hover:text-green-300 transition-colors duration-200">
                             {course.title}
                           </h3>
-                          <img 
+                          <Image 
                             src={skillLogos[course.provider]} 
-                            alt={`${course.provider} logo`} 
-                            className={`h-6 ${course.provider === 'CompTIA' ? 'h-12' : ''} 
-                            ${course.provider === 'Amazon' ? 'h-9 filter invert' : ''} 
+                            alt={`${course.provider} logo`}
+                            width={24}
+                            height={24}
+                            className={`h-6 ${course.provider === 'CompTIA' ? 'h-14' : ''} 
+                            ${course.provider === 'Amazon' ? 'h-11 filter invert' : ''} 
+                            ${course.provider === 'IBM' ? 'h-9' : ''} 
                             ${course.provider === 'New Horizons' ? 'h-8 filter invert' : ''}`}
                           />
                         </div>

@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Github, ExternalLink, Check, Filter, ChevronDown, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAchievements } from "@/lib/achievements-context"
-import Image from "next/image"
 import Slideshow from "@/components/ui/Slideshow"
 import ImageModal from "@/lib/image-modal"
 import { Tooltip } from "@/components/ui/tooltip"
@@ -15,7 +14,7 @@ import { Tooltip } from "@/components/ui/tooltip"
 export default function Projects() {
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(["all"]))
   const technologies = Array.from(new Set(projects.flatMap((project) => project.technologies))).sort()
-  const { clickProjectDemo, viewProject, visitTab } = useAchievements()
+  const { clickProjectDemo, viewProject, visitTab, clickProjectCode } = useAchievements()
   const [viewedProjects, setViewedProjects] = useState<Set<string>>(new Set())
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
   const [isMobile, setIsMobile] = useState<boolean>(false)
@@ -337,6 +336,7 @@ export default function Projects() {
                     className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.code_available ? '' : 'opacity-50 cursor-not-allowed'}`}
                     asChild
                     disabled={!project.code_available}
+                    onClick={project.code_available ? () => clickProjectCode(project.title) : undefined}
                   >
                     {project.code_available ? (
                       <a href={project.github} target="_blank" rel="noopener noreferrer">

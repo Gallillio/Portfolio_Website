@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 
 interface ImageModalProps {
   isOpen: boolean;
@@ -62,10 +63,12 @@ const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageSrc, onClose, imag
         {/* Image Container */}
         <div className="relative p-4 border border-green-500/20 rounded-b-md">
           <div className="relative flex items-center justify-center">
-            <img
+            <Image
               style={{ maxWidth: '80%' }}
               src={imageSrc}
               alt="Expanded view"
+              width={800}
+              height={600}
               className="max-w-full max-h-[70vh] object-contain rounded-sm"
             />
           </div>

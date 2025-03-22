@@ -21,7 +21,7 @@ export const projects: Project[] = [
     title: "Real-Time Facial Emotion Classification",
     description:
     "Developed a real-time facial emotion classification system using transfer learning (MobileNetV2, VGG) and a custom CNN, achieving 83% accuracy on FER-2013 dataset using fine-tuned MobileNetV2 model.",
-    technologies: ["OpenCV", "CNN", "MobileNetV2", "VGG", "Data Augmentation"],
+    technologies: ["OpenCV", "CNN", "MobileNetV2", "VGG", "Flask"],
     images: [
       { src: "/RealTime Facial Emotion Classification Results Slideshow/neutral.png", alt: "Neutral Expression" },
       { src: "/RealTime Facial Emotion Classification Results Slideshow/happy.png", alt: "Happy Expression" },
@@ -54,7 +54,7 @@ export const projects: Project[] = [
     title: "Data Visualer and Analysis Tool",
     description:
     "A tool to visualize and analyze data. It provides a user-friendly interface for data exploration and model training, with features for data preprocessing.",
-    technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn"],
+    technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn", "Tkinter"],
     images: [
       { src: "/Data Visualizer Tool/Main.png", alt: "Main" },
       { src: "/Data Visualizer Tool/Histogram EDA.png", alt: "Histogram EDA" },
@@ -70,8 +70,8 @@ export const projects: Project[] = [
   {
     title: "ESLSCA University Chatbot",
     description:
-      "A chatbot that streamlines University admissions. Awarded The Times Highest Higher Education Award 2024 for Technological Innovation. It automates document processing and enhances communication with real-time updates. \n\n Note: This project is currently under development from the University and has seen many changes.",
-    technologies: ["Microsoft Azure", "Langchain", "OpenAI Function Calling", "Vector Database", "RAG"],
+      "A chatbot that streamlines University admissions. Awarded The Times Highest Higher Education Award 2024 for Technological Innovation. It automates document processing and enhances communication with real-time updates. \n Note: This project is currently under development and has undergone several changes.",
+    technologies: ["Microsoft Azure", "Langchain", "Django", "OpenAI Function Calling", "Vector Database", "RAG"],
     images: [
       { src: "/ESLSCA Chatbot/example2.png", alt: "ESLSCA Chatbot Example" },
     ],
@@ -84,7 +84,7 @@ export const projects: Project[] = [
     title: "My Portfolio Website",
     description:
     "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
-    technologies: ["ReactJS", "Next.js", "TypeScript", "TailwindCSS"],
+    technologies: ["TypeScript", "Next.js", "ReactJS", "TailwindCSS", "Vercel"],
     images: [
       { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
     ],

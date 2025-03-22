@@ -118,7 +118,7 @@ export function Tooltip({ children, text, isMobile, isTablet, showTooltip = fals
       {isVisible && (
         <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 ${isMobile || isTablet ? 'w-28' : 'w-64'} opacity-100 transition-opacity duration-200 z-50`}>
           <div className="bg-gray-900 border border-green-500 p-2 rounded-md shadow-lg text-xs text-green-400">
-            <p className="text-center">{text}</p>
+            <p className="text-center whitespace-pre-line">{text}</p>
             {/* Triangle Pointer */}
             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-r border-b border-green-500 transform rotate-45"></div>
           </div>

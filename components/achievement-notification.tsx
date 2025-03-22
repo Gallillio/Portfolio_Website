@@ -1,74 +1,69 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Trophy, X } from "lucide-react"
-import { cn } from "@/lib/utils"
-import type { Achievement } from "@/lib/achievements-context"
+import { useEffect } from 'react';
+import { Trophy } from 'lucide-react';
+import type { Achievement } from '@/lib/achievements-context';
 
 interface AchievementNotificationProps {
-  achievement: Achievement | null
-  onClose: () => void
-  onNavigate: () => void
+  achievement: Achievement | null;
+  onClose: () => void;
+  onNavigate: () => void;
 }
 
-export default function AchievementNotification({ achievement, onClose, onNavigate }: AchievementNotificationProps) {
-  const [isVisible, setIsVisible] = useState(false)
-
+export default function AchievementNotification({ 
+  achievement, 
+  onClose, 
+  onNavigate 
+}: AchievementNotificationProps) {
+  // Auto-dismiss notification after 7 seconds
   useEffect(() => {
     if (achievement) {
-      setIsVisible(true)
       const timer = setTimeout(() => {
-        setIsVisible(false)
-        setTimeout(onClose, 300) // Wait for animation to complete
-      }, 5000) // Show for 5 seconds
-
-      return () => clearTimeout(timer)
+        onClose();
+      }, 7000);
+      
+      return () => clearTimeout(timer);
     }
-  }, [achievement, onClose])
+  }, [achievement, onClose]);
 
-  if (!achievement) return null
-
-  const handleClose = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event from bubbling up to parent
-    setIsVisible(false);
-    setTimeout(onClose, 300); // Wait for animation to complete
-  };
+  if (!achievement) return null;
+  
+  const isSecret = achievement.isSecret;
 
   return (
-    <div
-      className={cn(
-        "fixed top-4 right-4 z-50 transition-all duration-300 transform",
-        isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0",
-      )}
+    <div 
+      className="fixed top-4 right-4 bg-gray-900 border-2 border-green-500 p-4 rounded-md shadow-lg z-50 max-w-sm animate-slide-in cursor-pointer"
+      onClick={() => {
+        onNavigate(); // Navigate to YourAchievements
+        onClose(); // Close the notification
+      }}
     >
-      <Card
-        className="bg-gray-900 border-green-500 shadow-lg shadow-green-500/20 cursor-pointer hover:shadow-green-500/40 relative overflow-hidden"
-        onClick={onNavigate}
-      >
-        {/* Header with close button */}
-        <div className="absolute top-0 right-0 pt-2 pr-2">
-          <div 
-            className="rounded-full hover:bg-gray-800 transition-colors text-green-400 hover:text-green-300 cursor-pointer z-10 h-6 w-6 flex items-center justify-center"
-            onClick={handleClose}
-            title="Dismiss"
-          >
-            <X className="h-4 w-4" />
-          </div>
+      <div className="flex items-center gap-3">
+        <div className={`p-3 rounded-full ${isSecret ? 'bg-yellow-400' : 'bg-green-500/20'}`}>
+          {achievement.icon || <Trophy className="h-6 w-6 text-green-400" />}
         </div>
-        
-        {/* Main content with increased right padding to avoid overlap */}
-        <CardContent className="p-4 pr-8 flex items-center space-x-3">
-          <div className="p-2 rounded-full bg-green-500/20 text-green-400 flex-shrink-0">
-            {achievement.icon || <Trophy className="h-6 w-6" />}
-          </div>
-          <div className="flex-grow min-w-0"> {/* Allow text container to shrink if needed */}
-            <h4 className="text-green-400 font-bold truncate">Achievement Unlocked!</h4>
-            <p className="text-green-300 text-sm truncate">{achievement.title}</p>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="flex-grow">
+          <h3 className={`font-bold ${isSecret ? 'text-yellow-400' : 'text-green-400'}`}>
+            {isSecret ? '🌟 Secret Achievement Unlocked!' : 'Achievement Unlocked!'}
+          </h3>
+          <p className="text-green-300 text-sm font-medium">{achievement.title}</p>
+          {/* <p className="text-green-300/70 text-xs mt-1">{achievement.description}</p> */}
+        </div>
+        <button 
+          className="text-green-500 hover:text-green-400"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent triggering the onNavigate
+            onClose(); // Close the notification
+          }}
+          aria-label="Close notification"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
     </div>
-  )
+  );
 }
 

@@ -1,6 +1,7 @@
 import type { Command, CommandResponse } from "@/lib/types"
 import { useState, useCallback, useEffect } from "react"
 import { availableCommands } from "@/lib/commands"
+import { Tooltip } from "@/components/ui/tooltip"
 
 interface TerminalOutputProps {
   history: Array<Command & CommandResponse>
@@ -9,20 +10,24 @@ interface TerminalOutputProps {
 
 const TerminalLink = ({ href }: { href: string }) => {
   const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
 
   useEffect(() => {
     // Check if device is mobile/touch screen
-    const checkMobile = () => {
-      setIsMobile(
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    const checkDeviceType = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
         ('ontouchstart' in window) ||
         (navigator.maxTouchPoints > 0)
-      )
+      
+      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
+      
+      setIsMobile(isMobileDevice && !isTabletDevice)
+      setIsTablet(isTabletDevice)
     }
 
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    return () => window.removeEventListener('resize', checkDeviceType)
   }, [])
 
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -32,62 +37,113 @@ const TerminalLink = ({ href }: { href: string }) => {
   }, [href, isMobile])
 
   return (
-    <span 
-      className="text-green-400 underline cursor-pointer relative"
-      onClick={handleClick}
-    >
-      {href}
-    </span>
+    <Tooltip text="Follow Link: ctrl + click" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
+      <span 
+        className="text-green-400 underline cursor-pointer relative"
+        onClick={handleClick}
+      >
+        {href}
+      </span>
+    </Tooltip>
   )
 }
 
 const CommandLink = ({ command, onClick }: { command: string; onClick: (command: string) => void }) => {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        ('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0)
-      )
-    }
-
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
   return (
     <span 
-      className="text-green-400 hover:underline cursor-pointer relative group"
+      className="text-green-400 hover:underline cursor-pointer"
       onClick={() => onClick(command)}
     >
       {command}
-      {!isMobile && (
-        <span className="absolute left-0 -top-6 bg-gray-900 text-green-400 text-xs px-2 py-1 rounded border border-green-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-          Click to add command to input
-        </span>
-      )}
     </span>
+  )
+}
+
+// Component for tab links (for Projects, Your Achievements, etc.)
+const TabLink = ({ tabName, displayName }: { tabName: string; displayName: string }) => {
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+
+  useEffect(() => {
+    const checkDeviceType = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        ('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0)
+      
+      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
+      
+      setIsMobile(isMobileDevice && !isTabletDevice)
+      setIsTablet(isTabletDevice)
+    }
+
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    return () => window.removeEventListener('resize', checkDeviceType)
+  }, [])
+
+  const handleClick = useCallback(() => {
+    // List of about section tabs that need special handling
+    const aboutSectionTabs = ['experience', 'skills', 'education', 'freelance', 'courses']
+    
+    // Check if this is an about section tab
+    if (aboutSectionTabs.includes(tabName)) {
+      // Switch to the about tab
+      window.dispatchEvent(new CustomEvent('switch-terminal-tab', { detail: { tabName: 'about' } }))
+      
+      // After a small delay to ensure the about tab is loaded, switch to the specific section
+      setTimeout(() => {
+        // Try to use postMessage to communicate with the inner tab
+        try {
+          window.postMessage({ type: 'navigate-about-section', sectionId: tabName }, '*')
+        } catch (error) {
+          console.error(`Error navigating to ${tabName} section:`, error)
+        }
+        
+        // Also try to find and click the tab directly
+        setTimeout(() => {
+          const sectionTab = document.querySelector(`[value="${tabName}"]`) as HTMLElement
+          if (sectionTab) {
+            sectionTab.click()
+          }
+        }, 100)
+      }, 200)
+    } else {
+      // Default behavior for other tabs
+      window.dispatchEvent(new CustomEvent('switch-terminal-tab', { detail: { tabName } }))
+    }
+  }, [tabName])
+
+  return (
+    <Tooltip text="Click to switch tab" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
+      <span 
+        className="text-green-400 underline cursor-pointer"
+        onClick={handleClick}
+      >
+        {displayName}
+      </span>
+    </Tooltip>
   )
 }
 
 const CVLink = () => {
   const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    const checkDeviceType = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
         ('ontouchstart' in window) ||
         (navigator.maxTouchPoints > 0)
-      )
+      
+      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
+      
+      setIsMobile(isMobileDevice && !isTabletDevice)
+      setIsTablet(isTabletDevice)
     }
 
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    return () => window.removeEventListener('resize', checkDeviceType)
   }, [])
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -103,27 +159,124 @@ const CVLink = () => {
   }
 
   return (
-    <span className="text-green-400 hover:underline cursor-pointer relative group">
-      <a
-        href="#"
-        onClick={handleClick}
-        className="text-green-400 underline"
-        tabIndex={-1}
-      >
-        /Ahmed Elzeky Resume.pdf
-      </a>
-      {!isMobile && (
-        <span className="absolute left-0 -top-6 bg-gray-900 text-green-400 text-xs px-2 py-1 rounded border border-green-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-          Download (ctrl + click)
-        </span>
-      )}
-    </span>
+    <Tooltip text="Download CV: ctrl + click" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
+      <span className="text-green-400 hover:underline cursor-pointer">
+        <a
+          href="#"
+          onClick={handleClick}
+          className="text-green-400 underline"
+          tabIndex={-1}
+        >
+          /Ahmed Elzeky Resume.pdf
+        </a>
+      </span>
+    </Tooltip>
   )
 }
+
+// Component for email links (for Contact command)
+const EmailLink = ({ email }: { email: string }) => {
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+  
+  useEffect(() => {
+    const checkDeviceType = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        ('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0)
+      
+      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
+      
+      setIsMobile(isMobileDevice && !isTabletDevice)
+      setIsTablet(isTabletDevice)
+    }
+
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    return () => window.removeEventListener('resize', checkDeviceType)
+  }, [])
+
+  const handleClick = () => {
+    // Open email client
+    window.location.href = `mailto:${email}`;
+    
+    // Try to get achievements context and trigger achievement
+    try {
+      // This is a workaround since we can't use hooks directly in this component
+      const achievementEvent = new CustomEvent('contact-email-clicked');
+      window.dispatchEvent(achievementEvent);
+    } catch (error) {
+      console.error('Error triggering contact achievement:', error);
+    }
+  };
+
+  return (
+    <Tooltip text="Click to send email" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
+      <span 
+        className="text-green-400 underline cursor-pointer"
+        onClick={handleClick}
+      >
+        {email}
+      </span>
+    </Tooltip>
+  );
+};
 
 export default function TerminalOutput({ history, onCommandClick }: TerminalOutputProps) {
   const renderLine = (line: React.ReactNode, index: number) => {
     if (typeof line === 'string') {
+      // Check for email tags <email>...</email>
+      const emailMatch = line.match(/<email>(.*?)<\/email>/);
+      if (emailMatch) {
+        const [fullMatch, email] = emailMatch;
+        const beforeText = line.substring(0, line.indexOf(fullMatch));
+        const afterText = line.substring(line.indexOf(fullMatch) + fullMatch.length);
+        
+        return (
+          <>
+            {beforeText}
+            <EmailLink key={`email-${index}`} email={email} />
+            {afterText}
+          </>
+        );
+      }
+      
+      // Check for status tags <status class="...">...</status>
+      const statusMatch = line.match(/<status class="(.*?)">(.*?)<\/status>/);
+      if (statusMatch) {
+        const [fullMatch, className, status] = statusMatch;
+        const beforeText = line.substring(0, line.indexOf(fullMatch));
+        const afterText = line.substring(line.indexOf(fullMatch) + fullMatch.length);
+        
+        return (
+          <>
+            {beforeText}
+            <span key={`status-${index}`} className={className}>
+              {status}
+            </span>
+            {afterText}
+          </>
+        );
+      }
+
+      // Check for tab navigation patterns like "go to projects" or "click on your-achievements"
+      const tabNavigationMatch = line.match(/(?:go to|click on) (projects|your-achievements|about|contact|my-achievements|experience|skills|education|freelance|courses)/i)
+      if (tabNavigationMatch && tabNavigationMatch.index !== undefined) {
+        const tabName = tabNavigationMatch[1].toLowerCase()
+        const displayName = tabName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        
+        const beforeText = line.substring(0, tabNavigationMatch.index)
+        const afterText = line.substring(tabNavigationMatch.index + tabNavigationMatch[0].length)
+        
+        return (
+          <>
+            {beforeText}
+            <TabLink key={`tab-${index}`} tabName={tabName} displayName={displayName} />
+            {afterText}
+          </>
+        )
+      }
+
       // Handle URLs that might be prefixed with box drawing characters
       const urlMatch = line.match(/\│\s*(https?:\/\/[^\s]+)/)
       if (urlMatch) {

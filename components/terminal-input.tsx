@@ -20,7 +20,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [suggestion, setSuggestion] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
-  const { executeCommand, visitTab } = useAchievements()
+  const { executeCommand: trackCommand, markCommandExecuted, visitTab, executeSecretCommand } = useAchievements()
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
 
   // Expose methods through ref
@@ -65,13 +65,23 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     e.preventDefault()
     if (!input.trim()) return
 
-    onCommand(input)
+    const trimmedInput = input.trim()
+    
+    // Process command for achievements
+    markCommandExecuted() // Count total commands
+    trackCommand(trimmedInput) // Track unique commands
 
-    // Track command execution for achievement
-    executeCommand(input)
+    // Check for secret commands
+    const command = trimmedInput.toLowerCase()
+    if (command === "hello" || command === "hi" || command === "hey") {
+      executeSecretCommand("hello")
+    }
+
+    // Execute the command
+    onCommand(trimmedInput)
 
     // Add to command history
-    setCommandHistory((prev) => [...prev, input])
+    setCommandHistory((prev) => [...prev, trimmedInput])
     setHistoryIndex(-1)
     setInput("")
     setSuggestion("")

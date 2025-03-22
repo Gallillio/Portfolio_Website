@@ -160,8 +160,8 @@ export interface FreelanceProject {
 // Add freelance projects data
 export const freelanceProjects: FreelanceProject[] = [
   {
-    title: "IIG-HEC Company Profile Website",
-    description: "A website for IIG-HEC Company Profile. With a clean and modern design, it showcases the company's services, projects, and a blog section.",
+    title: '"IIG-HEC" Company Profile Website',
+    description: "A website fofeatures a clean and modern design that effectively showcases the company's services, projects, and blog section, providing visitors with a comprehensive overview of IIG-HEC.",
     technologies: ["JavaScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Firebase", "Vercel"],
     period: "Jun. 2023 - Dec. 2023",
     github: "https://github.com/Gallillio/MERN-IIG_HEC_Company_Website",
@@ -170,12 +170,22 @@ export const freelanceProjects: FreelanceProject[] = [
     code_available: true,
   },
   {
-    title: "SelZeky Company Profile Website",
-    description: "A website for SelZeky Company Profile. With a clean and modern design, it showcases the company's services, Recruitment, and a blog section.",
+    title: '"SelZeky" Company Profile Website',
+    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky’s services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.",
     technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
     period: "Mar. 2025 - Present (In Progress)",
     github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
     demo: "https://www.selzeky.com/",
+    demo_available: false,
+    code_available: false,
+  },
+  {
+    title: '"Leen" Company Profile Website',
+    description: "This ecommerce platform presents a user-friendly interface that showcases Leen's range of products and services, making it easy for customers to browse and shop online.",
+    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
+    period: "Mar. 2025 - Present (In Progress)",
+    github: "https://github.com/Gallillio/MERN-Leen_Company_Website",
+    demo: "https://www.leen.com/",
     demo_available: false,
     code_available: false,
   },

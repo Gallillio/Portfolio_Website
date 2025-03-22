@@ -10,7 +10,7 @@ import About from "./about"
 import AsciiArt from "./ascii-art"
 import MyAchievements from "./my-achievements"
 import YourAchievements from "./your-achievements"
-import AchievementNotification from "./achievement-notification"
+import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
 import { Maximize2, Minimize2, Menu, X, ChevronRight } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
@@ -34,7 +34,9 @@ function TerminalContent() {
     clearLastUnlockedAchievement, 
     executeSecretCommand,
     markCommandExecuted,
-    downloadCV
+    downloadCV,
+    registerTerminalClosed,
+    registerTerminalMinimized
   } = useAchievements()
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
@@ -64,14 +66,23 @@ function TerminalContent() {
       }
     };
 
+    // Listen for contact email clicked event
+    const handleContactEmailClicked = () => {
+      // Trigger the sendContact achievement
+      executeSecretCommand("contact");
+    };
+
     // Listen for custom events
     window.addEventListener('switch-terminal-tab', handleTabSwitch);
+    window.addEventListener('contact-email-clicked', handleContactEmailClicked);
     
     // Listen for postMessage events
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === 'switch-tab' && event.data.tabName) {
         console.log('Terminal received postMessage to switch tab:', event.data.tabName);
         setActiveTab(event.data.tabName);
+      } else if (event.data && event.data.type === 'contact-email-clicked') {
+        handleContactEmailClicked();
       }
     };
     
@@ -79,9 +90,10 @@ function TerminalContent() {
     
     return () => {
       window.removeEventListener('switch-terminal-tab', handleTabSwitch);
+      window.removeEventListener('contact-email-clicked', handleContactEmailClicked);
       window.removeEventListener('message', handleMessage);
     };
-  }, []);
+  }, [executeSecretCommand]);
 
   // Check if we're on a mobile device and handle responsive behavior
   useEffect(() => {
@@ -147,6 +159,36 @@ function TerminalContent() {
       timestamp: new Date(),
     }
 
+    // Check for specific commands
+    if (trimmedInput.toLowerCase() === "contact") {
+      const contactInfo = [
+        "Email: AhmedGalal11045@gmail.com",
+        "Phone: +20 1110333933",
+        "Location: New Cairo, Egypt",
+        "If you would like to see more, click on",
+        "",
+        <span 
+          key="contact-link"
+          className="text-green-400 underline cursor-pointer" 
+          onClick={() => {
+            setActiveTab("contact");
+            clearLastUnlockedAchievement();
+          }}
+        >
+           Contact / CV
+        </span>
+      ];
+
+      const response = {
+        output: contactInfo,
+        isError: false,
+      };
+
+      // Add command and response to history
+      setHistory((prev) => [...prev, { ...newCommand, ...response }]);
+      return; // Exit early to prevent further command processing
+    }
+
     // Execute command and get response from commands module (not from achievements)
     const response = await executeCommand(trimmedInput)
 
@@ -197,6 +239,11 @@ function TerminalContent() {
         setIsFullscreen(false)
         setAnimationClass("animate-contract")
       }
+      // Track terminal minimized achievement
+      executeSecretCommand("minimized");
+      setTimeout(() => {
+        registerTerminalMinimized();
+      }, 500);
     }
   }
 
@@ -208,9 +255,10 @@ function TerminalContent() {
       setIsFullscreen(false)
       setAnimationClass("animate-contract")
     }
-    // Pretend to track this as an achievement
+    // Track terminal closed achievement
+    executeSecretCommand("closed");
     setTimeout(() => {
-      executeSecretCommand("closed");
+      registerTerminalClosed();
     }, 500);
   }
 
@@ -818,7 +866,7 @@ function TerminalContent() {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="16 3 21 3 21 8"></polyline>
               <line x1="4" y1="20" x2="21" y2="3"></line>
-              <path d="M21 13v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8"></path>
+              {/* <path d="M21 13v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8"></path> */}
             </svg>
           </button>
         </div>
