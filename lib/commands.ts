@@ -1,5 +1,5 @@
 import type { CommandResponse } from "./types"
-import { skills, experiences, education, freelanceProjects, links } from "./profile-data"
+import { skills, experiences, education, freelanceProjects, links, courses } from "./profile-data"
 import { commandRegistry } from "./command-registry"
 
 // Register all commands
@@ -166,21 +166,6 @@ commandRegistry.register("hello", "Secret welcome message", async () => ({
   timestamp: new Date(),
 }), true, ["hi", "hey", "hii", "heyy", "whats up", "what's up"])
 
-commandRegistry.register("theme", "Change terminal theme", async () => ({
-  output: [
-    "╔══════════════════════════════════════════",
-    "║               Theme Info                 ",
-    "╚══════════════════════════════════════════",
-    "",
-    "┌─ Status",
-    "│  Theme changing functionality coming soon!",
-    "│  Currently using the default terminal theme.",
-    "└────────────────────────────────────",
-    ""
-  ],
-  timestamp: new Date(),
-}))
-
 commandRegistry.register("freelance", "View my freelance projects", async () => {
   const freelanceOutput = [
     "╔══════════════════════════════════════════",
@@ -256,6 +241,29 @@ commandRegistry.register("help", "Show available commands", async () => ({
   timestamp: new Date(),
 }))
 
+commandRegistry.register("courses", "View my taken courses", async () => {
+  const coursesOutput = [
+    "╔══════════════════════════════════════════",
+    "║                 Courses             ",
+    "╚══════════════════════════════════════════",
+    ""
+  ];
+
+  // Add each course to the output
+  courses.forEach(course => {
+    coursesOutput.push(`┌─ ${course.title}`);
+    coursesOutput.push(`│  Provider: ${course.provider}`);
+    coursesOutput.push(`│  Date: ${course.date}`);
+    coursesOutput.push("└────────────────────────────────────");
+    coursesOutput.push(""); // Add a blank line for spacing
+  });
+
+  return {
+    output: coursesOutput,
+    timestamp: new Date(),
+  };
+})
+
 // Export the available commands for the terminal input component
 export const availableCommands = commandRegistry.getAvailableCommands()
 
@@ -263,4 +271,11 @@ export const availableCommands = commandRegistry.getAvailableCommands()
 export async function executeCommand(input: string): Promise<CommandResponse> {
   return commandRegistry.executeCommand(input)
 }
+
+export const helpText = `
+Available commands:
+- help: Show this help message
+- courses: Display the courses I've taken
+// ... other commands ...
+`;
 

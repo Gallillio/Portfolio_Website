@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, TouchEvent } from "react";
 import Image from "next/image";
 
 interface SlideshowProps {
@@ -12,6 +12,8 @@ interface SlideshowProps {
 const Slideshow: React.FC<SlideshowProps> = ({ images, onImageClick }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null); // Create a ref for the timer
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   useEffect(() => {
     if (images.length > 1) { // Only set the interval if there are multiple images
@@ -34,8 +36,56 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, onImageClick }) => {
     }, 3000);
   };
 
+  // Touch event handlers for swipe functionality
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    // Pause the timer while user is interacting
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    // Minimum swipe distance required (in pixels)
+    const minSwipeDistance = 50;
+    
+    if (touchStartX.current && touchEndX.current) {
+      const swipeDistance = touchEndX.current - touchStartX.current;
+      
+      if (Math.abs(swipeDistance) > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          // Swipe right, go to previous image
+          setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+        } else {
+          // Swipe left, go to next image
+          setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+        }
+      }
+    }
+    
+    // Reset touch coordinates
+    touchStartX.current = null;
+    touchEndX.current = null;
+    
+    // Restart the timer
+    if (images.length > 1) {
+      timerRef.current = setInterval(() => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+      }, 3000);
+    }
+  };
+
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div 
+      className="relative w-full h-full overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {images.map((image, index) => (
         <div
           key={index}

@@ -43,6 +43,7 @@ export const skillLogos: { [key: string]: string } = {
   "Jira": "https://img.icons8.com/color/96/jira.png",
   "Trello": "https://img.icons8.com/color/96/trello.png",
   "Slack": "https://img.icons8.com/color/96/slack.png",
+  "Notion": "https://img.icons8.com/color/96/notion.png",
 
   // Courses' providers' logos
   "Microsoft": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Microsoft_icon.svg/2048px-Microsoft_icon.svg.png",

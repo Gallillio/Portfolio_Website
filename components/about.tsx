@@ -315,27 +315,23 @@ export default function About() {
                       {category.skills.map((skill, skillIndex) => (
                         <div
                           key={skillIndex}
-                          className="group relative p-4 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1"
+                          className="group relative p-4 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1 flex flex-col items-center justify-center"
                         >
                           <div className="absolute inset-0 bg-green-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="relative z-10">
-                            <div className="flex items-center justify-center gap-2">
-                              {skillLogos[skill] && (
-                                <div className="w-6 h-6 relative flex-shrink-0">
-                                  <Image
-                                    src={skillLogos[skill]}
-                                    alt={`${skill} logo`}
-                                    fill
-                                    className="object-contain"
-                                    sizes="24px"
-                                    style={{ filter: ['ExpressJS', 'Django', 'Flask', 'Vercel', 'Node.js'].includes(skill) ? 'invert(0.6)' : 'none' }}
-                                  />
-                                </div>
-                              )}
-                              <span className="text-green-400 group-hover:text-green-300 transition-colors duration-200 text-sm font-mono">
-                                {skill}
-                              </span>
-                            </div>
+                          <div className="relative z-10 flex flex-col items-center">
+                            {skillLogos[skill] && (
+                              <div className="w-6 h-6 relative flex-shrink-0">
+                                <Image
+                                  src={skillLogos[skill]}
+                                  alt={`${skill} logo`}
+                                  fill
+                                  className="object-contain"
+                                  sizes="24px"
+                                  style={{ filter: ['ExpressJS', 'Django', 'Flask', 'Vercel', 'Node.js'].includes(skill) ? 'invert(0.6)' : 'none' }}
+                                />
+                              </div>
+                            )}
+                            <span className="mt-2 text-green-400">{skill}</span>
                           </div>
                         </div>
                       ))}
@@ -1024,7 +1020,7 @@ export default function About() {
                           <img 
                             src={skillLogos[course.provider]} 
                             alt={`${course.provider} logo`} 
-                            className={`h-6 ${course.provider === 'CompTIA' ? 'h-14' : ''} 
+                            className={`h-6 ${course.provider === 'CompTIA' ? 'h-12' : ''} 
                             ${course.provider === 'Amazon' ? 'h-9 filter invert' : ''} 
                             ${course.provider === 'New Horizons' ? 'h-8 filter invert' : ''}`}
                           />

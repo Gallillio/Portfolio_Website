@@ -2,6 +2,22 @@ import type { Project } from "./types"
 
 export const projects: Project[] = [
   {
+    title: "GPTube",
+    description:
+      "An interactive tool that engages users with YouTube videos through a GPT-powered chatbot, utilizing TTS and STT for voice interaction. It features generating mock tests, correcting user answers, and creating PowerPoint presentations.",
+    technologies: ["Microsoft Azure", "Google Gemini", "ReactJS", "Django", "Langchain", "Vector Database", "RAG", "OpenAI Function Calling"],
+    images: [
+      { src: "/GPTube/main.png", alt: "Main Page" },
+      { src: "/GPTube/question.png", alt: "Question Example" },
+      { src: "/GPTube/quiz.png", alt: "Quiz Example" },
+      { src: "/GPTube/powerpoint.png", alt: "Presentation Example" },
+    ],
+    github: "https://github.com/Gallillio/GPTube",
+    demo: "https://gptube-demo.com",
+    demo_available: false,
+    code_available: true,
+  },
+  {
     title: "Real-Time Facial Emotion Classification",
     description:
     "Developed a real-time facial emotion classification system using transfer learning (MobileNetV2, VGG) and a custom CNN, achieving 83% accuracy on FER-2013 dataset using fine-tuned MobileNetV2 model.",
@@ -15,23 +31,6 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/Gallillio/RealTime_Facial_Emotion_Classification",
     demo: "You think I'm going to host a demo for this one? Hahaha",
-    demo_available: false,
-    code_available: true,
-  },
-  {
-    title: "Data Visualer and Analysis Tool",
-    description:
-    "A tool to visualize and analyze data. It provides a user-friendly interface for data exploration and model training, with features for data preprocessing.",
-    technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn"],
-    images: [
-      { src: "/Data Visualizer Tool/Main.png", alt: "Main" },
-      { src: "/Data Visualizer Tool/Histogram EDA.png", alt: "Histogram EDA" },
-      { src: "/Data Visualizer Tool/Encode Column.png", alt: "Encode Column" },
-      { src: "/Data Visualizer Tool/Detailed EDA.png", alt: "Detailed EDA" },
-      { src: "/Data Visualizer Tool/Handle NA.png", alt: "Handle NA" },
-    ],
-    github: "https://github.com/Gallillio/Data_Science-Data_Visualizer_Tool?tab=readme-ov-file",
-    demo: "https://your-portfolio-demo.com",
     demo_available: false,
     code_available: true,
   },
@@ -52,15 +51,19 @@ export const projects: Project[] = [
     code_available: true,
   },
   {
-    title: "GPTube",
+    title: "Data Visualer and Analysis Tool",
     description:
-      "An interactive tool that engages users with YouTube videos through a GPT-powered chatbot, utilizing TTS and STT for voice interaction. It features generating mock tests, correcting user answers, and creating PowerPoint presentations.",
-    technologies: ["Microsoft Azure", "ReactJS", "Django", "Langchain", "Vector Database", "OpenAI Function Calling", "RAG"],
+    "A tool to visualize and analyze data. It provides a user-friendly interface for data exploration and model training, with features for data preprocessing.",
+    technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn"],
     images: [
-      { src: "/placeholder.svg?height=300&width=400", alt: "Placeholder" },
+      { src: "/Data Visualizer Tool/Main.png", alt: "Main" },
+      { src: "/Data Visualizer Tool/Histogram EDA.png", alt: "Histogram EDA" },
+      { src: "/Data Visualizer Tool/Encode Column.png", alt: "Encode Column" },
+      { src: "/Data Visualizer Tool/Detailed EDA.png", alt: "Detailed EDA" },
+      { src: "/Data Visualizer Tool/Handle NA.png", alt: "Handle NA" },
     ],
-    github: "https://github.com/Gallillio/GPTube",
-    demo: "https://your-gptube-demo.com",
+    github: "https://github.com/Gallillio/Data_Science-Data_Visualizer_Tool?tab=readme-ov-file",
+    demo: "https://your-portfolio-demo.com",
     demo_available: false,
     code_available: true,
   },
@@ -74,7 +77,7 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/your-username/gptube",
     demo: "https://chatbot.eslsca.edu.eg/",
-    demo_available: false,
+    demo_available: true,
     code_available: false,
   },
   {

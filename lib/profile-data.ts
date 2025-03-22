@@ -49,7 +49,8 @@ export const skills: SkillsData = {
     "Vercel",
     "V0",
     "Linux",
-    "Agile/Scrum"
+    "Agile/Scrum",
+    "Notion"
   ],
   "Design & Collaboration": [
     "Figma",
