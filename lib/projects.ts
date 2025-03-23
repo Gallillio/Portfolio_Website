@@ -81,22 +81,22 @@ export const projects: Project[] = [
     code_available: false,
   },
   {
-    title: "My Portfolio Website",
-    description:
-    "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
-    technologies: ["TypeScript", "Next.js", "ReactJS", "TailwindCSS", "Vercel"],
+    title: '"SelZeky" AI Sales Consultant SaaS',
+    description: "SelZeky is an AI-powered sales consultant that uses NLP to understand customer needs and recommend products. It provides real-time updates and a chatbot for customer support.",
+    technologies: ["Microsoft Azure", "Django", "Vector Database", "RAG", "Python", "ReactJS", "NextJS", "NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
     images: [
-      { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
+      { src: "/in-development.png", alt: "Still In Development" },
     ],
-    github: "https://github.com/Gallillio/Portfolio_Website",
-    demo: "https://gallillio.com",
-    demo_available: true,
-    code_available: true,
+    github: "https://github.com/Gallillio/MERN-Leen_Company_Website",
+    demo: "https://www.leen.com/",
+    demo_available: false,
+    code_available: false,
+    inDevelopment: true,
   },
   {
     title: '"Brillium" AI SaaS',
     description: "Brillium is an AI-powered LMS that converts PDF textbooks into interactive learning experiences. It generates quizzes, flashcards, and presentations, analyze student performance, and dynamically create questions for improvement. Teachers can monitor and edit content, while a chatbot serves as a personal assistant for students.\n\n⚠️ This project is currently under development ⚠️",
-    technologies: ["Google Gemini", "FastAPI","Tesseract OCR", "Python", "ReactJS", "NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
+    technologies: ["Google Gemini", "FastAPI","Tesseract OCR", "Python", "ReactJS", "NextJS","NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
     images: [
       { src: "/in-development.png", alt: "Still In Development" },
     ],
@@ -109,7 +109,7 @@ export const projects: Project[] = [
   {
     title: '"SelZeky" Company Profile Website',
     description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.\n\n⚠️ This project is currently under development ⚠️",
-    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
+    technologies: ["TypeScript", "ReactJS", "NextJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
     images: [
       { src: "/in-development.png", alt: "Still In Development" },
     ],
@@ -120,17 +120,17 @@ export const projects: Project[] = [
     inDevelopment: true,
   },
   {
-    title: '"Leen" Company Profile Website',
-    description: "This ecommerce platform presents a user-friendly interface that showcases Leen's range of products and services, making it easy for customers to browse and shop online.\n\n⚠️ This project is currently under development ⚠️",
-    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
+    title: "My Portfolio Website",
+    description:
+    "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
+    technologies: ["TypeScript", "NextJS", "ReactJS", "TailwindCSS", "Vercel"],
     images: [
-      { src: "/in-development.png", alt: "Still In Development" },
+      { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
     ],
-    github: "https://github.com/Gallillio/MERN-Leen_Company_Website",
-    demo: "https://www.leen.com/",
-    demo_available: false,
-    code_available: false,
-    inDevelopment: true,
+    github: "https://github.com/Gallillio/Portfolio_Website",
+    demo: "https://gallillio.com",
+    demo_available: true,
+    code_available: true,
   },
 ];
 
