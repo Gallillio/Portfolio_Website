@@ -222,6 +222,45 @@ const EmailLink = ({ email }: { email: string }) => {
   );
 };
 
+// Component for phone links (for Contact command)
+const PhoneLink = ({ phone }: { phone: string }) => {
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
+  
+  useEffect(() => {
+    const checkDeviceType = () => {
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        ('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0)
+      
+      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
+      
+      setIsMobile(isMobileDevice && !isTabletDevice)
+      setIsTablet(isTabletDevice)
+    }
+
+    checkDeviceType()
+    window.addEventListener('resize', checkDeviceType)
+    return () => window.removeEventListener('resize', checkDeviceType)
+  }, [])
+
+  const handleClick = () => {
+    // Open phone dialer
+    window.location.href = `tel:${phone}`;
+  };
+
+  return (
+    <Tooltip text="Click to call" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
+      <span 
+        className="text-green-400 underline cursor-pointer"
+        onClick={handleClick}
+      >
+        {phone}
+      </span>
+    </Tooltip>
+  );
+};
+
 export default function TerminalOutput({ history, onCommandClick }: TerminalOutputProps) {
   const renderLine = (line: React.ReactNode, index: number) => {
     if (typeof line === 'string') {
@@ -236,6 +275,22 @@ export default function TerminalOutput({ history, onCommandClick }: TerminalOutp
           <>
             {beforeText}
             <EmailLink key={`email-${index}`} email={email} />
+            {afterText}
+          </>
+        );
+      }
+      
+      // Check for phone numbers in Contact command
+      const phoneMatch = line.match(/\+\d{2}\s\d{10}/);
+      if (phoneMatch && phoneMatch.index !== undefined) {
+        const [fullMatch] = phoneMatch;
+        const beforeText = line.substring(0, phoneMatch.index);
+        const afterText = line.substring(phoneMatch.index + fullMatch.length);
+        
+        return (
+          <>
+            {beforeText}
+            <PhoneLink key={`phone-${index}`} phone={fullMatch} />
             {afterText}
           </>
         );

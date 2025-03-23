@@ -93,15 +93,30 @@ class CommandRegistry {
     // Sort commands alphabetically (excluding secret ones)
     const sortedCommands = this.getAvailableCommands().sort()
     
+    // Check if we're on a mobile device
+    const isMobile = typeof window !== 'undefined' && 
+      (('ontouchstart' in window) || 
+      (navigator.maxTouchPoints > 0) || 
+      window.innerWidth < 768 ||
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    
     // Add each command and its description
     sortedCommands.forEach(cmd => {
       const metadata = this.getCommand(cmd)
       if (metadata) {
-        helpText.push(`  ${cmd.padEnd(20)} - ${metadata.description}`)
+        if (isMobile) {
+          // On mobile, display command and description on separate lines with indentation
+          helpText.push(` - ${cmd}`)
+          helpText.push(`    ${metadata.description}`)
+          helpText.push("")  // Add empty line for spacing
+        } else {
+          // On desktop, keep the original format with padding
+          helpText.push(`  ${cmd.padEnd(20)} - ${metadata.description}`)
+        }
       }
     })
 
-    helpText.push("", "Type any command to see more information.")
+    helpText.push("Type any command to see more information.")
     return helpText
   }
 }

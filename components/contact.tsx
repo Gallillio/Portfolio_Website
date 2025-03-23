@@ -179,7 +179,7 @@ export default function Contact() {
                   <Mail className="mr-3 text-green-400" size={20} />
                   <a 
                     href="mailto:ahmedgalal11045@gmail.com" 
-                    className="text-green-300 hover:text-green-400"
+                    className="text-green-300 hover:text-green-400 underline"
                     onClick={() => sendContact()}
                   >
                     AhmedGalal11045@gmail.com
@@ -187,7 +187,12 @@ export default function Contact() {
                 </div>
                 <div className="flex items-center">
                   <Phone className="mr-3 text-green-400" size={20} />
-                  <span className="text-green-300">+20 1110333933</span>
+                  <a 
+                    href="tel:+20 1110333933" 
+                    className="text-green-300 hover:text-green-400 underline"
+                  >
+                    +20 1110333933
+                  </a>
                 </div>
                 <div className="flex items-center">
                   <MapPin className="mr-3 text-green-400" size={20} />

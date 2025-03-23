@@ -593,7 +593,7 @@ function TerminalContent() {
 
         {!isMinimized && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto">
+            <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed">
               {/* Mobile/Tablet Hamburger Menu */}
               <div className="md:hidden flex items-center">
                 <button 
@@ -729,7 +729,7 @@ function TerminalContent() {
               onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
                 onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <Projects />
@@ -742,7 +742,7 @@ function TerminalContent() {
               onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
                 onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <About />
@@ -755,7 +755,7 @@ function TerminalContent() {
               onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
                 onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <Contact />
@@ -768,7 +768,7 @@ function TerminalContent() {
               onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
                 onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <MyAchievements />
@@ -781,7 +781,7 @@ function TerminalContent() {
               onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out`}
+                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
                 onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <YourAchievements />

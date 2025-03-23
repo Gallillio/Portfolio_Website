@@ -56,6 +56,7 @@ export const metadata: Metadata = {
   viewport: {
     width: 'device-width',
     initialScale: 1,
+    viewportFit: 'cover',  // Enable safe area on modern mobile devices
   },
 };
 

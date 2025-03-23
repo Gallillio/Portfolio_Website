@@ -342,8 +342,9 @@ export default function About() {
         </Card>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <div className="overflow-x-auto pb-2">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* Tabs list with horizontal scroll */}
+        <div className="overflow-x-auto pb-2 terminal-header-fixed">
           <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
             <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Skills
@@ -369,7 +370,7 @@ export default function About() {
           </TabsList>
         </div>
 
-        <TabsContent value="skills" className="mt-4">
+        <TabsContent value="skills" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <div className="space-y-8">
@@ -410,7 +411,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="timeline" className="mt-4">
+        <TabsContent value="timeline" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6 pb-12">
               {/* Filter Button for Mobile */}
@@ -842,7 +843,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="experience" className="mt-4">
+        <TabsContent value="experience" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <div className="space-y-8">
@@ -928,7 +929,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="education" className="mt-4">
+        <TabsContent value="education" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <div className="space-y-8">
@@ -956,7 +957,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="languages" className="mt-4">
+        <TabsContent value="languages" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <div className="space-y-6">
@@ -987,7 +988,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="freelance" className="mt-4">
+        <TabsContent value="freelance" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1054,7 +1055,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="courses" className="mt-4">
+        <TabsContent value="courses" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <div className="space-y-6">
