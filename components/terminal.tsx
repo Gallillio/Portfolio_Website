@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import TerminalInput, { TerminalInputRef } from "./terminal-input"
 import TerminalOutput from "./terminal-output"
@@ -24,7 +24,6 @@ function TerminalContent(): React.ReactNode {
   const [animationClass, setAnimationClass] = useState("")
   const [isMobile, setIsMobile] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
-  const [secretJokeRevealed, setSecretJokeRevealed] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const terminalRef = useRef<HTMLDivElement>(null)
@@ -41,6 +40,7 @@ function TerminalContent(): React.ReactNode {
   } = useAchievements()
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
+  const scrollTimer = useRef<NodeJS.Timeout | null>(null)
 
   // Initial setup on component mount
   useEffect(() => {
@@ -407,22 +407,21 @@ function TerminalContent(): React.ReactNode {
     }
   }, [isFullscreen])
 
-  const focusInput = () => {
-    terminalInputRef.current?.focus()
+  const focusInput = useCallback(() => {
+    terminalInputRef.current?.focus();
     
     // Ensure input is visible, especially on mobile
     if (window.innerWidth < 768) {
       ensureInputVisible();
     }
-  }
+  }, [terminalInputRef]);
 
   // Add effect to focus input when terminal tab is selected
   useEffect(() => {
     if (activeTab === "terminal") {
-      // Add a small delay to ensure the tab content is rendered
       setTimeout(() => {
-        focusInput()
-      }, 0)
+        focusInput();
+      }, 0);
     }
     
     // When navigating to the about tab, don't reset its internal state
@@ -432,7 +431,7 @@ function TerminalContent(): React.ReactNode {
     if (typeof window !== 'undefined') {
       localStorage.setItem('terminalActiveTab', activeTab);
     }
-  }, [activeTab])
+  }, [activeTab, focusInput])
 
   const handleNavigateToAchievements = () => {
     setActiveTab("your-achievements")
@@ -484,15 +483,6 @@ function TerminalContent(): React.ReactNode {
         : "h-[calc(100vh-140px)]" // Adjusted for mobile
       : "h-[70vh]";
 
-  // Add new function for revealing the secret joke
-  const handleSecretClick = () => {
-    setSecretJokeRevealed(true);
-    // Pretend to mark this as an achievement too
-    setTimeout(() => {
-      executeSecretCommand("minimized");
-    }, 500);
-  };
-
   // Toggle mobile menu
   const toggleMobileMenu = () => {
     // If we're toggling the menu to open while scrolling,
@@ -528,7 +518,6 @@ function TerminalContent(): React.ReactNode {
 
   // Track if currently scrolling
   const [isScrolling, setIsScrolling] = useState(false);
-  let scrollTimer: NodeJS.Timeout | null = null;
 
   // Close mobile menu when clicking outside or scrolling
   useEffect(() => {
@@ -550,8 +539,8 @@ function TerminalContent(): React.ReactNode {
       setIsScrolling(true);
       
       // Clear any existing scroll timer
-      if (scrollTimer) {
-        clearTimeout(scrollTimer);
+      if (scrollTimer.current) {
+        clearTimeout(scrollTimer.current);
       }
       
       // Only close menu if it wasn't explicitly opened during scroll
@@ -560,7 +549,7 @@ function TerminalContent(): React.ReactNode {
       }
       
       // Reset scrolling state after a delay
-      scrollTimer = setTimeout(() => {
+      scrollTimer.current = setTimeout(() => {
         setIsScrolling(false);
         
         // Reset the menuOpenedDuringScroll flag a bit later
@@ -577,8 +566,8 @@ function TerminalContent(): React.ReactNode {
       setIsScrolling(true);
       
       // Clear any existing scroll timer
-      if (scrollTimer) {
-        clearTimeout(scrollTimer);
+      if (scrollTimer.current) {
+        clearTimeout(scrollTimer.current);
       }
       
       // Only close menu if it wasn't explicitly opened during scroll
@@ -587,7 +576,7 @@ function TerminalContent(): React.ReactNode {
       }
       
       // Reset scrolling state after a delay
-      scrollTimer = setTimeout(() => {
+      scrollTimer.current = setTimeout(() => {
         setIsScrolling(false);
         
         // Reset the menuOpenedDuringScroll flag a bit later
@@ -643,8 +632,8 @@ function TerminalContent(): React.ReactNode {
       document.removeEventListener('touchstart', handleTouchStart as EventListener);
       document.removeEventListener('touchend', handleTouchEnd as EventListener);
       
-      if (scrollTimer) {
-        clearTimeout(scrollTimer);
+      if (scrollTimer.current) {
+        clearTimeout(scrollTimer.current);
       }
       
       scrollableAreas.forEach(area => {
@@ -1004,7 +993,7 @@ function TerminalContent(): React.ReactNode {
                 ) : (
                   <p className="text-xl text-green-300">
                     &ldquo;Why did the terminal break up with the window?
-                    <br />Because it couldn't handle the pressure of being <span className="text-green-400">too open!</span>&rdquo;
+                    <br />Because it couldn&apos;t handle the pressure of being <span className="text-green-400">too open!</span>&rdquo;
                   </p>
                 )}
               </div>
@@ -1019,10 +1008,6 @@ function TerminalContent(): React.ReactNode {
                   <></>
                 )}
               </p>
-
-              {secretJokeRevealed && (
-                <></>
-              )}
             </div>
           </div>
           
