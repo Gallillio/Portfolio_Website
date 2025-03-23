@@ -279,15 +279,15 @@ export default function About() {
             <div className={`relative ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
               <div className={`space-y-4 ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
                 <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  I approach innovation with an AI-first mindset, using Software Engineering to bring advanced technology to
-                  life.
+                  I approach innovation with an AI-first mindset, I firmly believe in using AI tools along side with 
+                  Software Engineering to bring advanced technology to life quickly and efficiently.
                 </p>
                 <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
                   Drawing on diverse international experiences, I design and deploy cutting-edge AI
                   Solutions and Software Systems designed to streamline complex processes and deliver substantial value.
                 </p>
                 <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  Leveraging robust technologies like Azure, IBM Watsonx, GPT-powered frameworks, TensorFlow, and React.
+                  Leveraging robust technologies like Azure, IBM Watsonx, React.js, Next.js, and Cursor.
                 </p>
                 <p className={`${!isBioExpanded ? 'hidden' : ''}`}>
                   My work has consistently delivered transformative results, earning recognition in esteemed International

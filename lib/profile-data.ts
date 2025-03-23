@@ -44,10 +44,10 @@ export const skills: SkillsData = {
   ],
   "DevOps & Tools": [
     "Git",
-    "Docker",
-    "Postman",
+    "Cursor",
     "Vercel",
     "V0",
+    "Postman",
     "Linux",
     "Agile/Scrum",
     "Notion"

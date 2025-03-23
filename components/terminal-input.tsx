@@ -174,6 +174,9 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isSwiping || !suggestion) return
     
+    // Prevent default scrolling behavior when swiping on suggestion
+    e.preventDefault()
+    
     const currentX = e.touches[0].clientX
     const diff = currentX - touchStartX
     

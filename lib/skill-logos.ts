@@ -32,6 +32,8 @@ export const skillLogos: { [key: string]: string } = {
   // DevOps & Tools
   "Git": "https://img.icons8.com/color/96/git.png",
   "Docker": "https://img.icons8.com/color/96/docker.png",
+  // "Cursor": "https://img.icons8.com/color/96/cursor.png",
+  "Cursor": "cursor.svg",
   "Postman": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg",
   "Vercel": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vercel/vercel-original.svg",
   "V0": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/v0.png",

@@ -150,7 +150,7 @@ function TerminalContent() {
             if (terminalInputRef.current) {
               const inputElement = document.querySelector('input[aria-label="Terminal input"]')
               if (inputElement) {
-                inputElement.scrollIntoView({ behavior: 'smooth', block: 'end' })
+                inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
               }
             }
           }, 300)
@@ -201,7 +201,13 @@ function TerminalContent() {
   useEffect(() => {
     // Scroll to bottom when history changes
     outputEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [history])
+    
+    // Also ensure input is visible when history changes
+    // This helps when the keyboard might cover the input
+    if (window.innerWidth < 768 && activeTab === "terminal") {
+      ensureInputVisible();
+    }
+  }, [history, activeTab])
 
   const handleCommand = async (input: string) => {
     const trimmedInput = input.trim()
@@ -247,6 +253,10 @@ function TerminalContent() {
 
       // Add command and response to history
       setHistory((prev) => [...prev, { ...newCommand, ...response }]);
+      
+      // Ensure input is visible after adding command
+      ensureInputVisible();
+      
       return; // Exit early to prevent further command processing
     }
 
@@ -276,15 +286,31 @@ function TerminalContent() {
     // Add command and response to history
     setHistory((prev) => [...prev, { ...newCommand, ...response, isError: response.isError ?? false }])
     
-    // Ensure the input field is visible on mobile after command execution
+    // Ensure the input field is visible after adding command
+    ensureInputVisible();
+  }
+  
+  // Helper function to ensure input is visible on mobile after command execution
+  const ensureInputVisible = () => {
     if (window.innerWidth < 768) {
+      // First, scroll to the end of output to show the command results
+      outputEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      
+      // Then, after a short delay to allow rendering, focus and scroll to the input
       setTimeout(() => {
-        const inputElement = document.querySelector('input[aria-label="Terminal input"]')
-        if (inputElement instanceof HTMLElement) {
-          inputElement.focus()
-          inputElement.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        if (terminalInputRef.current) {
+          terminalInputRef.current.focus();
+          const inputElement = document.querySelector('input[aria-label="Terminal input"]');
+          if (inputElement instanceof HTMLElement) {
+            // Use block: 'end' to ensure the input is at the bottom of the visible area
+            // This helps prevent the keyboard from covering it
+            inputElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'end'
+            });
+          }
         }
-      }, 300)
+      }, 400); // Slightly longer delay to ensure everything is rendered
     }
   }
 
@@ -370,12 +396,7 @@ function TerminalContent() {
     
     // Ensure input is visible, especially on mobile
     if (window.innerWidth < 768) {
-      setTimeout(() => {
-        const inputElement = document.querySelector('input[aria-label="Terminal input"]')
-        if (inputElement instanceof HTMLElement) {
-          inputElement.scrollIntoView({ behavior: 'smooth', block: 'end' })
-        }
-      }, 100)
+      ensureInputVisible();
     }
   }
 
@@ -409,11 +430,42 @@ function TerminalContent() {
     }
   }
 
-  // Determine the terminal height based on fullscreen status
+  // Determine the terminal height based on fullscreen status and keyboard state
+  const [keyboardAdjustedHeight, setKeyboardAdjustedHeight] = useState(0);
+  
+  // Add effect to adjust height when keyboard appears
+  useEffect(() => {
+    if (window.visualViewport) {
+      const handleVisualViewportChange = () => {
+        if (window.innerWidth < 768) {
+          const heightDiff = window.innerHeight - (window.visualViewport?.height || 0);
+          // If difference is significant, adjust the height
+          if (heightDiff > 150) {
+            // Set a custom height that accounts for the keyboard
+            setKeyboardAdjustedHeight(window.visualViewport?.height ? window.visualViewport.height - 120 : 0); // Adjust for headers
+          } else {
+            // Reset to default when keyboard is hidden
+            setKeyboardAdjustedHeight(0);
+          }
+        }
+      };
+      
+      window.visualViewport.addEventListener('resize', handleVisualViewportChange);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleVisualViewportChange);
+      };
+    }
+  }, []);
+  
+  // Calculate content height considering keyboard
   const contentHeight = isFullscreen 
-    ? "h-[calc(100vh-120px)]" // Adjusted for both headers (title + tabs)
+    ? keyboardAdjustedHeight > 0 
+      ? `h-[${keyboardAdjustedHeight}px]` 
+      : "h-[calc(100vh-120px)]" // Adjusted for both headers
     : isMobile 
-      ? "h-[calc(100vh-140px)]" // Adjusted for mobile
+      ? keyboardAdjustedHeight > 0
+        ? `h-[${keyboardAdjustedHeight}px]` 
+        : "h-[calc(100vh-140px)]" // Adjusted for mobile
       : "h-[70vh]";
 
   // Add new function for revealing the secret joke
