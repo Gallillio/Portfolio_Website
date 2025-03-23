@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Interactive Portfolio Terminal
+
+## Overview
+
+Welcome to the Interactive Portfolio Terminal! This project is a unique and engaging way to showcase your skills, experiences, and achievements through a terminal-style interface. Users can interact with the terminal by typing commands to navigate through different sections, view projects, and access contact information, all while experiencing a modern and visually appealing design.
+
+## Theme
+
+The project is themed around a terminal interface, providing a nostalgic and unique way to present my
+personal information and Stand-out!.
+
+### Gamification
+
+One of the standout features of this project is its **gamification** element. Users can collect achievements based on their interactions in the website. This system encourages exploration and engagement, rewarding users for completing specific tasks and commands. As users navigate through the portfolio, they can unlock various achievements, adding a fun and interactive layer to the experience.
+
+## Features
+
+- **Interactive Commands**: Users can type commands to navigate through various sections, including:
+
+  - About Me
+  - Skills
+  - Experience
+  - Freelance Work
+  - My Achievements / Publications / Certifications
+  - Education
+  - Projects
+  - Courses
+  - Languages
+  - Contact Information
+  - Timeline of order of events
+  - The user's achievements!
+
+- **Responsive Design**: The terminal adapts to different screen sizes, ensuring a seamless experience on both desktop and mobile devices.
 
 ## Getting Started
 
-First, run the development server:
+To run this project locally, follow these steps:
+
+### Prerequisites
+
+- Node.js (version 14 or higher)
+- npm (Node Package Manager)
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Gallillio/Portfolio_Website.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd Portfolio_Website
+   ```
+
+3. Install the required dependencies listed in `package.json`:
+
+   ```bash
+   npm install
+   ```
+
+### Running the Project
+
+To start the development server, run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This will start the application, and you can access it in your web browser at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To create a production build of the project, run:
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+This will compile the project and prepare it for deployment.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Once the application is running, you can interact with the terminal by typing commands. Type `help` to see a list of available commands. You can navigate through different sections by typing commands like `about`, `projects`, `contact`, etc.
