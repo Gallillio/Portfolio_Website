@@ -7,7 +7,7 @@ import { experiences, education, freelanceProjects, personalAchievements, getSki
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"
-import { Github, ExternalLink, BookOpen, Trophy, ShieldCheck, Star, Languages, ChevronDown, ChevronUp, Check, Filter } from "lucide-react"
+import { Github, ExternalLink, BookOpen, Trophy, ShieldCheck, Star, Languages, ChevronDown, ChevronUp, Check, Filter, ChevronRight } from "lucide-react"
 import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
 import { skillLogos } from "@/lib/skill-logos"
@@ -345,29 +345,91 @@ export default function About() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tabs list with horizontal scroll */}
         <div className="overflow-x-auto pb-2 terminal-header-fixed">
-          <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
-            <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Skills
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Timeline
-            </TabsTrigger>
-            <TabsTrigger value="experience" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Professional Experience
-            </TabsTrigger>
-            <TabsTrigger value="education" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Education
-            </TabsTrigger>
-            <TabsTrigger value="freelance" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Freelance Projects
-            </TabsTrigger>
-            <TabsTrigger value="languages" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Languages
-            </TabsTrigger>
-            <TabsTrigger value="courses" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Courses
-            </TabsTrigger>
-          </TabsList>
+          {isMobile ? (
+            /* Mobile-friendly dropdown tabs UI */
+            <div className="mb-4">
+              <div 
+                onClick={() => setModalOpen(!modalOpen)} 
+                className="bg-gray-900 border border-green-500 p-3 flex items-center justify-between rounded-md cursor-pointer group hover:bg-gray-800 transition-colors duration-200"
+              >
+                <div className="flex items-center">
+                  <span className="text-green-400 font-mono">{
+                    activeTab === "skills" ? "Skills" :
+                    activeTab === "timeline" ? "Timeline" :
+                    activeTab === "experience" ? "Professional Experience" :
+                    activeTab === "education" ? "Education" :
+                    activeTab === "freelance" ? "Freelance Projects" :
+                    activeTab === "languages" ? "Languages" : "Courses"
+                  }</span>
+                  <span className="ml-2 terminal-cursor"></span>
+                </div>
+                <div className="text-green-500 group-hover:text-green-400 transition-colors duration-200">
+                  {modalOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                </div>
+              </div>
+              
+              {/* Dropdown Menu */}
+              {modalOpen && (
+                <div className="absolute z-30 mt-2 w-full bg-gray-900 border border-green-500 rounded-md shadow-lg animate-fadeIn">
+                  {[
+                    { id: "skills", label: "Skills" },
+                    { id: "timeline", label: "Timeline" },
+                    { id: "experience", label: "Professional Experience" },
+                    { id: "education", label: "Education" },
+                    { id: "freelance", label: "Freelance Projects" },
+                    { id: "languages", label: "Languages" },
+                    { id: "courses", label: "Courses" }
+                  ].map((tab, index) => (
+                    <div
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setModalOpen(false);
+                      }}
+                      className={`px-4 py-3 flex items-center border-b last:border-b-0 border-green-500/30 transition-colors cursor-pointer ${
+                        activeTab === tab.id 
+                          ? "bg-black text-green-400" 
+                          : "text-green-500 hover:bg-gray-800"
+                      }`}
+                      style={{
+                        animationDelay: `${index * 50}ms`,
+                        animation: "fadeInDown 0.3s ease-out forwards"
+                      }}
+                    >
+                      <ChevronRight size={14} className="mr-2" />
+                      <span className="mr-2 opacity-70">{activeTab === tab.id ? ">" : "$"}</span>
+                      <span className={activeTab === tab.id ? "text-green-300" : ""}>{tab.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Desktop tabs UI remains the same */
+            <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
+              <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Skills
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Timeline
+              </TabsTrigger>
+              <TabsTrigger value="experience" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Professional Experience
+              </TabsTrigger>
+              <TabsTrigger value="education" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Education
+              </TabsTrigger>
+              <TabsTrigger value="freelance" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Freelance Projects
+              </TabsTrigger>
+              <TabsTrigger value="languages" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Languages
+              </TabsTrigger>
+              <TabsTrigger value="courses" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Courses
+              </TabsTrigger>
+            </TabsList>
+          )}
         </div>
 
         <TabsContent value="skills" className="pt-4">
