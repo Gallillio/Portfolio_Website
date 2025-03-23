@@ -49,10 +49,25 @@ const TerminalLink = ({ href }: { href: string }) => {
 }
 
 const CommandLink = ({ command, onClick }: { command: string; onClick: (command: string) => void }) => {
+  const handleClick = () => {
+    onClick(command)
+    
+    // Ensure the terminal input is visible after clicking
+    setTimeout(() => {
+      // Find the terminal input field
+      const terminalInput = document.querySelector('input[aria-label="Terminal input"]')
+      if (terminalInput instanceof HTMLElement) {
+        terminalInput.focus()
+        // Scroll to the input field
+        terminalInput.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      }
+    }, 100)
+  }
+
   return (
     <span 
       className="text-green-400 hover:underline cursor-pointer"
-      onClick={() => onClick(command)}
+      onClick={handleClick}
     >
       {command}
     </span>

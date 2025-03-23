@@ -19,7 +19,11 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [suggestion, setSuggestion] = useState("")
+  const [isSwiping, setIsSwiping] = useState(false)
+  const [touchStartX, setTouchStartX] = useState(0)
+  const [animateArrow, setAnimateArrow] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const suggestionContainerRef = useRef<HTMLDivElement>(null)
   const { executeCommand: trackCommand, markCommandExecuted, visitTab, executeSecretCommand } = useAchievements()
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
 
@@ -42,6 +46,22 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     inputRef.current?.focus()
   }, [])
 
+  // Pulse the arrow animation periodically when suggestion is present
+  useEffect(() => {
+    if (suggestion) {
+      // Initial animation when suggestion appears
+      setAnimateArrow(true)
+      setTimeout(() => setAnimateArrow(false), 1000)
+      
+      const interval = setInterval(() => {
+        setAnimateArrow(true)
+        setTimeout(() => setAnimateArrow(false), 1000)
+      }, 3000)
+      
+      return () => clearInterval(interval)
+    }
+  }, [suggestion])
+
   // Update suggestion when input changes
   useEffect(() => {
     if (!input.trim()) {
@@ -60,6 +80,25 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
       setSuggestion("")
     }
   }, [input])
+
+  // Scroll to view when input receives focus or a new command is input
+  useEffect(() => {
+    const handleFocus = () => {
+      setTimeout(() => {
+        if (inputRef.current) {
+          // Scroll the terminal input into view
+          inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+      }, 100)
+    }
+    
+    if (inputRef.current) {
+      inputRef.current.addEventListener('focus', handleFocus)
+      return () => {
+        inputRef.current?.removeEventListener('focus', handleFocus)
+      }
+    }
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -85,6 +124,12 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     setHistoryIndex(-1)
     setInput("")
     setSuggestion("")
+    
+    // Ensure the input is visible after command execution
+    setTimeout(() => {
+      inputRef.current?.focus()
+      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }, 100)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -117,6 +162,32 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     inputRef.current?.focus()
   }
 
+  // Handle touch events for swipe gesture
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (suggestion) {
+      setTouchStartX(e.touches[0].clientX)
+      setIsSwiping(true)
+    }
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isSwiping || !suggestion) return
+    
+    const currentX = e.touches[0].clientX
+    const diff = currentX - touchStartX
+    
+    // If swiped right more than 50px, complete the suggestion
+    if (diff > 50) {
+      setInput(prev => prev + suggestion)
+      setSuggestion("")
+      setIsSwiping(false)
+    }
+  }
+
+  const handleTouchEnd = () => {
+    setIsSwiping(false)
+  }
+
   return (
     <div onClick={focusInput} className="cursor-text">
       <form onSubmit={handleSubmit} className="flex items-center mt-2">
@@ -124,7 +195,13 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
           <span className="mr-1">$</span>
           <ArrowRight size={14} />
         </div>
-        <div className="flex-1 relative">
+        <div 
+          className="flex-1 relative"
+          ref={suggestionContainerRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <input
             ref={inputRef}
             type="text"
@@ -136,10 +213,17 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             aria-label="Terminal input"
           />
           {suggestion && (
-            <span className="absolute left-0 top-0 text-green-500/30 font-mono pointer-events-none">
-              {input}
-              {suggestion}
-            </span>
+            <div className="absolute left-0 top-0 flex items-center pointer-events-none">
+              <span className="text-green-500/30 font-mono">
+                {input}
+                {suggestion}
+              </span>
+              <span className={`ml-2 text-green-500/60 transition-all duration-700 ${
+                animateArrow ? 'translate-x-3 text-green-400' : ''
+              }`}>
+                <ArrowRight size={16} className="animate-pulse" />
+              </span>
+            </div>
           )}
         </div>
       </form>

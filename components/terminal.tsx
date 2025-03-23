@@ -26,6 +26,7 @@ function TerminalContent() {
   const [secretJokeRevealed, setSecretJokeRevealed] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
@@ -133,6 +134,52 @@ function TerminalContent() {
     }
   }, [isMobile, isFullscreen])
 
+  // Effect to detect virtual keyboard visibility on mobile
+  useEffect(() => {
+    // Function to check if virtual keyboard is likely open
+    const checkKeyboard = () => {
+      // Only run this check on mobile devices
+      if (window.innerWidth < 768) {
+        // If the visual viewport is significantly smaller than the layout viewport,
+        // it's likely that a keyboard is shown
+        const heightDiff = window.innerHeight - window.visualViewport?.height!
+        const isKeyboardOpen = heightDiff > 150 // Typical keyboard heights are > 150px
+
+        setIsKeyboardVisible(isKeyboardOpen)
+
+        if (isKeyboardOpen) {
+          // Scroll to make the input field visible when keyboard opens
+          setTimeout(() => {
+            if (terminalInputRef.current) {
+              const inputElement = document.querySelector('input[aria-label="Terminal input"]')
+              if (inputElement) {
+                inputElement.scrollIntoView({ behavior: 'smooth', block: 'end' })
+              }
+            }
+          }, 300)
+        }
+      }
+    }
+
+    // Set up event listeners for visual viewport changes
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', checkKeyboard)
+      window.visualViewport.addEventListener('scroll', checkKeyboard)
+    }
+
+    // Also check on window resize
+    window.addEventListener('resize', checkKeyboard)
+
+    // Cleanup
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', checkKeyboard)
+        window.visualViewport.removeEventListener('scroll', checkKeyboard)
+      }
+      window.removeEventListener('resize', checkKeyboard)
+    }
+  }, [])
+
   const initializeTerminal = () => {
     // Initial welcome message
     setHistory([
@@ -231,6 +278,17 @@ function TerminalContent() {
 
     // Add command and response to history
     setHistory((prev) => [...prev, { ...newCommand, ...response, isError: response.isError ?? false }])
+    
+    // Ensure the input field is visible on mobile after command execution
+    if (window.innerWidth < 768) {
+      setTimeout(() => {
+        const inputElement = document.querySelector('input[aria-label="Terminal input"]')
+        if (inputElement instanceof HTMLElement) {
+          inputElement.focus()
+          inputElement.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+      }, 300)
+    }
   }
 
   const toggleFullscreen = () => {
@@ -312,6 +370,16 @@ function TerminalContent() {
 
   const focusInput = () => {
     terminalInputRef.current?.focus()
+    
+    // Ensure input is visible, especially on mobile
+    if (window.innerWidth < 768) {
+      setTimeout(() => {
+        const inputElement = document.querySelector('input[aria-label="Terminal input"]')
+        if (inputElement instanceof HTMLElement) {
+          inputElement.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+      }, 100)
+    }
   }
 
   // Add effect to focus input when terminal tab is selected
