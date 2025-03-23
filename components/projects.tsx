@@ -374,15 +374,18 @@ export default function Projects() {
                 text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
                 isMobile={isMobile}
                 isTablet={isTablet}
-                showTooltip={!project.demo_available}
+                // showTooltip={!project.demo_available || project.inDevelopment}
+                showTooltip={project.inDevelopment ? false : !project.demo_available}
+
+                
               >
                 <Button
                   variant="outline"
                   size="sm"
                   className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.demo_available ? '' : 'opacity-50 cursor-not-allowed'}`}
                   asChild
-                  disabled={!project.demo_available}
-                  onClick={project.demo_available ? handleDemoClick : undefined}
+                  disabled={!project.demo_available || project.inDevelopment}
+                  onClick={project.demo_available && !project.inDevelopment ? handleDemoClick : undefined}
                 >
                   {project.demo && project.demo_available ? (
                     <a href={project.demo} target="_blank" rel="noopener noreferrer">

@@ -51,32 +51,6 @@ export const projects: Project[] = [
     code_available: true,
   },
   {
-    title: '"SelZeky" Company Profile Website',
-    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.\n\n⚠️ This project is currently under development ⚠️",
-    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
-    images: [
-      { src: "/in-development.png", alt: "Still In Development" },
-    ],
-    github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
-    demo: "https://www.selzeky.com/",
-    demo_available: false,
-    code_available: false,
-    inDevelopment: true,
-  },
-  {
-    title: '"Leen" Company Profile Website',
-    description: "This ecommerce platform presents a user-friendly interface that showcases Leen's range of products and services, making it easy for customers to browse and shop online.\n\n⚠️ This project is currently under development ⚠️",
-    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
-    images: [
-      { src: "/in-development.png", alt: "Still In Development" },
-    ],
-    github: "https://github.com/Gallillio/MERN-Leen_Company_Website",
-    demo: "https://www.leen.com/",
-    demo_available: false,
-    code_available: false,
-    inDevelopment: true,
-  },
-  {
     title: "Data Visualer and Analysis Tool",
     description:
     "A tool to visualize and analyze data. It provides a user-friendly interface for data exploration and model training, with features for data preprocessing.",
@@ -118,6 +92,45 @@ export const projects: Project[] = [
     demo: "https://gallillio.com",
     demo_available: true,
     code_available: true,
+  },
+  {
+    title: '"Brillium" AI SaaS',
+    description: "Brillium is an AI-powered LMS that converts PDF textbooks into interactive learning experiences. It generates quizzes, flashcards, and presentations, analyze student performance, and dynamically create questions for improvement. Teachers can monitor and edit content, while a chatbot serves as a personal assistant for students.\n\n⚠️ This project is currently under development ⚠️",
+    technologies: ["Google Gemini", "FastAPI","Tesseract OCR", "Python", "ReactJS", "NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
+    images: [
+      { src: "/in-development.png", alt: "Still In Development" },
+    ],
+    github: "https://github.com/Gallillio/Brillium",
+    demo: "https://www.Brillium.com/",
+    demo_available: false,
+    code_available: false,
+    inDevelopment: true,
+  },
+  {
+    title: '"SelZeky" Company Profile Website',
+    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.\n\n⚠️ This project is currently under development ⚠️",
+    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
+    images: [
+      { src: "/in-development.png", alt: "Still In Development" },
+    ],
+    github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
+    demo: "https://www.selzeky.com/",
+    demo_available: false,
+    code_available: false,
+    inDevelopment: true,
+  },
+  {
+    title: '"Leen" Company Profile Website',
+    description: "This ecommerce platform presents a user-friendly interface that showcases Leen's range of products and services, making it easy for customers to browse and shop online.\n\n⚠️ This project is currently under development ⚠️",
+    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
+    images: [
+      { src: "/in-development.png", alt: "Still In Development" },
+    ],
+    github: "https://github.com/Gallillio/MERN-Leen_Company_Website",
+    demo: "https://www.leen.com/",
+    demo_available: false,
+    code_available: false,
+    inDevelopment: true,
   },
 ];
 
