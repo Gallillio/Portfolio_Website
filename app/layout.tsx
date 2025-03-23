@@ -53,7 +53,10 @@ export const metadata: Metadata = {
       },
     ],
   },
-  
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+  },
 };
 
 export default function RootLayout({

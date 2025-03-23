@@ -109,6 +109,7 @@
 html {
   scrollbar-width: thin;
   scrollbar-color: #22c55e #111;
+  touch-action: manipulation;
 }
 
 html::-webkit-scrollbar {
@@ -128,6 +129,35 @@ html::-webkit-scrollbar-thumb {
 
 html::-webkit-scrollbar-thumb:hover {
   background: #16a34a;
+}
+
+/* Fix touch interaction issues on scrollable content */
+@media (hover: none) and (pointer: coarse) {
+  a,
+  button {
+    touch-action: manipulation;
+  }
+
+  /* Improve touch interactions to avoid delays */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Add a specific class for touch-optimized elements */
+  .touch-optimized {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Prevent scroll cancellation */
+  body,
+  .overflow-y-auto,
+  .overflow-auto {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 :root {
@@ -181,10 +211,12 @@ html::-webkit-scrollbar-thumb:hover {
 
 body {
   @apply bg-background text-foreground;
+  background-color: black;
 }
 
 html {
   @apply dark;
+  background-color: black;
 }
 
 /* Terminal mobile menu animations */

@@ -46,6 +46,12 @@ function TerminalContent() {
     // Set initial mobile state and fullscreen
     const initialIsMobile = window.innerWidth < 768
     setIsMobile(initialIsMobile)
+    
+    // Set fullscreen automatically on mobile
+    if (initialIsMobile) {
+      setIsFullscreen(true)
+      setAnimationClass("animate-expand")
+    }
 
     // Load saved tab from localStorage after initial render
     const savedTab = localStorage.getItem('terminalActiveTab');
@@ -99,9 +105,20 @@ function TerminalContent() {
   useEffect(() => {
     const checkIfMobile = () => {
       const isMobileNow = window.innerWidth < 768
+      const wasMobile = isMobile
+      
       setIsMobile(isMobileNow)
       
-      // We no longer set fullscreen automatically on mobile transition
+      // Set fullscreen automatically when transitioning to mobile
+      if (isMobileNow && !wasMobile) {
+        setIsFullscreen(true)
+        setAnimationClass("animate-expand")
+      }
+      // Exit fullscreen when transitioning from mobile to desktop
+      else if (!isMobileNow && wasMobile && isFullscreen) {
+        setIsFullscreen(false)
+        setAnimationClass("animate-contract")
+      }
     }
     
     // Initial check
@@ -114,7 +131,7 @@ function TerminalContent() {
     return () => {
       window.removeEventListener('resize', checkIfMobile)
     }
-  }, [isMobile])
+  }, [isMobile, isFullscreen])
 
   const initializeTerminal = () => {
     // Initial welcome message
@@ -597,31 +614,31 @@ function TerminalContent() {
                 <TabsList className="bg-transparent border-none rounded-none h-auto">
                   <TabsTrigger
                     value="terminal"
-                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                    className="custom-tab touch-optimized data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
                   >
                     Terminal
                   </TabsTrigger>
                   <TabsTrigger
                     value="projects"
-                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                    className="custom-tab touch-optimized data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
                   >
                     Projects
                   </TabsTrigger>
                   <TabsTrigger
                     value="about"
-                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                    className="custom-tab touch-optimized data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
                   >
                     About / Experience
                   </TabsTrigger>
                   <TabsTrigger
                     value="contact"
-                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                    className="custom-tab touch-optimized data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
                   >
                     Contact / CV
                   </TabsTrigger>
                   <TabsTrigger
                     value="my-achievements"
-                    className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
+                    className="custom-tab touch-optimized data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none border-r border-green-500"
                   >
                     My Achievements / Publications / Certifications
                   </TabsTrigger>
@@ -632,7 +649,7 @@ function TerminalContent() {
               <TabsList className="bg-transparent border-none rounded-none h-auto ml-auto flex-grow">
                 <TabsTrigger
                   value="your-achievements"
-                  className="custom-tab data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none w-full flex justify-end pr-6"
+                  className="custom-tab touch-optimized data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none w-full flex justify-end pr-6"
                 >
                   <span className="hidden md:inline">Your Achievements</span>
                   <span className="md:hidden">Your Achievements</span>
@@ -661,7 +678,7 @@ function TerminalContent() {
                     <button
                       key={item.id}
                       onClick={() => handleTabChange(item.id)}
-                      className={`mobile-menu-item text-left px-4 py-3 flex items-center border-b border-green-500/30 transition-colors cursor-pointer ${
+                      className={`mobile-menu-item touch-optimized text-left px-4 py-3 flex items-center border-b border-green-500/30 transition-colors cursor-pointer ${
                         activeTab === item.id 
                           ? "bg-black text-green-400" 
                           : "text-green-500 hover:bg-gray-800"

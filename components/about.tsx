@@ -23,7 +23,7 @@ const iconMap = {
 } as const;
 
 type TimelineItem = 
-  | { type: 'achievement'; date: string; title: string; subtitle: string; category: string | undefined; targetTab: string; icon: ReactNode; link?: string }
+  | { type: 'achievement'; date: string; title: string; subtitle: string; category: string | undefined; targetTab: string; icon: ReactNode; link?: string; linkText?: string }
   | { type: 'experience'; title: string; company: string; period: string; description: string; targetTab: string }
   | { type: 'education'; degree: string; institution: string; year: string; focus: string; location: string; targetTab: string }
   | { type: 'freelance'; title: string; description: string; period: string; technologies: string[]; targetTab: string }
@@ -61,6 +61,7 @@ export default function About() {
   // Add new state for mobile detection
   const [isMobile, setIsMobile] = useState(window.innerWidth < 767);
   const [modalOpen, setModalOpen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Add new state for timeline filters
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(['achievement', 'experience', 'education', 'freelance']))
@@ -223,6 +224,42 @@ export default function About() {
     })
   }
 
+  // Handle click outside dropdown and modal to close them
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setModalOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Effect to scroll the active tab button into view
+  useEffect(() => {
+    const activeTabEl = document.querySelector(`[value="${activeTab}"]`) as HTMLElement;
+    if (activeTabEl) {
+      // Find the scroll container
+      const scrollContainer = activeTabEl.closest('.overflow-x-auto') as HTMLElement;
+      
+      if (scrollContainer) {
+        // On mobile/touch screens, position the tab at the far left
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        
+        if (isTouchDevice || window.innerWidth < 768) {
+          // Set scroll position directly to position the tab at the far left
+          scrollContainer.scrollLeft = activeTabEl.offsetLeft;
+        } else {
+          // On desktop, use the native scrollIntoView
+          activeTabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
+      }
+    }
+  }, [activeTab]);
+
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
       <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">About Me</h2>
@@ -308,25 +345,25 @@ export default function About() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
         <div className="overflow-x-auto pb-2">
           <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
-            <TabsTrigger value="skills" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+            <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Skills
             </TabsTrigger>
-            <TabsTrigger value="timeline" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+            <TabsTrigger value="timeline" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Timeline
             </TabsTrigger>
-            <TabsTrigger value="experience" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+            <TabsTrigger value="experience" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Professional Experience
             </TabsTrigger>
-            <TabsTrigger value="education" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+            <TabsTrigger value="education" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Education
             </TabsTrigger>
-            <TabsTrigger value="freelance" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+            <TabsTrigger value="freelance" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Freelance Projects
             </TabsTrigger>
-            <TabsTrigger value="languages" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+            <TabsTrigger value="languages" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Languages
             </TabsTrigger>
-            <TabsTrigger value="courses" className="custom-tab data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+            <TabsTrigger value="courses" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
               Courses
             </TabsTrigger>
           </TabsList>
@@ -421,7 +458,7 @@ export default function About() {
               {/* Modal for Mobile Filters */}
               {modalOpen && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center">
-                  <div className="bg-gray-800 p-6 rounded-lg w-11/12 max-w-md relative">
+                  <div ref={modalRef} className="bg-gray-800 p-6 rounded-lg w-11/12 max-w-md relative">
                     <h3 className="text-green-400 mb-4 font-bold flex items-center justify-between">
                       <span>Filter Timeline</span>
                       <button 
@@ -497,7 +534,8 @@ export default function About() {
                           category: achievement.category,
                           icon: iconMap[achievement.icon],
                           targetTab: 'my-achievements',
-                          link: achievement.link
+                          link: achievement.link,
+                          linkText: achievement.linkText
                         })),
                         ...experiences.map(exp => ({
                           type: 'experience' as const,
@@ -584,10 +622,10 @@ export default function About() {
                                       rel="noopener noreferrer"
                                       className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
                                       onClick={(e) => e.stopPropagation()}
-                                      title="View Paper"
+                                      title={item.linkText || "View Link"}
                                     >
                                       <ExternalLink className="h-5 w-5" />
-                                      <span className="ml-1 text-sm">View Paper</span>
+                                      <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
                                     </a>
                                   )}
                                 </span>
@@ -634,7 +672,8 @@ export default function About() {
                           category: achievement.category,
                           icon: iconMap[achievement.icon],
                           targetTab: 'my-achievements',
-                          link: achievement.link
+                          link: achievement.link,
+                          linkText: achievement.linkText
                         })),
                         ...experiences.map(exp => ({
                           type: 'experience' as const,
@@ -718,10 +757,10 @@ export default function About() {
                                           rel="noopener noreferrer"
                                           className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
                                           onClick={(e) => e.stopPropagation()}
-                                          title="View Paper"
+                                          title={item.linkText || "View Link"}
                                         >
                                           <ExternalLink className="h-5 w-5" />
-                                          <span className="ml-1 text-sm">View Paper</span>
+                                          <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
                                         </a>
                                       )}
                                     </span>
@@ -775,10 +814,10 @@ export default function About() {
                                           rel="noopener noreferrer"
                                           className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
                                           onClick={(e) => e.stopPropagation()}
-                                          title="View Paper"
+                                          title={item.linkText || "View Link"}
                                         >
                                           <ExternalLink className="h-5 w-5" />
-                                          <span className="ml-1 text-sm">View Paper</span>
+                                          <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
                                         </a>
                                       )}
                                     </span>
