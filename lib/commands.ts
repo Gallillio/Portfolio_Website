@@ -415,7 +415,7 @@ commandRegistry.register("cv", "Download my CV", async () => ({
   ],
   timestamp: new Date(),
   specialAction: "downloadCV",
-}))
+}), true, ["resume"])
 
 commandRegistry.register("help", "Show available commands", async () => ({
   output: commandRegistry.getHelpText(),
@@ -453,6 +453,23 @@ commandRegistry.register("courses", "View my taken courses", async () => {
     timestamp: new Date(),
   };
 })
+
+// Add new timeline command
+commandRegistry.register("timeline", "View my career timeline", async () => ({
+  output: [
+    "╔══════════════════════════════════════════",
+    "║                Timeline                  ",
+    "╚══════════════════════════════════════════",
+    "",
+    "Exploring my professional journey in chronological order...",
+    "",
+    "Navigating to Timeline view...",
+  ],
+  specialAction: "switchTab",
+  tabName: "about",
+  timelineSection: "timeline", // This will be used to navigate to the specific section
+  timestamp: new Date(),
+}))
 
 // Export the available commands for the terminal input component
 export const availableCommands = commandRegistry.getAvailableCommands()

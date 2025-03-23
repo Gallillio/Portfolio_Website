@@ -168,6 +168,8 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     if (suggestion) {
       setTouchStartX(e.touches[0].clientX)
       setIsSwiping(true)
+      // Prevent default to stop screen movement
+      e.preventDefault()
     }
   }
 
@@ -176,6 +178,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     
     // Prevent default scrolling behavior when swiping on suggestion
     e.preventDefault()
+    e.stopPropagation()
     
     const currentX = e.touches[0].clientX
     const diff = currentX - touchStartX
@@ -188,7 +191,12 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     }
   }
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (isSwiping) {
+      // Prevent default behavior to stop screen movement
+      e.preventDefault()
+      e.stopPropagation()
+    }
     setIsSwiping(false)
   }
 
@@ -205,6 +213,8 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          style={{ touchAction: suggestion ? 'none' : 'auto' }}
         >
           <input
             ref={inputRef}

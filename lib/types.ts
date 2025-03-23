@@ -9,6 +9,7 @@ export interface CommandResponse {
   isError?: boolean
   specialAction?: "switchTab" | "none" | "clear" | "downloadCV"
   tabName?: string
+  timelineSection?: string
 }
 
 export interface Project {
