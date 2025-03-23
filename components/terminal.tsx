@@ -495,6 +495,11 @@ function TerminalContent(): React.ReactNode {
 
   // Toggle mobile menu
   const toggleMobileMenu = () => {
+    // If we're toggling the menu to open while scrolling,
+    // set a flag to prevent immediate closing
+    if (isScrolling) {
+      setMenuOpenedDuringScroll(true);
+    }
     setMobileMenuOpen(prev => !prev);
   }
 
@@ -518,15 +523,15 @@ function TerminalContent(): React.ReactNode {
     }, 50);
   };
 
+  // Track if menu was opened during scroll explicitly
+  const [menuOpenedDuringScroll, setMenuOpenedDuringScroll] = useState(false);
+
   // Track if currently scrolling
   const [isScrolling, setIsScrolling] = useState(false);
   let scrollTimer: NodeJS.Timeout | null = null;
 
   // Close mobile menu when clicking outside or scrolling
   useEffect(() => {
-    // Flag for tracking if menu was opened during scroll
-    let menuOpenedDuringScroll = false;
-    
     const handleClickOutside = (event: MouseEvent) => {
       if (
         mobileMenuOpen && 
@@ -539,19 +544,6 @@ function TerminalContent(): React.ReactNode {
       }
     };
     
-    // When hamburger button is clicked
-    const handleHamburgerClick = () => {
-      if (isScrolling) {
-        menuOpenedDuringScroll = true;
-      } else {
-        menuOpenedDuringScroll = false;
-      }
-    };
-    
-    if (hamburgerButtonRef.current) {
-      hamburgerButtonRef.current.addEventListener('click', handleHamburgerClick);
-    }
-    
     // Direct wheel event handler
     const handleWheel = () => {
       // Set scrolling state
@@ -562,18 +554,21 @@ function TerminalContent(): React.ReactNode {
         clearTimeout(scrollTimer);
       }
       
-      // Reset scrolling state after a short delay
-      scrollTimer = setTimeout(() => {
-        setIsScrolling(false);
-      }, 150);
-      
       // Only close menu if it wasn't explicitly opened during scroll
       if (mobileMenuOpen && !menuOpenedDuringScroll) {
         setMobileMenuOpen(false);
       }
       
-      // Reset flag after handling scroll
-      menuOpenedDuringScroll = false;
+      // Reset scrolling state after a delay
+      scrollTimer = setTimeout(() => {
+        setIsScrolling(false);
+        
+        // Reset the menuOpenedDuringScroll flag a bit later
+        // to allow interacting with the menu after scrolling stops
+        setTimeout(() => {
+          setMenuOpenedDuringScroll(false);
+        }, 500);
+      }, 150);
     };
     
     // Direct touch move handler for mobile devices
@@ -586,18 +581,20 @@ function TerminalContent(): React.ReactNode {
         clearTimeout(scrollTimer);
       }
       
-      // Reset scrolling state after a short delay
-      scrollTimer = setTimeout(() => {
-        setIsScrolling(false);
-      }, 150);
-      
       // Only close menu if it wasn't explicitly opened during scroll
       if (mobileMenuOpen && !menuOpenedDuringScroll) {
         setMobileMenuOpen(false);
       }
       
-      // Reset flag after handling scroll
-      menuOpenedDuringScroll = false;
+      // Reset scrolling state after a delay
+      scrollTimer = setTimeout(() => {
+        setIsScrolling(false);
+        
+        // Reset the menuOpenedDuringScroll flag a bit later
+        setTimeout(() => {
+          setMenuOpenedDuringScroll(false);
+        }, 500);
+      }, 150);
     };
     
     // Track touch position to detect scrolling
@@ -620,9 +617,6 @@ function TerminalContent(): React.ReactNode {
       if (diff > 5 && !menuOpenedDuringScroll) {
         setMobileMenuOpen(false);
       }
-      
-      // Reset flag after touch end
-      menuOpenedDuringScroll = false;
     };
     
     // Add all necessary event listeners
@@ -649,10 +643,6 @@ function TerminalContent(): React.ReactNode {
       document.removeEventListener('touchstart', handleTouchStart as EventListener);
       document.removeEventListener('touchend', handleTouchEnd as EventListener);
       
-      if (hamburgerButtonRef.current) {
-        hamburgerButtonRef.current.removeEventListener('click', handleHamburgerClick);
-      }
-      
       if (scrollTimer) {
         clearTimeout(scrollTimer);
       }
@@ -664,7 +654,7 @@ function TerminalContent(): React.ReactNode {
         area.removeEventListener('touchend', handleTouchEnd as EventListener);
       });
     };
-  }, [mobileMenuOpen, isScrolling]);
+  }, [mobileMenuOpen, isScrolling, menuOpenedDuringScroll]);
 
   return (
     <>
@@ -915,12 +905,10 @@ function TerminalContent(): React.ReactNode {
             <TabsContent 
               value="terminal" 
               className="p-0 m-0"
-              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div
                 className={`${contentHeight} overflow-y-auto overflow-x-auto bg-black p-4 pt-6 font-mono text-green-500 cursor-text custom-scrollbar transition-height duration-700 ease-in-out`}
                 onClick={focusInput}
-                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <TerminalOutput history={history} onCommandClick={handleCommandClick} />
                 <div ref={outputEndRef} />
@@ -931,11 +919,9 @@ function TerminalContent(): React.ReactNode {
             <TabsContent 
               value="projects" 
               className="p-0 m-0"
-              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
-                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <Projects />
               </div>
@@ -944,11 +930,9 @@ function TerminalContent(): React.ReactNode {
             <TabsContent 
               value="about" 
               className="p-0 m-0"
-              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
-                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <About />
               </div>
@@ -957,11 +941,9 @@ function TerminalContent(): React.ReactNode {
             <TabsContent 
               value="contact" 
               className="p-0 m-0"
-              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
-                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <Contact />
               </div>
@@ -970,11 +952,9 @@ function TerminalContent(): React.ReactNode {
             <TabsContent 
               value="my-achievements" 
               className="p-0 m-0"
-              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
-                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <MyAchievements />
               </div>
@@ -983,11 +963,9 @@ function TerminalContent(): React.ReactNode {
             <TabsContent 
               value="your-achievements" 
               className="p-0 m-0"
-              onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div 
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
-                onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
                 <YourAchievements />
               </div>
