@@ -340,9 +340,9 @@ function TerminalContent() {
 
   // Determine the terminal height based on fullscreen status
   const contentHeight = isFullscreen 
-    ? "h-[calc(100vh-82px)]" 
+    ? "h-[calc(100vh-120px)]" // Adjusted for both headers (title + tabs)
     : isMobile 
-      ? "h-[calc(100vh-100px)]" 
+      ? "h-[calc(100vh-140px)]" // Adjusted for mobile
       : "h-[70vh]";
 
   // Add new function for revealing the secret joke
@@ -393,38 +393,18 @@ function TerminalContent() {
       }
     };
     
-    // Track if the user was already scrolling before opening the menu
-    let wasScrolling = false;
-    let lastScrollTime = 0;
-    
-    // Check if user was already scrolling
-    const checkIfScrolling = () => {
-      lastScrollTime = Date.now();
-      wasScrolling = true;
-      // Reset wasScrolling flag after a small delay
-      setTimeout(() => {
-        if (Date.now() - lastScrollTime > 150) {
-          wasScrolling = false;
-        }
-      }, 200);
-    };
-    
     // Direct wheel event handler
     const handleWheel = () => {
-      // Check if menu was opened during scrolling - if so, don't close it
-      if (mobileMenuOpen && !wasScrolling) {
+      if (mobileMenuOpen) {
         setMobileMenuOpen(false);
       }
-      checkIfScrolling();
     };
     
     // Direct touch move handler for mobile devices
     const handleTouchMove = () => {
-      // Check if menu was opened during scrolling - if so, don't close it
-      if (mobileMenuOpen && !wasScrolling) {
+      if (mobileMenuOpen) {
         setMobileMenuOpen(false);
       }
-      checkIfScrolling();
     };
     
     // Track touch position to detect scrolling
@@ -433,7 +413,6 @@ function TerminalContent() {
     const handleTouchStart = (e: Event) => {
       const touchEvent = e as unknown as TouchEvent;
       touchStartY = touchEvent.touches[0].clientY;
-      checkIfScrolling();
     };
     
     const handleTouchEnd = (e: Event) => {
@@ -443,8 +422,8 @@ function TerminalContent() {
       const touchEndY = touchEvent.changedTouches[0].clientY;
       const diff = Math.abs(touchEndY - touchStartY);
       
-      // If user scrolled more than 5px vertically and wasn't already scrolling when menu opened, close menu
-      if (diff > 5 && !wasScrolling) {
+      // If user scrolled more than 5px vertically, close the menu
+      if (diff > 5) {
         setMobileMenuOpen(false);
       }
     };
@@ -499,34 +478,76 @@ function TerminalContent() {
           transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)"
         }}
       >
-        {/* Terminal Header - Always visible, even when content is scrolling */}
-        <div className="flex items-center justify-between bg-gray-900 border-b border-green-500 px-2 py-1 sticky top-0 left-0 right-0 z-30 terminal-header-fixed">
-          <div className="flex space-x-1.5">
+        <div className="flex items-center justify-between bg-gray-900 px-4 py-2 border-b border-green-500 cursor-default terminal-title-fixed">
+          <div className="flex space-x-2">
+            {/* Close button */}
             <button 
-              onClick={handleClose} 
-              className="w-3 h-3 bg-red-500 rounded-full hover:bg-red-600 focus:outline-none"
+              className="group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+              onClick={handleClose}
               aria-label="Close terminal"
             >
-              <span className="sr-only">Close</span>
+              <div className="w-3 h-3 rounded-full bg-red-500 group-hover:bg-red-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(239,68,68,0.7)]"></div>
+              {/* X icon that appears on hover */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                width="10" 
+                height="10" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white" 
+                strokeWidth="4" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
             </button>
+            
+            {/* Minimize button */}
             <button 
-              onClick={handleMinimize} 
-              className="w-3 h-3 bg-yellow-500 rounded-full hover:bg-yellow-600 focus:outline-none"
+              className="group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+              onClick={handleMinimize}
               aria-label="Minimize terminal"
             >
-              <span className="sr-only">Minimize</span>
+              <div className="w-3 h-3 rounded-full bg-yellow-500 group-hover:bg-yellow-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(234,179,8,0.7)]"></div>
+              {/* Minimize icon that appears on hover */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                width="10" 
+                height="10" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white" 
+                strokeWidth="4" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
             </button>
+            
+            {/* Maximize/restore button */}
             <button 
-              onClick={toggleFullscreen} 
-              className="w-3 h-3 bg-green-500 rounded-full hover:bg-green-600 focus:outline-none"
-              aria-label="Toggle fullscreen"
+              className="group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+              onClick={isMinimized ? handleRestore : (!isMobile ? toggleFullscreen : undefined)}
+              aria-label={isFullscreen ? "Exit fullscreen" : (isMinimized ? "Restore" : "Enter fullscreen")}
             >
-              <svg
-                className="h-3 w-3 text-black opacity-0 group-hover:opacity-100 transition-opacity"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
+              <div className="w-3 h-3 rounded-full bg-green-500 group-hover:bg-green-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(34,197,94,0.7)]"></div>
+              {/* Maximize/restore icon that appears on hover */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                width="10" 
+                height="10" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white" 
+                strokeWidth="4" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
               >
                 {isMinimized ? (
                   // Show + icon for restore from minimized
@@ -572,7 +593,7 @@ function TerminalContent() {
 
         {!isMinimized && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed sticky top-8 left-0 right-0 z-20">
+            <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed">
               {/* Mobile/Tablet Hamburger Menu */}
               <div className="md:hidden flex items-center">
                 <button 
@@ -692,7 +713,7 @@ function TerminalContent() {
               onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
             >
               <div
-                className={`${contentHeight} overflow-y-auto overflow-x-auto bg-black p-4 font-mono text-green-500 cursor-text custom-scrollbar transition-height duration-700 ease-in-out`}
+                className={`${contentHeight} overflow-y-auto overflow-x-auto bg-black p-4 pt-6 font-mono text-green-500 cursor-text custom-scrollbar transition-height duration-700 ease-in-out`}
                 onClick={focusInput}
                 onScroll={() => mobileMenuOpen && setMobileMenuOpen(false)}
               >
