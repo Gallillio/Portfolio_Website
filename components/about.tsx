@@ -351,7 +351,7 @@ export default function About() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tabs list with horizontal scroll - only show on desktop */}
         {!isMobile && (
-          <div className="overflow-x-auto pb-2 terminal-header-fixed">
+          <div className="mt-8 overflow-x-auto pb-2">
             <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
               <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
                 Skills
@@ -380,12 +380,10 @@ export default function About() {
         
         {/* Mobile-friendly section selector */}
         {isMobile && (
-          <div className="mb-4 bg-black pt-2 pb-3 border-b border-green-500/30">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-green-400 font-semibold text-sm">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
-            </div>
-            <div className="about-section-nav">
-              <div className="flex flex-wrap gap-2 px-1">
+          <div className="mb-6 mt-6 bg-gray-900 pt-3 pb-3 border border-green-500 rounded-md shadow-md">
+            
+            <div className="about-section-nav px-4">
+              <div className="flex flex-wrap gap-2">
                 {[
                   { id: 'skills', label: 'Skills' },
                   { id: 'timeline', label: 'Timeline' },
@@ -397,10 +395,10 @@ export default function About() {
                 ].map((section) => (
                   <button
                     key={section.id}
-                    className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors touch-optimized
+                    className={`px-4 py-2 text-sm rounded-md whitespace-nowrap transition-all touch-optimized
                       ${activeTab === section.id 
-                        ? 'bg-green-500/20 border border-green-500/70 text-green-400 font-semibold' 
-                        : 'bg-black/80 text-green-300 border border-green-500/30 hover:bg-green-500/10'}
+                        ? 'bg-green-500 text-black font-medium shadow-md transform scale-105' 
+                        : 'bg-gray-800 text-green-300 border border-green-500/30 hover:bg-green-500/10'}
                     `}
                     onClick={() => setActiveTab(section.id)}
                   >
@@ -415,6 +413,7 @@ export default function About() {
         <TabsContent value="skills" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
+              <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Skills</h3>
               <div className="space-y-8">
                 {getSkillsAsCategories().map((category, categoryIndex) => (
                   <div key={categoryIndex} className="space-y-4">
@@ -455,7 +454,8 @@ export default function About() {
 
         <TabsContent value="timeline" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
-            <CardContent className="pt-6 pb-12">
+            <CardContent className="pt-6">
+              <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Timeline</h3>
               {/* Filter Button for Mobile */}
               {isMobile ? (
                 <button 
@@ -888,6 +888,7 @@ export default function About() {
         <TabsContent value="experience" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
+              <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Professional Experience</h3>
               <div className="space-y-8">
                 {experiences.map((exp, index) => (
                   <div key={index} className="relative pl-6 pb-2 group hover:translate-x-1 transition-all duration-300 ease-in-out">
@@ -974,6 +975,7 @@ export default function About() {
         <TabsContent value="education" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
+              <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Education</h3>
               <div className="space-y-8">
                 {education.map((edu, index) => (
                   <div key={index} className="relative pl-6 pb-2 group hover:translate-x-1 transition-all duration-300 ease-in-out">
@@ -1002,6 +1004,7 @@ export default function About() {
         <TabsContent value="languages" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
+              <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Languages</h3>
               <div className="space-y-6">
                 <div className="relative pl-6 pb-2 group hover:translate-x-1 transition-all duration-300 ease-in-out">
                   {/* Green dot and line */}
@@ -1033,6 +1036,7 @@ export default function About() {
         <TabsContent value="freelance" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
+              <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Freelance Projects</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {freelanceProjects.map((project, index) => (
                   <div key={index} className="border border-green-500 rounded-lg p-4 group hover:border-green-400 hover:scale-[1.02] hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 ease-in-out">
@@ -1100,6 +1104,7 @@ export default function About() {
         <TabsContent value="courses" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
+              <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Courses</h3>
               <div className="space-y-6">
                 {/* Note about certifications */}
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">

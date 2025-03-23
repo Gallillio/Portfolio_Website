@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "@/components/scroll-to-top";
@@ -12,6 +12,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',  // Enable safe area on modern mobile devices
+};
 
 export const metadata: Metadata = {
   title: "portfolio@Gallillio:~",
@@ -52,11 +58,6 @@ export const metadata: Metadata = {
         url: '/favicon.ico',
       },
     ],
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    viewportFit: 'cover',  // Enable safe area on modern mobile devices
   },
 };
 

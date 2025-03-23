@@ -326,6 +326,17 @@ html {
   padding: 6px 12px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s ease;
+}
+
+/* Custom styling for the about section nav buttons */
+.about-section-nav button.touch-optimized {
+  margin-bottom: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.about-section-nav button.touch-optimized:active {
+  transform: translateY(1px);
 }
 
 /* Ensure content below sticky headers is properly positioned */

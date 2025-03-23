@@ -307,12 +307,14 @@ export default function Projects() {
           >
             <CardHeader>
               <CardTitle className="text-green-400">
-                {project.title}
-                {project.inDevelopment && (
-                  <span className="ml-2 text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full">
-                    In Development
-                  </span>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span>{project.title}</span>
+                  {project.inDevelopment && (
+                    <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full whitespace-nowrap">
+                      In Development
+                    </span>
+                  )}
+                </div>
               </CardTitle>
               <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
             </CardHeader>
