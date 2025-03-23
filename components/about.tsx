@@ -28,6 +28,18 @@ type TimelineItem =
   | { type: 'education'; degree: string; institution: string; year: string; focus: string; location: string; targetTab: string }
   | { type: 'freelance'; title: string; description: string; period: string; technologies: string[]; targetTab: string }
 
+// Define a mapping for styles based on course providers
+const providerStyles: { [key: string]: { width: number; height: number; unoptimized?: boolean; filterInvert?: boolean } } = {
+  CompTIA: { width: 57, height: 57, unoptimized: true },
+  IBM: { width: 36, height: 36 },
+  Amazon: { width: 39, height: 39, filterInvert: true },
+  "New Horizons": { width: 64, height: 46, filterInvert: true },
+  Microsoft: { width: 30, height: 30 },
+
+  // Add more providers and their styles as needed
+  default: { width: 30, height: 30 }, // Default style
+};
+
 export default function About() {
   const { visitTab } = useAchievements()
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
@@ -570,7 +582,7 @@ export default function About() {
                                       href={item.link}
                                       target="_blank" 
                                       rel="noopener noreferrer"
-                                      className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                                      className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
                                       onClick={(e) => e.stopPropagation()}
                                       title="View Paper"
                                     >
@@ -704,7 +716,7 @@ export default function About() {
                                           href={item.link}
                                           target="_blank" 
                                           rel="noopener noreferrer"
-                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
                                           onClick={(e) => e.stopPropagation()}
                                           title="View Paper"
                                         >
@@ -761,7 +773,7 @@ export default function About() {
                                           href={item.link}
                                           target="_blank" 
                                           rel="noopener noreferrer"
-                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200"
+                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
                                           onClick={(e) => e.stopPropagation()}
                                           title="View Paper"
                                         >
@@ -1023,39 +1035,41 @@ export default function About() {
 
                 {/* Courses Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {courses.map((course, index) => (
-                    <div 
-                      key={index}
-                      className="group relative p-4 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1"
-                    >
-                      <div className="absolute inset-0 bg-green-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <div className="relative z-10 space-y-2">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-bold text-green-400 group-hover:text-green-300 transition-colors duration-200">
-                            {course.title}
-                          </h3>
-                          <Image 
-                            src={skillLogos[course.provider]} 
-                            alt={`${course.provider} logo`}
-                            width={24}
-                            height={24}
-                            className={`h-6 ${course.provider === 'CompTIA' ? 'h-14' : ''} 
-                            ${course.provider === 'Amazon' ? 'h-11 filter invert' : ''} 
-                            ${course.provider === 'IBM' ? 'h-9' : ''} 
-                            ${course.provider === 'New Horizons' ? 'h-8 filter invert' : ''}`}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-green-300/70 group-hover:text-green-300/90 transition-colors duration-200">
-                            {course.provider}
-                          </span>
-                          <span className="text-green-300/70 font-mono group-hover:text-green-300/90 transition-colors duration-200">
-                            {course.date}
-                          </span>
+                  {courses.map((course, index) => {
+                    const { width, height, unoptimized, filterInvert } = providerStyles[course.provider] || providerStyles.default; // Get styles based on provider
+
+                    return (
+                      <div 
+                        key={index}
+                        className="group relative p-4 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1"
+                      >
+                        <div className="absolute inset-0 bg-green-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="relative z-10 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <h3 className="text-lg font-bold text-green-400 group-hover:text-green-300 transition-colors duration-200">
+                              {course.title}
+                            </h3>
+                            <Image 
+                              src={skillLogos[course.provider]} 
+                              alt={`${course.provider} logo`}
+                              width={width} 
+                              height={height} 
+                              unoptimized={unoptimized} // Apply unoptimized prop if defined
+                              className={filterInvert ? "filter invert" : ""} // Apply invert filter if defined
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-green-300/70 group-hover:text-green-300/90 transition-colors duration-200">
+                              {course.provider}
+                            </span>
+                            <span className="text-green-300/70 font-mono group-hover:text-green-300/90 transition-colors duration-200">
+                              {course.date}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </CardContent>

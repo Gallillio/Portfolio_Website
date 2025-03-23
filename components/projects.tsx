@@ -302,16 +302,32 @@ export default function Projects() {
         {filteredProjects.map((project, index) => (
           <Card
             key={index}
-            className="bg-gray-900 border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all"
+            className={`bg-gray-900 border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all hover:scale-[1.02] hover:-translate-y-1 ${project.inDevelopment ? 'border-2 border-yellow-500/50' : ''}`}
             onMouseEnter={() => handleProjectView(project.title)}
           >
             <CardHeader>
-              <CardTitle className="text-green-400">{project.title}</CardTitle>
+              <CardTitle className="text-green-400">
+                {project.title}
+                {project.inDevelopment && (
+                  <span className="ml-2 text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full">
+                    In Development
+                  </span>
+                )}
+              </CardTitle>
               <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-40 mb-4 overflow-hidden rounded-md  flex items-center justify-center">
-                <Slideshow images={project.images} onImageClick={handleImageClick} />
+              <div className="h-40 mb-4 overflow-hidden rounded-md flex items-center justify-center">
+                {project.inDevelopment ? (
+                  <div className="h-full w-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/30 rounded-md">
+                    <div className="text-center p-4">
+                      <span className="text-yellow-500 text-lg font-bold">Under Development</span>
+                      <p className="text-yellow-500/70 text-sm mt-2">Coming Soon!</p>
+                    </div>
+                  </div>
+                ) : (
+                  <Slideshow images={project.images} onImageClick={handleImageClick} />
+                )}
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
                 {project.technologies.map((tech, techIndex) => (

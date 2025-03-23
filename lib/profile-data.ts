@@ -309,9 +309,9 @@ export const courses: Course[] = [
     date: "Jul. 2023"
   },
   {
-    title: "Security +",
-    provider: "CompTIA",
-    date: "Apr. 2023"
+    title: "Supervised Machine Learning",
+    provider: "DeepLearning.AI",
+    date: "Aug. 2022"
   },
   {
     title: "Cloud AWS Practitioner",
@@ -319,9 +319,9 @@ export const courses: Course[] = [
     date: "Oct. 2022"
   },
   {
-    title: "Supervised Machine Learning",
-    provider: "DeepLearning.AI",
-    date: "Aug. 2022"
+    title: "Security +",
+    provider: "CompTIA",
+    date: "Apr. 2023"
   },
   {
     title: "Network +",

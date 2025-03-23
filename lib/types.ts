@@ -20,5 +20,6 @@ export interface Project {
   demo?: string
   demo_available?: boolean
   code_available?: boolean
+  inDevelopment?: boolean
 }
 
