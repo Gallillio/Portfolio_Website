@@ -126,7 +126,64 @@ export default function About() {
         console.log('About component received navigation request to section:', sectionId);
         if (sectionId && typeof sectionId === 'string') {
           setActiveTab(sectionId);
+          
+          // Check for shouldScrollToNav flag and scroll to navbar if true
+          if (event.data.shouldScrollToNav) {
+            // Use a sequence of timeouts with increasing delays to ensure scrolling works
+            setTimeout(() => {
+              scrollToNavigation();
+            }, 300);
+            
+            // Try again after a longer delay in case the first attempt fails
+            setTimeout(() => {
+              scrollToNavigation();
+            }, 600);
+            
+            // Final attempt with an even longer delay
+            setTimeout(() => {
+              scrollToNavigation();
+            }, 1000);
+          }
         }
+      }
+    };
+    
+    // Helper function to find and scroll to the navigation bar
+    const scrollToNavigation = () => {
+      console.log('Attempting to scroll to navigation');
+      // Try multiple selectors to find the navigation elements
+      const mobileNav = document.querySelector('.about-section-nav');
+      const desktopNav = document.querySelector('[role="tablist"]');
+      const tabList = document.querySelector('.about-tab-list') || document.querySelector('.tab-list');
+      
+      // Try to find any element that could be the navigation
+      const navElement = mobileNav || desktopNav || tabList;
+      
+      if (navElement) {
+        console.log('Found navigation element, scrolling to it');
+        
+        // Ensure the About tab content is scrollable
+        const aboutTabContent = document.querySelector('[data-state="active"][role="tabpanel"]');
+        if (aboutTabContent) {
+          // Force scroll to the top first to reset position
+          aboutTabContent.scrollTop = 0;
+          
+          // Then scroll to the navbar
+          setTimeout(() => {
+            navElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start' 
+            });
+          }, 50);
+        } else {
+          // Direct scroll if we can't find the tab content
+          navElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+          });
+        }
+      } else {
+        console.log('Navigation element not found');
       }
     };
 

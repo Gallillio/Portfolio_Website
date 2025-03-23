@@ -109,7 +109,11 @@ const TabLink = ({ tabName, displayName }: { tabName: string; displayName: strin
       setTimeout(() => {
         // Try to use postMessage to communicate with the inner tab
         try {
-          window.postMessage({ type: 'navigate-about-section', sectionId: tabName }, '*')
+          window.postMessage({ 
+            type: 'navigate-about-section', 
+            sectionId: tabName,
+            shouldScrollToNav: true  // Add flag to indicate scrolling to navbar
+          }, '*')
         } catch (error) {
           console.error(`Error navigating to ${tabName} section:`, error)
         }
@@ -119,6 +123,8 @@ const TabLink = ({ tabName, displayName }: { tabName: string; displayName: strin
           const sectionTab = document.querySelector(`[value="${tabName}"]`) as HTMLElement
           if (sectionTab) {
             sectionTab.click()
+            
+            // Remove direct scrolling from here as it's now handled in the About component
           }
         }, 100)
       }, 200)

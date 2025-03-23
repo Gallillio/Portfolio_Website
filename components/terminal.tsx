@@ -272,17 +272,18 @@ function TerminalContent(): React.ReactNode {
       
       // Handle navigation to specific section in the About tab
       if (response.tabName === "about" && response.timelineSection) {
-        // After a small delay to ensure the about tab is loaded, navigate to timeline section
+        // After a delay to ensure the about tab is loaded, navigate to timeline section
         setTimeout(() => {
           try {
             window.postMessage({ 
               type: 'navigate-about-section', 
-              sectionId: response.timelineSection 
+              sectionId: response.timelineSection,
+              shouldScrollToNav: true // Add flag to scroll to section navbar
             }, '*')
           } catch (error) {
             console.error(`Error navigating to ${response.timelineSection} section:`, error)
           }
-        }, 200)
+        }, 500) // Increase delay to ensure tab is fully loaded
       }
     }
     // Special handling for clear command

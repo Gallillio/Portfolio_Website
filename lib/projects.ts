@@ -89,7 +89,7 @@ export const projects: Project[] = [
       { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
     ],
     github: "https://github.com/Gallillio/Portfolio_Website",
-    demo: "https://gallillio.com",
+    demo: "https://gallillio.vercel.app",
     demo_available: true,
     code_available: true,
   },
