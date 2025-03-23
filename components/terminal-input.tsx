@@ -83,19 +83,20 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
 
   // Scroll to view when input receives focus or a new command is input
   useEffect(() => {
+    const currentInputRef = inputRef.current; // Capture the current ref value
     const handleFocus = () => {
       setTimeout(() => {
-        if (inputRef.current) {
+        if (currentInputRef) {
           // Scroll the terminal input into view
-          inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+          currentInputRef.scrollIntoView({ behavior: 'smooth', block: 'end' })
         }
       }, 100)
     }
     
-    if (inputRef.current) {
-      inputRef.current.addEventListener('focus', handleFocus)
+    if (currentInputRef) {
+      currentInputRef.addEventListener('focus', handleFocus)
       return () => {
-        inputRef.current?.removeEventListener('focus', handleFocus)
+        currentInputRef.removeEventListener('focus', handleFocus)
       }
     }
   }, [])

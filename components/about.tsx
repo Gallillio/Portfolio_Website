@@ -283,7 +283,7 @@ export default function About() {
                   life.
                 </p>
                 <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  Drawing on diverse international experiences in Egypt and Japan, I design and deploy cutting-edge AI
+                  Drawing on diverse international experiences, I design and deploy cutting-edge AI
                   Solutions and Software Systems designed to streamline complex processes and deliver substantial value.
                 </p>
                 <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>

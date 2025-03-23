@@ -19,6 +19,7 @@ export default function YourAchievements() {
   
   const [filter, setFilter] = useState<string>("all")
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -46,76 +47,59 @@ export default function YourAchievements() {
     }
   })
 
+  // Function to clear all achievements data
+  const clearAchievementsData = () => {
+    localStorage.clear();
+    window.location.reload(); // Refresh the page after clearing
+  }
+
+  // Close modal when clicking outside
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('modal-backdrop')) {
+      setIsModalOpen(false);
+    }
+  };
+
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono relative custom-scrollbar">
-      <div className="mb-6 border-b border-green-500 pb-2">
-        <h2 className="text-2xl mb-4">Your Achievements</h2>
-        <div className="flex flex-wrap overflow-x-auto pb-2 gap-2">
-          <Badge
-            onClick={() => setFilter("all")}
-            className={cn(
-              "cursor-pointer hover:bg-green-500/20 whitespace-nowrap",
-              filter === "all" ? "bg-green-500 text-black" : "bg-transparent",
-            )}
-          >
-            All
-          </Badge>
-          <Badge
-            onClick={() => setFilter("unlocked")}
-            className={cn(
-              "cursor-pointer hover:bg-green-500/20 whitespace-nowrap",
-              filter === "unlocked" ? "bg-green-500 text-black" : "bg-transparent",
-            )}
-          >
-            Unlocked
-          </Badge>
-          <Badge
-            onClick={() => setFilter("locked")}
-            className={cn(
-              "cursor-pointer hover:bg-green-500/20 whitespace-nowrap",
-              filter === "locked" ? "bg-green-500 text-black" : "bg-transparent",
-            )}
-          >
-            Locked
-          </Badge>
-          <Badge
-            onClick={() => setFilter("exploration")}
-            className={cn(
-              "cursor-pointer hover:bg-green-500/20 whitespace-nowrap",
-              filter === "exploration" ? "bg-green-500 text-black" : "bg-transparent",
-            )}
-          >
-            Exploration
-          </Badge>
-          <Badge
-            onClick={() => setFilter("interaction")}
-            className={cn(
-              "cursor-pointer hover:bg-green-500/20 whitespace-nowrap",
-              filter === "interaction" ? "bg-green-500 text-black" : "bg-transparent",
-            )}
-          >
-            Interaction
-          </Badge>
-          <Badge
-            onClick={() => setFilter("persistence")}
-            className={cn(
-              "cursor-pointer hover:bg-green-500/20 whitespace-nowrap",
-              filter === "persistence" ? "bg-green-500 text-black" : "bg-transparent",
-            )}
-          >
-            Persistence
-          </Badge>
-          {/* Always show the Secret Achievements badge */}
-          <Badge
-            onClick={() => setFilter("secret")}
-            className={cn(
-              "cursor-pointer hover:bg-green-500/20 whitespace-nowrap",
-              filter === "secret" ? "bg-green-500 text-black" : "bg-transparent",
-            )}
-          >
-            Secret Achievements
-          </Badge>
+      {/* Warning Modal */}
+      {isModalOpen && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 modal-backdrop"
+          onClick={handleBackdropClick} // Handle clicks on the backdrop
+        >
+          <div className="bg-gray-800 p-4 rounded-md max-w-md w-full">
+            <h3 className="text-lg text-red-500">Warning</h3>
+            <p className="text-gray-300">
+              This will delete all unlocked achievements, and there is no way to recover them except by completing the achievements again.
+            </p>
+            <div className="flex justify-end mt-4">
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md mr-2 transition-colors duration-300"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={clearAchievementsData} 
+                className="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-md transition-colors duration-300"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
         </div>
+      )}
+
+      <div className="mb-6 border-b border-green-500 pb-2 flex justify-between items-center">
+        <h2 className="text-2xl mb-4">Your Achievements</h2>
+        <button 
+          onClick={() => setIsModalOpen(true)} 
+          className="bg-gray-900 border border-red-700 text-red-700 px-4 py-2 rounded-md transition-colors duration-300 hover:bg-red-900 hover:text-white"
+        >
+          Clear All Achievements Data
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -162,11 +146,6 @@ export default function YourAchievements() {
                 )}>
                   {showObfuscated ? <HelpCircle className="h-6 w-6" /> : (achievement.icon || <Trophy 
                   className="h-6 w-6" />)}
-                  {/* {showObfuscated ? (
-                    <div className="bg-yellow-400/30 p-2 rounded-full">
-                      <HelpCircle className="h-6 w-6" />
-                    </div>
-                  ) : (achievement.icon || <Trophy className="h-6 w-6" />)} */}
                 </div>
               </CardHeader>
               <CardContent>

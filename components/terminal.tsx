@@ -26,7 +26,6 @@ function TerminalContent() {
   const [secretJokeRevealed, setSecretJokeRevealed] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
@@ -142,10 +141,8 @@ function TerminalContent() {
       if (window.innerWidth < 768) {
         // If the visual viewport is significantly smaller than the layout viewport,
         // it's likely that a keyboard is shown
-        const heightDiff = window.innerHeight - window.visualViewport?.height!
+        const heightDiff = window.innerHeight - (window.visualViewport?.height || 0);
         const isKeyboardOpen = heightDiff > 150 // Typical keyboard heights are > 150px
-
-        setIsKeyboardVisible(isKeyboardOpen)
 
         if (isKeyboardOpen) {
           // Scroll to make the input field visible when keyboard opens
