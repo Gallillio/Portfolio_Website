@@ -500,7 +500,7 @@ function TerminalContent() {
         }}
       >
         {/* Terminal Header - Always visible, even when content is scrolling */}
-        <div className="flex items-center justify-between bg-gray-900 border-b border-green-500 px-2 py-1 sticky top-0 left-0 right-0 z-10">
+        <div className="flex items-center justify-between bg-gray-900 border-b border-green-500 px-2 py-1 sticky top-0 left-0 right-0 z-30 terminal-header-fixed">
           <div className="flex space-x-1.5">
             <button 
               onClick={handleClose} 
@@ -572,7 +572,7 @@ function TerminalContent() {
 
         {!isMinimized && (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed sticky top-8 left-0 right-0 z-10">
+            <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed sticky top-8 left-0 right-0 z-20">
               {/* Mobile/Tablet Hamburger Menu */}
               <div className="md:hidden flex items-center">
                 <button 

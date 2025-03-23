@@ -344,10 +344,10 @@ export default function About() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tabs list with horizontal scroll */}
-        <div className="overflow-x-auto pb-2 terminal-header-fixed">
+        <div className="overflow-x-auto pb-2 terminal-header-fixed sticky top-0 left-0 right-0 z-20 bg-black">
           {isMobile ? (
             /* Mobile-friendly dropdown tabs UI */
-            <div className="mb-4">
+            <div className="mb-4 relative">
               <div 
                 onClick={() => setModalOpen(!modalOpen)} 
                 className="bg-gray-900 border border-green-500 p-3 flex items-center justify-between rounded-md cursor-pointer group hover:bg-gray-800 transition-colors duration-200"
@@ -370,7 +370,7 @@ export default function About() {
               
               {/* Dropdown Menu */}
               {modalOpen && (
-                <div className="absolute z-30 mt-2 w-full bg-gray-900 border border-green-500 rounded-md shadow-lg animate-fadeIn">
+                <div className="absolute z-50 mt-2 w-full bg-gray-900 border border-green-500 rounded-md shadow-lg animate-fadeIn top-full left-0">
                   {[
                     { id: "skills", label: "Skills" },
                     { id: "timeline", label: "Timeline" },
