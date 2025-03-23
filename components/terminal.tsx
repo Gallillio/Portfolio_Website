@@ -15,8 +15,9 @@ import { executeCommand } from "@/lib/commands"
 import { Maximize2, Minimize2, Menu, X, ChevronRight } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command } from '@/lib/types'
+import React from "react"
 
-function TerminalContent() {
+function TerminalContent(): React.ReactNode {
   const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>([])
   const [activeTab, setActiveTab] = useState<string>("terminal")
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -517,8 +518,15 @@ function TerminalContent() {
     }, 50);
   };
 
+  // Track if currently scrolling
+  const [isScrolling, setIsScrolling] = useState(false);
+  let scrollTimer: NodeJS.Timeout | null = null;
+
   // Close mobile menu when clicking outside or scrolling
   useEffect(() => {
+    // Flag for tracking if menu was opened during scroll
+    let menuOpenedDuringScroll = false;
+    
     const handleClickOutside = (event: MouseEvent) => {
       if (
         mobileMenuOpen && 
@@ -531,18 +539,65 @@ function TerminalContent() {
       }
     };
     
+    // When hamburger button is clicked
+    const handleHamburgerClick = () => {
+      if (isScrolling) {
+        menuOpenedDuringScroll = true;
+      } else {
+        menuOpenedDuringScroll = false;
+      }
+    };
+    
+    if (hamburgerButtonRef.current) {
+      hamburgerButtonRef.current.addEventListener('click', handleHamburgerClick);
+    }
+    
     // Direct wheel event handler
     const handleWheel = () => {
-      if (mobileMenuOpen) {
+      // Set scrolling state
+      setIsScrolling(true);
+      
+      // Clear any existing scroll timer
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+      
+      // Reset scrolling state after a short delay
+      scrollTimer = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+      
+      // Only close menu if it wasn't explicitly opened during scroll
+      if (mobileMenuOpen && !menuOpenedDuringScroll) {
         setMobileMenuOpen(false);
       }
+      
+      // Reset flag after handling scroll
+      menuOpenedDuringScroll = false;
     };
     
     // Direct touch move handler for mobile devices
     const handleTouchMove = () => {
-      if (mobileMenuOpen) {
+      // Set scrolling state
+      setIsScrolling(true);
+      
+      // Clear any existing scroll timer
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+      
+      // Reset scrolling state after a short delay
+      scrollTimer = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+      
+      // Only close menu if it wasn't explicitly opened during scroll
+      if (mobileMenuOpen && !menuOpenedDuringScroll) {
         setMobileMenuOpen(false);
       }
+      
+      // Reset flag after handling scroll
+      menuOpenedDuringScroll = false;
     };
     
     // Track touch position to detect scrolling
@@ -561,9 +616,13 @@ function TerminalContent() {
       const diff = Math.abs(touchEndY - touchStartY);
       
       // If user scrolled more than 5px vertically, close the menu
-      if (diff > 5) {
+      // Only if it wasn't explicitly opened during scroll
+      if (diff > 5 && !menuOpenedDuringScroll) {
         setMobileMenuOpen(false);
       }
+      
+      // Reset flag after touch end
+      menuOpenedDuringScroll = false;
     };
     
     // Add all necessary event listeners
@@ -590,6 +649,14 @@ function TerminalContent() {
       document.removeEventListener('touchstart', handleTouchStart as EventListener);
       document.removeEventListener('touchend', handleTouchEnd as EventListener);
       
+      if (hamburgerButtonRef.current) {
+        hamburgerButtonRef.current.removeEventListener('click', handleHamburgerClick);
+      }
+      
+      if (scrollTimer) {
+        clearTimeout(scrollTimer);
+      }
+      
       scrollableAreas.forEach(area => {
         area.removeEventListener('wheel', handleWheel);
         area.removeEventListener('touchmove', handleTouchMove);
@@ -597,7 +664,7 @@ function TerminalContent() {
         area.removeEventListener('touchend', handleTouchEnd as EventListener);
       });
     };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, isScrolling]);
 
   return (
     <>
