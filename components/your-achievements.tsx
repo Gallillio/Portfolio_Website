@@ -63,46 +63,36 @@ export default function YourAchievements() {
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono relative custom-scrollbar">
-      {/* Warning Modal */}
-      {isModalOpen && (
-        <div 
-          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 modal-backdrop"
-          onClick={handleBackdropClick} // Handle clicks on the backdrop
-        >
-          <div className="bg-gray-800 p-4 rounded-md max-w-md w-full">
-            <h3 className="text-lg text-red-500">Warning</h3>
-            <p className="text-gray-300">
-              This will delete all unlocked achievements, and there is no way to recover them except by completing the achievements again.
-            </p>
-            <div className="flex justify-end mt-4">
-              <button 
-                onClick={() => setIsModalOpen(false)} 
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md mr-2 transition-colors duration-300"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={clearAchievementsData} 
-                className="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-md transition-colors duration-300"
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="mb-6 border-b border-green-500 pb-2 flex justify-between items-center">
+      <div className="mb-6 border-b border-green-500 pb-2">
         <h2 className="text-2xl mb-4">Your Achievements</h2>
-        <button 
-          onClick={() => setIsModalOpen(true)} 
-          className="bg-gray-900 border border-red-700 text-red-700 px-4 py-2 rounded-md transition-colors duration-300 hover:bg-red-900 hover:text-white"
-        >
-          Clear All Achievements Data
-        </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="mt-8 p-4 bg-gray-900/50 border border-green-500 rounded-md">
+        <h2 className="text-xl text-green-400 mb-2">This is Your Achievements!</h2>
+        <p className="text-green-300 mb-4">
+          Explore the portfolio and interact with different sections to unlock achievements. Some achievements are
+          secret and will only be revealed once unlocked!
+        </p>
+        <p className="text-green-300/70 text-sm">
+          Tip: Try using different terminal commands, visiting all tabs, and interacting with projects.
+        </p>
+      </div>
+
+      {/* Progress Bar Section */}
+      <div className="mt-4 p-4 bg-gray-900/50 border border-green-500 rounded-md">
+        <h3 className="text-lg text-green-400 mb-2">Achievements Progress</h3>
+        <Progress
+          value={(Object.values(achievementProgress).filter(progress => progress.unlocked).length / achievements.length) * 100}
+          className="h-2 bg-gray-800"
+          indicatorClassName="bg-green-500"
+        />
+        <div className="flex justify-between text-xs mt-2">
+          <span className="text-green-400">{Object.values(achievementProgress).filter(progress => progress.unlocked).length} Achievements Collected</span>
+          <span className="text-green-400">{achievements.length} Total Achievements</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {filteredAchievements.map((achievement) => {
           const isUnlocked = achievementProgress[achievement.id]?.unlocked || false;
           const isSecret = achievement.isSecret;
@@ -207,17 +197,6 @@ export default function YourAchievements() {
         </div>
       )}
 
-      <div className="mt-8 p-4 bg-gray-900/50 border border-green-500 rounded-md">
-        <h2 className="text-xl text-green-400 mb-2">How to Earn Achievements</h2>
-        <p className="text-green-300 mb-4">
-          Explore the portfolio and interact with different sections to unlock achievements. Some achievements are
-          secret and will only be revealed once unlocked!
-        </p>
-        <p className="text-green-300/70 text-sm">
-          Tip: Try using different terminal commands, visiting all tabs, and interacting with projects.
-        </p>
-      </div>
-
       <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-md">
         <h2 className="text-xl text-yellow-400 mb-2">Secret Achievements</h2>
         <p className="text-yellow-300/80 mb-2">
@@ -227,6 +206,45 @@ export default function YourAchievements() {
           Hint: Try unusual interactions with the terminal, visit at unusual hours, explore all project links...
         </p>
       </div>
+
+      {/* Clear Achievements Data Button */}
+      <div className="mt-4 flex justify-center">
+        <button 
+          onClick={() => setIsModalOpen(true)} 
+          className="bg-gray-900 border border-red-700 text-red-700 px-4 py-2 rounded-md transition-colors duration-300 hover:bg-red-900 hover:text-white"
+        >
+          Clear Achievements Data
+        </button>
+      </div>
+
+      {/* Warning Modal */}
+      {isModalOpen && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 modal-backdrop"
+          onClick={handleBackdropClick} // Handle clicks on the backdrop
+        >
+          <div className="bg-gray-800 p-4 rounded-md max-w-md w-full">
+            <h3 className="text-lg text-red-500">Warning</h3>
+            <p className="text-gray-300">
+              This will delete all unlocked achievements, and there is no way to recover them except by completing the achievements again.
+            </p>
+            <div className="flex justify-end mt-4">
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md mr-2 transition-colors duration-300"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={clearAchievementsData} 
+                className="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-md transition-colors duration-300"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

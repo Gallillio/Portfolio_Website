@@ -88,7 +88,7 @@ class CommandRegistry {
 
   // Get help text for all commands (excluding secret ones)
   getHelpText(): string[] {
-    const helpText = ["Available commands (Click to add to input):"]
+    const helpText = ["Available commands \n(You can type them in the terminal or click on the command to input it):"]
     
     // Sort commands alphabetically (excluding secret ones)
     const sortedCommands = this.getAvailableCommands().sort()
