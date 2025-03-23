@@ -999,12 +999,12 @@ function TerminalContent(): React.ReactNode {
                 </p>
                 {isClosing ? (
                   <p className="text-xl text-green-300">
-                    &ldquo;I would tell you an exit joke, but there&apos;s no escape...&rdquo;
+                    &ldquo;Why do programmers prefer dark mode? Because light attracts bugs!&rdquo;
                   </p>
                 ) : (
                   <p className="text-xl text-green-300">
-                    &ldquo;I would tell you a joke about being minimized,
-                    <br />but I&apos;m afraid it would be <span className="text-green-400">too small</span> to understand.&rdquo;
+                    &ldquo;Why did the terminal break up with the window?
+                    <br />Because it couldn't handle the pressure of being <span className="text-green-400">too open!</span>&rdquo;
                   </p>
                 )}
               </div>
@@ -1014,46 +1014,14 @@ function TerminalContent(): React.ReactNode {
               </p>
               <p className="text-sm text-green-500/70">
                 {isClosing ? (
-                  <>
-                    Did you know? This terminal has exactly 
-                    <span 
-                      className="text-green-400 cursor-pointer hover:text-green-300 transition-colors relative inline-block"
-                      onClick={handleSecretClick}
-                      title="Click me for a surprise"
-                    > 42</span> different ways to exit, 
-                    but you found the secret one!
-                  </>
+                  <></>
                 ) : (
-                  <>
-                    Fun fact: If you count all the pixels in this message, you&apos;ll get  
-                    <span 
-                      className="text-green-400 cursor-pointer hover:text-green-300 transition-colors relative inline-block"
-                      onClick={handleSecretClick}
-                      title="Click me for a surprise"
-                    > 42</span>, the answer to life, the universe and everything.
-                    <br />
-                    (Not really, but wouldn&apos;t that be neat?)
-                  </>
+                  <></>
                 )}
               </p>
 
               {secretJokeRevealed && (
-                <div className="mt-6 bg-green-900/20 p-4 rounded-md border border-green-500/40 animate-fade-in">
-                  <p className="text-green-300 font-bold mb-2">Hidden Easter Egg Found!</p>
-                  <p className="text-green-400 italic">
-                    {isClosing 
-                      ? "\"Why did the developer go broke?\""
-                      : "\"Why do programmers prefer dark mode?\""}
-                  </p>
-                  <p className="mt-2 text-green-300">
-                    {isClosing 
-                      ? "\"Because they lost their domain!\"" 
-                      : "\"Because light attracts bugs!\""}
-                  </p>
-                  <div className="flex justify-center space-x-2 mt-3 text-green-500 text-xs">
-                    <span>⭐</span><span>⭐</span><span>⭐</span>
-                  </div>
-                </div>
+                <></>
               )}
             </div>
           </div>
@@ -1066,7 +1034,6 @@ function TerminalContent(): React.ReactNode {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="16 3 21 3 21 8"></polyline>
               <line x1="4" y1="20" x2="21" y2="3"></line>
-              {/* <path d="M21 13v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8"></path> */}
             </svg>
           </button>
         </div>
