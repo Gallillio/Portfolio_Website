@@ -6,6 +6,7 @@ Welcome to the Interactive Portfolio Terminal! This project is a unique and enga
 
 ## Theme
 
+### Terminal
 The project is themed around a terminal interface, providing a nostalgic and unique way to present my
 personal information and Stand-out!.
 
