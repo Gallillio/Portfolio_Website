@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "portfolio@Gallillio:~",
   description: "Ahmed Galal Elzeky's Portfolio - AI & Software Engineer",
+  icons: {
+    icon: "/black-cat-dance.png",
+  },
 };
 
 export default function RootLayout({
