@@ -282,6 +282,12 @@ function TerminalContent() {
   const handleRestore = () => {
     setIsMinimized(false)
     setIsClosing(false)
+    
+    // If on mobile, set to fullscreen
+    if (isMobile) {
+      setIsFullscreen(true)
+      setAnimationClass("animate-expand")
+    }
   }
 
   // Reset animation class after animation completes
@@ -793,8 +799,8 @@ function TerminalContent() {
 
       {(isMinimized || isClosing) && (
         <div className="fixed inset-4 z-40 bg-black border border-green-500 rounded-md p-6 flex flex-col justify-center items-center text-center shadow-lg shadow-green-500/30 font-mono">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-2xl text-green-400 font-bold">
+          <div className="max-w-2xl mx-auto space-y-6 pt-8 md:pt-0">
+            <h2 className="text-2xl text-green-400 font-bold mt-8 md:mt-0">
               {isClosing ? "Terminal Closed" : "Terminal Minimized"}
             </h2>
             

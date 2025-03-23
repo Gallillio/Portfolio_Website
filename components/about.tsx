@@ -224,19 +224,25 @@ export default function About() {
     })
   }
 
-  // Handle click outside dropdown and modal to close them
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setModalOpen(false);
-      }
-    };
+  // Function to close the mobile section modal when clicking outside
+  const handleCloseModal = (event: MouseEvent) => {
+    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      setModalOpen(false);
+    }
+  };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  // Handle clicks outside the modal
+  useEffect(() => {
+    if (modalOpen) {
+      document.addEventListener('mousedown', handleCloseModal);
+    } else {
+      document.removeEventListener('mousedown', handleCloseModal);
+    }
+    
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleCloseModal);
     };
-  }, []);
+  }, [modalOpen]);
 
   // Effect to scroll the active tab button into view
   useEffect(() => {
@@ -264,7 +270,7 @@ export default function About() {
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
       <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">About Me</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-3 gap-6">
         <Card ref={bioRef} className="bg-gray-900 border-green-500 md:col-span-3 lg:col-span-2 order-2 lg:order-1">
           <CardHeader>
             <CardTitle className="text-green-400">Bio</CardTitle>
@@ -343,33 +349,69 @@ export default function About() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        {/* Tabs list with horizontal scroll */}
-        <div className="overflow-x-auto pb-2 terminal-header-fixed">
-          <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
-            <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Skills
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Timeline
-            </TabsTrigger>
-            <TabsTrigger value="experience" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Professional Experience
-            </TabsTrigger>
-            <TabsTrigger value="education" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Education
-            </TabsTrigger>
-            <TabsTrigger value="freelance" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Freelance Projects
-            </TabsTrigger>
-            <TabsTrigger value="languages" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Languages
-            </TabsTrigger>
-            <TabsTrigger value="courses" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-              Courses
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
+        {/* Tabs list with horizontal scroll - only show on desktop */}
+        {!isMobile && (
+          <div className="overflow-x-auto pb-2 terminal-header-fixed">
+            <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
+              <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Skills
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Timeline
+              </TabsTrigger>
+              <TabsTrigger value="experience" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Professional Experience
+              </TabsTrigger>
+              <TabsTrigger value="education" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Education
+              </TabsTrigger>
+              <TabsTrigger value="freelance" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Freelance Projects
+              </TabsTrigger>
+              <TabsTrigger value="languages" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Languages
+              </TabsTrigger>
+              <TabsTrigger value="courses" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
+                Courses
+              </TabsTrigger>
+            </TabsList>
+          </div>
+        )}
+        
+        {/* Mobile-friendly section selector */}
+        {isMobile && (
+          <div className="mb-4 bg-black pt-2 pb-3 border-b border-green-500/30">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-green-400 font-semibold text-sm">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h3>
+            </div>
+            <div className="about-section-nav">
+              <div className="flex flex-wrap gap-2 px-1">
+                {[
+                  { id: 'skills', label: 'Skills' },
+                  { id: 'timeline', label: 'Timeline' },
+                  { id: 'experience', label: 'Experience' },
+                  { id: 'education', label: 'Education' },
+                  { id: 'freelance', label: 'Freelance' },
+                  { id: 'languages', label: 'Languages' },
+                  { id: 'courses', label: 'Courses' }
+                ].map((section) => (
+                  <button
+                    key={section.id}
+                    className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors touch-optimized
+                      ${activeTab === section.id 
+                        ? 'bg-green-500/20 border border-green-500/70 text-green-400 font-semibold' 
+                        : 'bg-black/80 text-green-300 border border-green-500/30 hover:bg-green-500/10'}
+                    `}
+                    onClick={() => setActiveTab(section.id)}
+                  >
+                    {section.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        
         <TabsContent value="skills" className="pt-4">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
