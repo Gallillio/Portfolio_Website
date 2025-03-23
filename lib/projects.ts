@@ -81,6 +81,19 @@ export const projects: Project[] = [
     code_available: false,
   },
   {
+    title: "My Portfolio Website",
+    description:
+    "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
+    technologies: ["TypeScript", "NextJS", "ReactJS", "TailwindCSS", "Vercel"],
+    images: [
+      { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
+    ],
+    github: "https://github.com/Gallillio/Portfolio_Website",
+    demo: "https://gallillio.com",
+    demo_available: true,
+    code_available: true,
+  },
+  {
     title: '"SelZeky" AI Sales Consultant SaaS',
     description: "SelZeky is an AI-powered sales consultant that uses NLP to understand customer needs and recommend products. It provides real-time updates and a chatbot for customer support.",
     technologies: ["Microsoft Azure", "Django", "Vector Database", "RAG", "Python", "ReactJS", "NextJS", "NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
@@ -118,19 +131,6 @@ export const projects: Project[] = [
     demo_available: false,
     code_available: false,
     inDevelopment: true,
-  },
-  {
-    title: "My Portfolio Website",
-    description:
-    "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
-    technologies: ["TypeScript", "NextJS", "ReactJS", "TailwindCSS", "Vercel"],
-    images: [
-      { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
-    ],
-    github: "https://github.com/Gallillio/Portfolio_Website",
-    demo: "https://gallillio.com",
-    demo_available: true,
-    code_available: true,
   },
 ];
 

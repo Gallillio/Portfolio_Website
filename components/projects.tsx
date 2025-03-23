@@ -302,7 +302,7 @@ export default function Projects() {
         {filteredProjects.map((project, index) => (
           <Card
             key={index}
-            className={`bg-gray-900 border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all hover:scale-[1.02] hover:-translate-y-1 ${project.inDevelopment ? 'border-2 border-yellow-500/50' : ''}`}
+            className={`bg-gray-900 border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all hover:scale-[1.02] hover:-translate-y-1 ${project.inDevelopment ? 'border-2 border-yellow-500/50' : ''} flex flex-col`}
             onMouseEnter={() => handleProjectView(project.title)}
           >
             <CardHeader>
@@ -318,7 +318,7 @@ export default function Projects() {
               </CardTitle>
               <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow">
               <div className="h-40 mb-4 overflow-hidden rounded-md flex items-center justify-center">
                 {project.inDevelopment ? (
                   <div className="h-full w-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/30 rounded-md">
@@ -339,9 +339,9 @@ export default function Projects() {
                 ))}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
+            
+            <CardFooter className="flex justify-between mt-auto">
               {project.github && (
-                // Code Button 
                 <Tooltip 
                   text="Sorry, the code is confidential and not public."
                   isMobile={isMobile}
@@ -371,15 +371,11 @@ export default function Projects() {
                 </Tooltip>
               )}
               
-              {/* Demo Button */}
               <Tooltip 
                 text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
                 isMobile={isMobile}
                 isTablet={isTablet}
-                // showTooltip={!project.demo_available || project.inDevelopment}
                 showTooltip={project.inDevelopment ? false : !project.demo_available}
-
-                
               >
                 <Button
                   variant="outline"
