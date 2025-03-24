@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useAchievements } from '@/lib/achievements-context'
 import AchievementNotification from './achievement-notification'
-import AllAchievementsNotification from './all-achievements-notification'
-import CookieConsentModal from './cookie-consent-modal'
 import { useRouter } from 'next/navigation'
 
 export default function AchievementNotificationProvider({ 
@@ -16,12 +14,9 @@ export default function AchievementNotificationProvider({
   const { 
     lastUnlockedAchievement, 
     clearLastUnlockedAchievement,
-    allAchievementsCompleted,
-    clearAllAchievementsCompleted,
   } = useAchievements()
   
   const [isMobile, setIsMobile] = useState(false)
-  const [showCookieModal, setShowCookieModal] = useState(false)
   
   // Check window size for mobile
   useEffect(() => {
@@ -37,25 +32,6 @@ export default function AchievementNotificationProvider({
       window.removeEventListener('resize', handleResize)
     }
   }, [])
-
-  // Listen for custom cookie modal events
-  useEffect(() => {
-    const handleCookieModalRequest = () => {
-      setShowCookieModal(true);
-    };
-    
-    window.addEventListener('show-cookie-modal', handleCookieModalRequest);
-    return () => {
-      window.removeEventListener('show-cookie-modal', handleCookieModalRequest);
-    };
-  }, []);
-
-  // Automatically clear individual achievement notifications when all achievements are completed
-  useEffect(() => {
-    if (allAchievementsCompleted && lastUnlockedAchievement) {
-      clearLastUnlockedAchievement();
-    }
-  }, [allAchievementsCompleted, lastUnlockedAchievement, clearLastUnlockedAchievement]);
   
   // Navigate to the achievements tab when notification is clicked
   const handleNavigateToAchievements = () => {
@@ -66,25 +42,11 @@ export default function AchievementNotificationProvider({
     <>
       {children}
       
-      {/* Give priority to the all achievements notification over individual achievement notifications */}
-      {allAchievementsCompleted && !showCookieModal ? (
-        <AllAchievementsNotification 
-          isMobile={isMobile}
-          onClose={clearAllAchievementsCompleted}
-          showCookieModal={() => setShowCookieModal(true)}
-        />
-      ) : lastUnlockedAchievement && (
+      {lastUnlockedAchievement && (
         <AchievementNotification 
           achievement={lastUnlockedAchievement}
           onClose={clearLastUnlockedAchievement}
           onNavigate={handleNavigateToAchievements}
-        />
-      )}
-      
-      {/* Cookie consent modal */}
-      {showCookieModal && (
-        <CookieConsentModal 
-          onClose={() => setShowCookieModal(false)}
         />
       )}
     </>

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode, useCallback } from "react"
 import { Code, Zap, Trophy, Star, Mail, Eye, Coffee, MessageSquare, Book, Award, ChevronsUp, Search, X, ArrowLeftRight } from "lucide-react"
+import { projects } from "./projects"
 
 // Define achievement types and categories
 export enum AchievementCategory {
@@ -77,17 +78,12 @@ export interface AchievementsContextType {
   markCommandExecuted: (command?: string) => void
   executeCommand: (command: string) => void
   projectCodeClicked: (projectId: string) => void
-
-  // All achievements completed notification
-  allAchievementsCompleted: boolean
-  clearAllAchievementsCompleted: () => void
   
   // Unlock all achievements at once (cheat code)
   unlockAllAchievements: () => void
 
-  // Celebration notification
-  celebrationAlreadyShown: boolean
-  showCookieNotification: () => void
+  // Enable Night Owl achievement
+  enableNightOwl: () => void
 }
 
 // Default context value
@@ -197,7 +193,7 @@ const achievementsList: Achievement[] = [
   {
     id: "night_owl",
     title: "Night Owl",
-    description: "Visited the portfolio during late hours (5 PM - 6 AM)",
+    description: "Visited the portfolio during late hours (7 PM - 4 AM)",
     icon: <Star className="h-6 w-6" />,
     category: AchievementCategory.SECRET,
     isSecret: true,
@@ -213,7 +209,7 @@ const achievementsList: Achievement[] = [
     isSecret: true,
     // hint: "Explore all the projects' code repositories",
     hint: "Since you're interested in my projects, you should check out how they're built! All of them.",
-    condition: (state) => state.projectCodesClicked.size >= 4, // Adjust this number based on projects with available code
+    condition: (state) => state.projectCodesClicked.size >= projects.filter(project => project.code_available).length,
   },
   {
     id: "terminal_escape_artist",
@@ -242,7 +238,7 @@ const achievementsList: Achievement[] = [
     icon: <ChevronsUp className="h-6 w-6" />,
     category: AchievementCategory.SECRET,
     isSecret: true,
-    hint: "The ultimate achievement for those who explore everything",
+    hint: "The ultimate achievement for the Completionists",
     condition: (state, progress, achievements) => {
       if (!progress || !achievements) return false;
       const otherAchievements = achievements.filter(a => a.id !== "portfolio_grandmaster");
@@ -254,7 +250,6 @@ const achievementsList: Achievement[] = [
 // Storage keys
 const ACHIEVEMENT_PROGRESS_KEY = "portfolio-achievement-progress";
 const ACHIEVEMENT_STATE_KEY = "portfolio-achievement-state";
-const ACHIEVEMENT_CELEBRATION_SHOWN_KEY = "portfolio-achievement-celebration-shown";
 
 // Global store for achievements to make them accessible outside React components
 let achievementsStore: Achievement[] = achievementsList.map(achievement => ({
@@ -301,23 +296,12 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
   // Last unlocked achievement for notification
   const [lastUnlockedAchievement, setLastUnlockedAchievement] = useState<Achievement | null>(null);
   
-  // Track if all achievements have been completed
-  const [allAchievementsCompleted, setAllAchievementsCompleted] = useState(false);
-  // Track if the celebration has been shown before
-  const [celebrationAlreadyShown, setCelebrationAlreadyShown] = useState(false);
-
   // Initialize achievements on first load
   useEffect(() => {
-    // Check if celebration has been shown before
-    if (typeof window !== "undefined") {
-      const shown = localStorage.getItem(ACHIEVEMENT_CELEBRATION_SHOWN_KEY) === "true";
-      setCelebrationAlreadyShown(shown);
-    }
-
     // Check if it's late night (10 PM - 5 AM)
     const checkLateNight = () => {
       const hour = new Date().getHours();
-      return hour >= 17 || hour < 6;
+      return hour >= 19 || hour < 4;
     };
 
     // Load achievement progress from localStorage
@@ -390,18 +374,6 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     const initProgress = loadAchievementProgress();
     if (Object.keys(initProgress).length > 0) {
       setAchievementProgress(initProgress);
-      
-      // Check if all achievements are completed on initialization
-      const unlockCount = Object.values(initProgress).filter((a: unknown) => {
-        const progress = a as AchievementProgress;
-        return progress.unlocked;
-      }).length;
-      if (unlockCount === achievementsList.length) {
-        // Only trigger celebration if it hasn't been shown before
-        const shown = localStorage.getItem(ACHIEVEMENT_CELEBRATION_SHOWN_KEY) === "true";
-        setAllAchievementsCompleted(!shown);
-        console.log("All achievements already completed! Celebration shown before:", shown);
-      }
     } else {
       // Create initial progress entries for all achievements
       const initialProgress: Record<string, AchievementProgress> = {};
@@ -503,40 +475,13 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     // Update progress if any achievements were unlocked
     if (newlyUnlocked) {
       setAchievementProgress(updatedProgress);
-      
-      // Check if this update has unlocked all achievements
-      const unlockCount = Object.values(updatedProgress).filter(a => a.unlocked).length;
-      console.log(`Unlocked achievements: ${unlockCount}`);
-
-      // Check if all achievements are completed - only show celebration if it hasn't been shown before
-      if (unlockCount === achievementsList.length && !celebrationAlreadyShown) {
-        setAllAchievementsCompleted(true);
-        console.log("All achievements completed!");
-      }
     }
-  }, [achievementProgress, state, celebrationAlreadyShown, setLastUnlockedAchievement, setAchievementProgress, setAllAchievementsCompleted]);
+  }, [achievementProgress, state, setLastUnlockedAchievement, setAchievementProgress]);
 
   // Check for achievements when state changes
   useEffect(() => {
     checkAchievements();
   }, [state, checkAchievements]);
-
-  // Check for all achievements being unlocked whenever achievement progress changes
-  useEffect(() => {
-    // Skip if no achievements or already shown celebration
-    if (Object.keys(achievementProgress).length === 0 || celebrationAlreadyShown || allAchievementsCompleted) {
-      return;
-    }
-    
-    // Count unlocked achievements
-    const unlockCount = Object.values(achievementProgress).filter(a => a.unlocked).length;
-    
-    // If all achievements are unlocked and celebration hasn't been shown yet
-    if (unlockCount === achievementsList.length && !celebrationAlreadyShown) {
-      console.log("All achievements detected! Showing celebration...");
-      setAllAchievementsCompleted(true);
-    }
-  }, [achievementProgress, celebrationAlreadyShown, allAchievementsCompleted]);
 
   // Clear the last unlocked achievement (after notification is shown)
   const clearLastUnlockedAchievement = useCallback(() => {
@@ -754,16 +699,6 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     achievement => achievementProgress[achievement.id]?.unlocked
   );
 
-  // Clear the all achievements completed notification
-  const clearAllAchievementsCompleted = useCallback(() => {
-    setAllAchievementsCompleted(false);
-    // Mark that we've shown the celebration
-    setCelebrationAlreadyShown(true);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(ACHIEVEMENT_CELEBRATION_SHOWN_KEY, "true");
-    }
-  }, []);
-
   // Function to unlock all achievements at once
   const unlockAllAchievements = useCallback(() => {
     // Create an updated version of progress with all achievements unlocked
@@ -783,24 +718,15 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     // Update the achievement progress state
     setAchievementProgress(updatedProgress);
     
-    // Clear any existing achievement notification to prevent it from overriding the all-achievements notification
-    setLastUnlockedAchievement(null);
-    
-    // Set all achievements completed flag - only if celebration hasn't been shown before
-    if (!celebrationAlreadyShown) {
-      setAllAchievementsCompleted(true);
-      console.log("All achievements completed via cheat code!");
-    }
-    
     console.log("🎮 Cheat code activated: All achievements unlocked!");
-  }, [achievementProgress, celebrationAlreadyShown, setAchievementProgress, setLastUnlockedAchievement, setAllAchievementsCompleted]);
+  }, [achievementProgress, setAchievementProgress]);
 
-  // Add a function to explicitly show the cookie modal
-  const showCookieNotification = useCallback(() => {
-    // Dispatch a custom event to show the cookie modal
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent('show-cookie-modal'));
-    }
+  // Add a function to explicitly enable Night Owl achievement
+  const enableNightOwl = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      lateNightVisit: true
+    }));
   }, []);
 
   // Create the context value
@@ -831,15 +757,12 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     achievementProgress,
     getProgress,
     getProgressDetails,
-
-    // All achievements completed notification
-    allAchievementsCompleted,
-    clearAllAchievementsCompleted,
-    celebrationAlreadyShown,
-    showCookieNotification,
     
     // Unlock all achievements at once
-    unlockAllAchievements
+    unlockAllAchievements,
+    
+    // Enable Night Owl achievement
+    enableNightOwl
   };
 
   return (

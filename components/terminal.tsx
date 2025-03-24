@@ -37,7 +37,8 @@ function TerminalContent(): React.ReactNode {
     downloadCV,
     registerTerminalClosed,
     registerTerminalMinimized,
-    unlockAllAchievements
+    unlockAllAchievements,
+    enableNightOwl
   } = useAchievements()
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
@@ -249,6 +250,33 @@ function TerminalContent(): React.ReactNode {
         unlockAllAchievements();
         ensureInputVisible();
       }, 100);
+      
+      return // Skip normal command execution
+    } else if (lowerCommand === "enable-night-owl") {
+      // Secret command to unlock the Night Owl achievement
+      executeSecretCommand("enable-night-owl");
+      
+      // Add custom response to history
+      const nightOwlResponse = {
+        command: trimmedInput,
+        output: [
+          "Okay Batman",
+          "",
+          <span key="night-owl" className="text-yellow-400">
+            🦇 Night Owl mode activated!
+          </span>
+        ],
+        isError: false,
+        timestamp: new Date(),
+      }
+      
+      setHistory((prev) => [...prev, nightOwlResponse])
+      
+      // Update state to enable Night Owl achievement
+      enableNightOwl();
+      
+      // Ensure input is visible
+      ensureInputVisible();
       
       return // Skip normal command execution
     }

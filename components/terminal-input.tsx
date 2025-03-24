@@ -118,6 +118,9 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     } else if (command === "this-site-is-cool") {
       // Track this as a secret command, but the actual unlocking happens in terminal.tsx
       executeSecretCommand("this-site-is-cool")
+    } else if (command === "enable-night-owl") {
+      // Track this as a secret command, but the actual unlocking happens in terminal.tsx
+      executeSecretCommand("enable-night-owl")
     }
 
     // Execute the command

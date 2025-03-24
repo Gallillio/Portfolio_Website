@@ -14,9 +14,8 @@ export default function YourAchievements() {
     achievementProgress,
     getProgress,
     getProgressDetails,
-    visitTab,
-    celebrationAlreadyShown,
-    showCookieNotification 
+    unlockedAchievements,
+    visitTab
   } = useAchievements()
   
   const [filter, setFilter] = useState<string>("all")
@@ -55,6 +54,9 @@ export default function YourAchievements() {
     localStorage.clear();
     
     // Make sure the celebration shown flag is cleared
+    localStorage.removeItem("portfolio-achievement-celebration-shown");
+    
+    // Explicitly remove the specific celebration flag
     localStorage.removeItem("portfolio-achievement-celebration-shown");
     
     // Refresh the page after clearing
@@ -227,17 +229,6 @@ export default function YourAchievements() {
         >
           Clear Achievements Data
         </button>
-        
-        {/* Show Cookie Button - Only visible after celebration notification has been shown once AND all achievements are unlocked */}
-        {celebrationAlreadyShown && areAllAchievementsUnlocked() && (
-          <button 
-            onClick={() => showCookieNotification()} 
-            className="bg-gray-900 border border-green-500 text-green-400 px-4 py-2 rounded-md transition-colors duration-300 hover:bg-green-900 hover:text-white flex items-center gap-2"
-          >
-            <span>Claim Your Cookie Reward</span>
-            <span className="text-lg">🍪</span>
-          </button>
-        )}
       </div>
 
       {/* Warning Modal */}
