@@ -41,7 +41,7 @@ function TerminalContent(): React.ReactNode {
     enableNightOwl
   } = useAchievements()
   const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
+  const hamburgerButtonRef = useRef<HTMLDivElement>(null)
   const scrollTimer = useRef<NodeJS.Timeout | null>(null)
 
   // Initial setup on component mount
@@ -608,8 +608,13 @@ function TerminalContent(): React.ReactNode {
       }
       
       // Only close menu if it wasn't explicitly opened during scroll
+      // and if scroll is significant (using a delay instead of closing immediately)
       if (mobileMenuOpen && !menuOpenedDuringScroll) {
-        setMobileMenuOpen(false);
+        // Use a delayed close to prevent accidental closing
+        scrollTimer.current = setTimeout(() => {
+          setMobileMenuOpen(false);
+        }, 1000); // Longer delay before closing
+        return;
       }
       
       // Reset scrolling state after a delay
@@ -620,8 +625,8 @@ function TerminalContent(): React.ReactNode {
         // to allow interacting with the menu after scrolling stops
         setTimeout(() => {
           setMenuOpenedDuringScroll(false);
-        }, 500);
-      }, 150);
+        }, 1000); // Increased from 500ms
+      }, 300); // Increased from 150ms
     };
     
     // Direct touch move handler for mobile devices
@@ -635,8 +640,13 @@ function TerminalContent(): React.ReactNode {
       }
       
       // Only close menu if it wasn't explicitly opened during scroll
+      // and if touch movement is significant (using a delay instead of closing immediately)
       if (mobileMenuOpen && !menuOpenedDuringScroll) {
-        setMobileMenuOpen(false);
+        // Use a delayed close to prevent accidental closing
+        scrollTimer.current = setTimeout(() => {
+          setMobileMenuOpen(false);
+        }, 1000); // Longer delay before closing
+        return;
       }
       
       // Reset scrolling state after a delay
@@ -646,8 +656,8 @@ function TerminalContent(): React.ReactNode {
         // Reset the menuOpenedDuringScroll flag a bit later
         setTimeout(() => {
           setMenuOpenedDuringScroll(false);
-        }, 500);
-      }, 150);
+        }, 1000); // Increased from 500ms
+      }, 300); // Increased from 150ms
     };
     
     // Track touch position to detect scrolling
@@ -843,18 +853,19 @@ function TerminalContent(): React.ReactNode {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="bg-gray-900 border-b border-green-500 w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed">
               {/* Mobile/Tablet Hamburger Menu */}
-              <div className="md:hidden flex items-center">
-                <button 
-                  ref={hamburgerButtonRef}
-                  onClick={toggleMobileMenu}
-                  className="p-2 flex items-center text-green-500 hover:text-green-400 focus:outline-none ml-1"
-                  aria-label="Toggle navigation menu"
-                >
-                  {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-                  <span className="font-mono text-sm ml-2">
-                    /{activeTab} <span className="terminal-cursor"></span>
-                  </span>
-                </button>
+              <div 
+                className="md:hidden flex-grow cursor-pointer" 
+                onClick={toggleMobileMenu}
+                ref={hamburgerButtonRef}
+              >
+                <div className="flex items-center p-2">
+                  <div className="flex items-center text-green-500 hover:text-green-400 focus:outline-none ml-1">
+                    {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                    <span className="font-mono text-sm ml-2">
+                      /{activeTab} <span className="terminal-cursor"></span>
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Desktop Tabs */}
@@ -893,14 +904,13 @@ function TerminalContent(): React.ReactNode {
                 </TabsList>
               </div>
 
-              {/* Your Achievements Tab */}
-              <TabsList className="bg-transparent border-none rounded-none h-auto ml-auto flex-grow">
+              {/* Your Achievements Tab - Hidden on mobile, visible on md and up */}
+              <TabsList className="bg-transparent border-none rounded-none h-auto ml-auto flex-grow hidden md:flex">
                 <TabsTrigger
                   value="your-achievements"
                   className="custom-tab touch-optimized data-[state=active]:bg-black data-[state=active]:text-green-500 rounded-none w-full flex justify-end pr-6"
                 >
-                  <span className="hidden md:inline">Your Achievements</span>
-                  <span className="md:hidden">Your Achievements</span>
+                  <span>Your Achievements</span>
                 </TabsTrigger>
               </TabsList>
             </div>
