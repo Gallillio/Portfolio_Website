@@ -32,7 +32,7 @@ export default function AchievementNotification({
 
   return (
     <div 
-      className="fixed top-4 right-4 bg-gray-900 border-2 border-green-500 p-4 rounded-md shadow-lg z-50 max-w-sm animate-slide-in cursor-pointer"
+      className="fixed top-4 right-4 bg-gray-900 border-2 border-green-500 p-4 rounded-md shadow-lg z-50 max-w-sm animate-slide-down cursor-pointer"
       onClick={() => {
         onNavigate(); // Navigate to YourAchievements
         onClose(); // Close the notification
@@ -49,6 +49,7 @@ export default function AchievementNotification({
           <p className="text-green-300 text-sm font-medium">{achievement.title}</p>
           {/* <p className="text-green-300/70 text-xs mt-1">{achievement.description}</p> */}
         </div>
+        
         <button 
           className="text-green-500 hover:text-green-400"
           onClick={(e) => {

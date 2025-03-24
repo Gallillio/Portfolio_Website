@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ScrollToTop from "@/components/scroll-to-top";
+import { AchievementsProvider } from "@/lib/achievements-context";
+import AchievementNotificationProvider from "@/components/achievement-notification-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -71,8 +73,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
-        <ScrollToTop />
+        <AchievementsProvider>
+          <AchievementNotificationProvider>
+            {children}
+            <ScrollToTop />
+          </AchievementNotificationProvider>
+        </AchievementsProvider>
       </body>
     </html>
   );

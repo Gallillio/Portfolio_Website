@@ -1,7 +1,11 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BookOpen, Trophy, Star, Languages, ExternalLink, ShieldCheck } from "lucide-react"
 import { personalAchievements } from "@/lib/profile-data"
+import { useAchievements } from "@/lib/achievements-context"
 
 // Map of icon strings to Lucide components
 const iconMap = {
@@ -13,6 +17,17 @@ const iconMap = {
 } as const;
 
 export default function MyAchievements() {
+  const { visitTab } = useAchievements()
+  const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
+
+  // Mark this tab as visited for the site explorer achievement - only once
+  useEffect(() => {
+    if (!hasMarkedVisit) {
+      visitTab("my-achievements")
+      setHasMarkedVisit(true)
+    }
+  }, [visitTab, hasMarkedVisit])
+
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
       <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">My Achievements</h2>

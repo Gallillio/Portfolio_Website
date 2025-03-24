@@ -55,6 +55,38 @@
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out forwards;
   }
+
+  /* Add slide-down animation for achievement notification */
+  @keyframes slideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Add slide-up animation for achievement notification */
+  @keyframes slideUp {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
 }
 
 /* Custom tab button styles */
@@ -342,4 +374,16 @@ html {
 /* Ensure content below sticky headers is properly positioned */
 .sticky-header-margin {
   margin-top: 1.5rem;
+}
+
+/* Typing effect animation for cookie consent modal */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+.typing-effect {
+  overflow: hidden;
+  white-space: normal;
+  animation: typing 1.5s steps(40, end);
 }

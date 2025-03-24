@@ -115,6 +115,9 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     const command = trimmedInput.toLowerCase()
     if (command === "hello" || command === "hi" || command === "hey") {
       executeSecretCommand("hello")
+    } else if (command === "this-site-is-cool") {
+      // Track this as a secret command, but the actual unlocking happens in terminal.tsx
+      executeSecretCommand("this-site-is-cool")
     }
 
     // Execute the command

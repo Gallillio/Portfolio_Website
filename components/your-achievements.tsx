@@ -14,7 +14,9 @@ export default function YourAchievements() {
     achievementProgress,
     getProgress,
     getProgressDetails,
-    visitTab 
+    visitTab,
+    celebrationAlreadyShown,
+    showCookieNotification 
   } = useAchievements()
   
   const [filter, setFilter] = useState<string>("all")
@@ -49,8 +51,14 @@ export default function YourAchievements() {
 
   // Function to clear all achievements data
   const clearAchievementsData = () => {
+    // Clear all localStorage data
     localStorage.clear();
-    window.location.reload(); // Refresh the page after clearing
+    
+    // Make sure the celebration shown flag is cleared
+    localStorage.removeItem("portfolio-achievement-celebration-shown");
+    
+    // Refresh the page after clearing
+    window.location.reload();
   }
 
   // Close modal when clicking outside
@@ -60,6 +68,11 @@ export default function YourAchievements() {
       setIsModalOpen(false);
     }
   };
+
+  // Function to check if all achievements are unlocked
+  const areAllAchievementsUnlocked = () => {
+    return Object.values(achievementProgress).filter(progress => progress.unlocked).length === achievements.length;
+  }
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono relative custom-scrollbar">
@@ -87,8 +100,7 @@ export default function YourAchievements() {
           indicatorClassName="bg-green-500"
         />
         <div className="flex justify-between text-xs mt-2">
-          <span className="text-green-400">{Object.values(achievementProgress).filter(progress => progress.unlocked).length} Achievements Collected</span>
-          <span className="text-green-400">{achievements.length} Total Achievements</span>
+          <span className="text-green-400"> Achievements Collected: {Object.values(achievementProgress).filter(progress => progress.unlocked).length} / {achievements.length} </span>
         </div>
       </div>
 
@@ -207,14 +219,25 @@ export default function YourAchievements() {
         </p>
       </div>
 
-      {/* Clear Achievements Data Button */}
-      <div className="mt-4 flex justify-center">
+      {/* Buttons Section */}
+      <div className="mt-4 flex justify-center gap-4 flex-wrap">
         <button 
           onClick={() => setIsModalOpen(true)} 
           className="bg-gray-900 border border-red-700 text-red-700 px-4 py-2 rounded-md transition-colors duration-300 hover:bg-red-900 hover:text-white"
         >
           Clear Achievements Data
         </button>
+        
+        {/* Show Cookie Button - Only visible after celebration notification has been shown once AND all achievements are unlocked */}
+        {celebrationAlreadyShown && areAllAchievementsUnlocked() && (
+          <button 
+            onClick={() => showCookieNotification()} 
+            className="bg-gray-900 border border-green-500 text-green-400 px-4 py-2 rounded-md transition-colors duration-300 hover:bg-green-900 hover:text-white flex items-center gap-2"
+          >
+            <span>Claim Your Cookie Reward</span>
+            <span className="text-lg">🍪</span>
+          </button>
+        )}
       </div>
 
       {/* Warning Modal */}
@@ -237,7 +260,7 @@ export default function YourAchievements() {
               </button>
               <button 
                 onClick={clearAchievementsData} 
-                className="bg-red-800 hover:bg-red-900 text-white px-4 py-2 rounded-md transition-colors duration-300"
+                className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-md transition-colors duration-300"
               >
                 Confirm
               </button>

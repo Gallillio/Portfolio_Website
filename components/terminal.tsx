@@ -36,7 +36,8 @@ function TerminalContent(): React.ReactNode {
     markCommandExecuted,
     downloadCV,
     registerTerminalClosed,
-    registerTerminalMinimized
+    registerTerminalMinimized,
+    unlockAllAchievements
   } = useAchievements()
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLButtonElement>(null)
@@ -216,8 +217,40 @@ function TerminalContent(): React.ReactNode {
     const trimmedInput = input.trim()
 
     // Check for secret commands
-    if (trimmedInput.toLowerCase() === "hello") {
+    const lowerCommand = trimmedInput.toLowerCase()
+    if (lowerCommand === "hello") {
       executeSecretCommand("hello")
+    } else if (lowerCommand === "this-site-is-cool") {
+      // Secret cheat code to unlock all achievements
+      // Clear any existing achievement notification first
+      clearLastUnlockedAchievement();
+      
+      // Add custom response to history
+      const cheatResponse = {
+        command: trimmedInput,
+        output: [
+          "Oh wow, you think so? How original... 🙄",
+          "But since you liked it so much, I'll unlock ALL achievements for you.",
+          "You're welcome. I guess...",
+          "",
+          <span key="cheat-code" className="text-yellow-400">
+            🔓 All achievements unlocked! Check your achievements tab!
+          </span>
+        ],
+        isError: false,
+        timestamp: new Date(),
+      }
+      
+      setHistory((prev) => [...prev, cheatResponse])
+      
+      // Unlock all achievements after a short delay 
+      // This allows the achievement system to properly detect the change
+      setTimeout(() => {
+        unlockAllAchievements();
+        ensureInputVisible();
+      }, 100);
+      
+      return // Skip normal command execution
     }
 
     // Track command execution for achievements
