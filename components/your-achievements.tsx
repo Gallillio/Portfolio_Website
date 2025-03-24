@@ -14,7 +14,6 @@ export default function YourAchievements() {
     achievementProgress,
     getProgress,
     getProgressDetails,
-    unlockedAchievements,
     visitTab
   } = useAchievements()
   
@@ -70,11 +69,6 @@ export default function YourAchievements() {
       setIsModalOpen(false);
     }
   };
-
-  // Function to check if all achievements are unlocked
-  const areAllAchievementsUnlocked = () => {
-    return Object.values(achievementProgress).filter(progress => progress.unlocked).length === achievements.length;
-  }
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono relative custom-scrollbar">

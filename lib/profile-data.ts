@@ -171,7 +171,7 @@ export const freelanceProjects: FreelanceProject[] = [
   },
   {
     title: '"SelZeky" Company Profile Website',
-    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky’s services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.",
+    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.",
     technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
     period: "Mar. 2025 - Present (In Progress)",
     github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
@@ -234,7 +234,7 @@ export const personalAchievements: PersonalAchievement[] = [
     icon: "shieldCheck",
     year: "Apr. 2025",
     category: "Certification",
-    link: "http://SorryStillstudyingfortheexam.com",
+    link: "/azure-certification",
     linkText: "View Certification"
   },
   {

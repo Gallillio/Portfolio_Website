@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Trophy } from 'lucide-react';
 import type { Achievement } from '@/lib/achievements-context';
 
@@ -8,13 +8,26 @@ interface AchievementNotificationProps {
   achievement: Achievement | null;
   onClose: () => void;
   onNavigate: () => void;
+  isMobile: boolean;
 }
 
 export default function AchievementNotification({ 
   achievement, 
   onClose, 
-  onNavigate 
+  onNavigate,
+  isMobile
 }: AchievementNotificationProps) {
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swiping, setSwiping] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isDismissing, setIsDismissing] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  // Minimum distance (in pixels) to consider a swipe
+  const minSwipeDistance = 50;
+
   // Auto-dismiss notification after 7 seconds
   useEffect(() => {
     if (achievement) {
@@ -26,17 +39,98 @@ export default function AchievementNotification({
     }
   }, [achievement, onClose]);
 
+  // Handle swipe animation and dismiss
+  useEffect(() => {
+    if (isDismissing && notificationRef.current) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 300); // Match the duration of the swipe-out animation
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isDismissing, onClose]);
+
+  // Handle touch start
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+    setTouchEnd(null);
+    setSwiping(true);
+  };
+
+  // Handle touch move
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!touchStart) return;
+    
+    const currentTouch = e.targetTouches[0].clientX;
+    setTouchEnd(currentTouch);
+    
+    // Calculate swipe offset for animation
+    const offset = currentTouch - touchStart;
+    setSwipeOffset(offset);
+    
+    // Determine swipe direction
+    if (offset > 0) {
+      setSwipeDirection('right');
+    } else if (offset < 0) {
+      setSwipeDirection('left');
+    }
+  };
+
+  // Handle touch end
+  const onTouchEnd = () => {
+    setSwiping(false);
+    
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchEnd - touchStart;
+    const isLeftSwipe = distance < -minSwipeDistance;
+    const isRightSwipe = distance > minSwipeDistance;
+    
+    // If swipe distance exceeds threshold, dismiss notification
+    if (isLeftSwipe || isRightSwipe) {
+      setIsDismissing(true);
+    } else {
+      // Reset position if swipe was not enough
+      setSwipeOffset(0);
+      setSwipeDirection(null);
+    }
+    
+    // Reset touch coordinates
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
   if (!achievement) return null;
   
   const isSecret = achievement.isSecret;
+  
+  // Position class based on mobile or desktop
+  const positionClass = isMobile
+    ? "top-4 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm"
+    : "top-4 right-4 max-w-sm";
 
   return (
     <div 
-      className="fixed top-4 right-4 bg-gray-900 border-2 border-green-500 p-4 rounded-md shadow-lg z-50 max-w-sm animate-slide-down cursor-pointer"
-      onClick={() => {
-        onNavigate(); // Navigate to YourAchievements
-        onClose(); // Close the notification
+      ref={notificationRef}
+      className={`fixed ${positionClass} bg-gray-900 border-2 border-green-500 p-4 rounded-md shadow-lg z-50 animate-slide-down cursor-pointer transition-transform duration-300`}
+      style={{ 
+        transform: isDismissing && swipeDirection === 'left' 
+          ? 'translateX(-100vw)' 
+          : isDismissing && swipeDirection === 'right' 
+          ? 'translateX(100vw)' 
+          : swiping 
+          ? `translateX(${swipeOffset}px)` 
+          : 'translateX(0)' 
       }}
+      onClick={() => {
+        if (!swiping) {
+          onNavigate(); // Navigate to YourAchievements
+          onClose(); // Close the notification
+        }
+      }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
       <div className="flex items-center gap-3">
         <div className={`p-3 rounded-full ${isSecret ? 'bg-yellow-400' : 'bg-green-500/20'}`}>

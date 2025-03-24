@@ -1093,6 +1093,7 @@ function TerminalContent(): React.ReactNode {
           achievement={lastUnlockedAchievement}
           onClose={clearLastUnlockedAchievement}
           onNavigate={handleNavigateToAchievements}
+          isMobile={isMobile}
         />
       )}
     </>

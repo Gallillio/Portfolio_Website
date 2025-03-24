@@ -47,6 +47,7 @@ export default function AchievementNotificationProvider({
           achievement={lastUnlockedAchievement}
           onClose={clearLastUnlockedAchievement}
           onNavigate={handleNavigateToAchievements}
+          isMobile={isMobile}
         />
       )}
     </>
