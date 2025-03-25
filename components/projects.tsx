@@ -25,6 +25,7 @@ export default function Projects() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+  const [searchTerm, setSearchTerm] = useState<string>("")
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -160,6 +161,11 @@ export default function Projects() {
     ...technologies.map(tech => ({ id: tech, label: tech }))
   ]
 
+  // Filter options based on search term
+  const filteredOptions = filterOptions.filter(option =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   // Get the count of selected filters (excluding "all")
   const selectedCount = selectedFilters.has("all") 
     ? 0 
@@ -212,9 +218,19 @@ export default function Projects() {
                     <X className="h-4 w-4" />
                   </button>
                 </div>
+                {/* Search Input */}
+                <div className="p-3">
+                  <input
+                    type="text"
+                    placeholder="Search technologies..."
+                    className="w-full p-2 border border-green-500 rounded-md bg-gray-800 text-green-400"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
                 <div className="p-3 max-h-[40vh] overflow-y-auto custom-scrollbar">
                   <div className="grid grid-cols-2 gap-3">
-                    {filterOptions.map((option) => (
+                    {filteredOptions.map((option) => (
                       <button
                         key={option.id}
                         onClick={() => toggleFilter(option.id)}
@@ -258,9 +274,20 @@ export default function Projects() {
                 </button>
               </div>
               
+              {/* Search Input for Mobile */}
+              <div className="p-3">
+                <input
+                  type="text"
+                  placeholder="Search technologies..."
+                  className="w-full p-2 border border-green-500 rounded-md bg-gray-800 text-green-400"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
               <div className="overflow-y-auto flex-grow custom-scrollbar p-1">
                 <div className="grid grid-cols-2 gap-2">
-                  {filterOptions.map((option) => (
+                  {filteredOptions.map((option) => (
                     <button
                       key={option.id}
                       onClick={() => toggleFilter(option.id)}
