@@ -195,7 +195,7 @@ function TerminalContent(): React.ReactNode {
           <AsciiArt key="ascii-art" />,
           "Welcome to my interactive portfolio terminal! \n",
           "You can learn everything you want about me by interacting with this terminal via typing commands,",
-          "by using natural language in the chat mode,",
+          "by using natural language in chat mode,",
           "Or by simply selecting a tab from the menu above.",
           "\n",
           "Type 'help' to see available commands.",
