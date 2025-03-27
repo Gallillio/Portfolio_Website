@@ -4,6 +4,8 @@ import "./globals.css";
 import ScrollToTop from "@/components/scroll-to-top";
 import { AchievementsProvider } from "@/lib/achievements-context";
 import AchievementNotificationProvider from "@/components/achievement-notification-provider";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Analytics } from "@vercel/analytics/react"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,6 +79,8 @@ export default function RootLayout({
           <AchievementNotificationProvider>
             {children}
             <ScrollToTop />
+            <SpeedInsights />
+            <Analytics />
           </AchievementNotificationProvider>
         </AchievementsProvider>
       </body>

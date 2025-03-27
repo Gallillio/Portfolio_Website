@@ -28,7 +28,7 @@ const AsciiArt: React.FC = () => {
         style={{
           fontFamily: "monospace",
           whiteSpace: "pre",
-          fontSize: "calc(6px + 1vw)", // Base font size
+          fontSize: "calc(4px + 1vw)", // Base font size
           margin: 0,
           padding: 0,
           transform: `scale(${scale})`,
@@ -47,8 +47,7 @@ const AsciiArt: React.FC = () => {
 ██████╔╝██║   ██║██████╔╝   ██║   █████╗  ██║   ██║██║     ██║ ██║   ██║
 ██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══╝  ██║   ██║██║     ██║ ██║   ██║
 ██║     ╚██████╔╝██║  ██║   ██║   ██║     ╚██████╔╝███████╗██║ ╚██████╔╝
-╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝  ╚═════╝ 
-                   
+╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝  ╚═════╝                
 `}
       </pre>
     </div>
