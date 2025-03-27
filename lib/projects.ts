@@ -53,7 +53,7 @@ export const projects: Project[] = [
   {
     title: "Data Visualer and Analysis Tool",
     description:
-    "A tool to visualize and analyze data. It provides a user-friendly interface for data exploration and model training, with features for data preprocessing.",
+    "An old-school tool to visualize and analyze data. It provides a user-friendly interface for data exploration and model training, with features for data preprocessing.",
     technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn", "Tkinter"],
     images: [
       { src: "/Data Visualizer Tool/Main.png", alt: "Main" },
@@ -84,7 +84,7 @@ export const projects: Project[] = [
     title: "My Portfolio Website",
     description:
     "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
-    technologies: ["TypeScript", "NextJS", "ReactJS", "TailwindCSS", "Vercel"],
+    technologies: ["Google Cloud", "TypeScript", "NextJS", "ReactJS", "TailwindCSS", "Vercel"],
     images: [
       { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
     ],
