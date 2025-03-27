@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to the Interactive Portfolio Terminal! This project is a unique and engaging way to showcase your skills, experiences, and achievements through a terminal-style interface. Users can interact with the terminal by typing commands to navigate through different sections, view projects, and access contact information, all while experiencing a modern and visually appealing design.
+Welcome to the Interactive Portfolio Terminal! This project is a unique and engaging way to showcase your skills, experiences, and achievements through a terminal-style interface. Users can interact with the terminal by typing commands to navigate through different sections, view projects, or simply ask the AI chatbot tailored to know all my detailed experiences and informatiom. All while experiencing a modern and visually appealing design.
 
 ## Theme
 
@@ -18,6 +18,7 @@ One of the standout features of this project is its **gamification** element. Us
 
 - **Interactive Commands**: Users can type commands to navigate through various sections, including:
 
+  - AI Chatbot
   - About Me
   - Skills
   - Experience
