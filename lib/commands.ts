@@ -7,9 +7,9 @@ import { getAchievementsData } from "./achievements-context"
 // Register all commands
 commandRegistry.register("about", "View my background and Bio", async () => ({
   output: [
-    "╔═════════════════════════════════════════╗",
-    "║                 About Me                ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║              About Me               ",
+    "╚═════════════════════════════════════╝",
     "",
     "┌─ Bio",
     "│",
@@ -36,9 +36,9 @@ commandRegistry.register("about", "View my background and Bio", async () => ({
 
 commandRegistry.register("projects", "View my projects gallery", async () => {
   const projectsOutput = [
-    "╔═════════════════════════════════════════╗",
-    "║               Projects                  ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║              Projects               ",
+    "╚═════════════════════════════════════╝",
     ""
   ]
 
@@ -76,9 +76,9 @@ commandRegistry.register("projects", "View my projects gallery", async () => {
 
 commandRegistry.register("contact", "Get my contact information", async () => ({
   output: [
-    "╔═════════════════════════════════════════╗",
-    "║             Contact Information         ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║             Contact Information     ",
+    "╚═════════════════════════════════════╝",
     "",
     "┌─ Email",
     "│  <email>AhmedGalal11045@gmail.com</email>",
@@ -111,9 +111,9 @@ commandRegistry.register("your-achievements", "View your unlocked achievements",
   const achievements = getAchievementsData();
   
   const achievementsOutput = [
-    "╔═════════════════════════════════════════╗",
-    "║            Your Achievements            ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║            Your Achievements        ",
+    "╚═════════════════════════════════════╝",
     "",
   ];
 
@@ -161,9 +161,9 @@ commandRegistry.register("your-achievements", "View your unlocked achievements",
 
 commandRegistry.register("skills", "View my technical skills", async () => {
   const skillsOutput = [
-    "╔═════════════════════════════════════════╗",
-    "║            Technical Skills             ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║            Technical Skills        ",
+    "╚═════════════════════════════════════╝",
     ""
   ]
 
@@ -206,9 +206,9 @@ commandRegistry.register("skills", "View my technical skills", async () => {
 
 commandRegistry.register("experience", "View my work experience", async () => {
   const experienceOutput = [
-    "╔═════════════════════════════════════════╗",
-    "║             Work Experience             ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║             Work Experience        ",
+    "╚═════════════════════════════════════╝",
     ""
   ]
 
@@ -253,9 +253,9 @@ commandRegistry.register("experience", "View my work experience", async () => {
 
 commandRegistry.register("education", "View my educational background", async () => {
   const educationOutput = [
-    "╔═════════════════════════════════════════╗",
-    "║               Education                 ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║               Education            ",
+    "╚═════════════════════════════════════╝",
     ""
   ]
 
@@ -289,9 +289,9 @@ commandRegistry.register("clear", "Clear the terminal", async () => ({
 
 commandRegistry.register("links", "View my professional links", async () => ({
   output: [
-    "╔═════════════════════════════════════════╗",
-    "║                 Links                   ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║                 Links              ",
+    "╚═════════════════════════════════════╝",
     "",
     "┌─ GitHub",
     `│  ${links.github}`,
@@ -315,9 +315,9 @@ commandRegistry.register("links", "View my professional links", async () => ({
 
 commandRegistry.register("hello", "Secret welcome message", async () => ({
   output: [
-    "╔═════════════════════════════════════════╗",
-    "║               Welcome!                  ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║               Welcome!               ",
+    "╚═════════════════════════════════════╝",
     "",
     "┌─",
     "│  Hello there! It's nice to meet you!",
@@ -331,9 +331,9 @@ commandRegistry.register("hello", "Secret welcome message", async () => ({
 
 commandRegistry.register("freelance", "View my freelance projects", async () => {
   const freelanceOutput = [
-    "╔═════════════════════════════════════════╗",
-    "║            Freelance Projects           ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║            Freelance Projects        ",
+    "╚═════════════════════════════════════╝",
     ""
   ]
 
@@ -385,9 +385,9 @@ commandRegistry.register("freelance", "View my freelance projects", async () => 
 
 commandRegistry.register("languages", "View my language proficiencies", async () => ({
   output: [
-    "╔═════════════════════════════════════════╗",
-    "║         Language Proficiencies          ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║         Language Proficiencies     ",
+    "╚═════════════════════════════════════╝",
     "",
     "┌─ English",
     "│  Level: Native Language",
@@ -424,9 +424,9 @@ commandRegistry.register("help", "Show available commands", async () => ({
 
 commandRegistry.register("courses", "View my taken courses", async () => {
   const coursesOutput = [
-    "╔═════════════════════════════════════════╗",
-    "║                 Courses                 ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║                 Courses              ",
+    "╚═════════════════════════════════════╝",
     ""
   ];
 
@@ -457,9 +457,9 @@ commandRegistry.register("courses", "View my taken courses", async () => {
 // Add new timeline command
 commandRegistry.register("timeline", "View my career timeline", async () => ({
   output: [
-    "╔═════════════════════════════════════════╗",
-    "║                Timeline                 ║",
-    "╚═════════════════════════════════════════╝",
+    "╔═════════════════════════════════════╗",
+    "║                Timeline            ",
+    "╚═════════════════════════════════════╝",
     "",
     "Exploring my professional journey in chronological order...",
     "",
@@ -475,9 +475,9 @@ commandRegistry.register("timeline", "View my career timeline", async () => ({
 commandRegistry.register("chat", "Start a conversation with Gallillio, my personal AI that knows everything about me", async () => {
   return {
     output: [
-      "╔═════════════════════════════════════════╗",
-      "║       Gallillio Chat Assistant          ║",
-      "╚═════════════════════════════════════════╝",
+      "╔═════════════════════════════════════╗",
+      "║       Gallillio Chat Assistant     ",
+      "╚═════════════════════════════════════╝",
       "",
       "Hello! I'm Gallillio, Ahmed's personal AI assistant.",
       "I know all about Ahmed's skills, experience, and projects.",
