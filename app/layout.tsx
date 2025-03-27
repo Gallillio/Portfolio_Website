@@ -26,11 +26,13 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "portfolio@Gallillio:~",
   description: "Ahmed Galal Elzeky's Portfolio - AI & Software Engineer",
-  // icons: {
-  //   icon:['/favicon.ico?v=4'],
-  //   apple:['/apple-touch-icon.png?v=4'],
-  //   shortcut:['/apple-touch-icon.png'],
-  // },
+  metadataBase: new URL("https://gallillio.vercel.app"),
+  openGraph: {
+    title: "portfolio@Gallillio:~",
+    description: "Ahmed Galal Elzeky's Portfolio - AI & Software Engineer",
+    images: ["/og-image.png"],
+    url: "https://gallillio.vercel.app",
+  },
   icons: {
     // For standard favicons in different sizes
     icon: [
