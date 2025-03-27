@@ -457,7 +457,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
   // Function to check for newly unlocked achievements
   const checkAchievements = useCallback(() => {
     let newlyUnlocked = false;
-    let newlyUnlockedAchievements: Achievement[] = [];
+    const newlyUnlockedAchievements: Achievement[] = [];
     
     // Make a copy of the current progress
     const updatedProgress = { ...achievementProgress };
