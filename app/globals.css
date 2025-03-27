@@ -378,12 +378,61 @@ html {
 
 /* Typing effect animation for cookie consent modal */
 @keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 .typing-effect {
   overflow: hidden;
   white-space: normal;
   animation: typing 1.5s steps(40, end);
+}
+
+/* Add smooth transitions for terminal mode switching */
+.terminal-title-fixed,
+.terminal-header-fixed,
+.terminal-output,
+.terminal-line,
+.command-prompt,
+.command-text,
+.terminal-cursor,
+.custom-tab {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Chat mode animation effects */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 5px rgba(156, 163, 175, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(156, 163, 175, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(156, 163, 175, 0.2);
+  }
+}
+
+.chat-mode {
+  animation: pulseGlow 3s infinite ease-in-out;
+  border-radius: 8px;
+}
+
+/* Chat cursor animation */
+.chat-cursor {
+  animation: blink-chat 1s step-end infinite;
+}
+
+@keyframes blink-chat {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }

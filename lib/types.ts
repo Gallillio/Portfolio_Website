@@ -7,9 +7,10 @@ export interface CommandResponse {
   output: React.ReactNode[]
   timestamp: Date
   isError?: boolean
-  specialAction?: "switchTab" | "none" | "clear" | "downloadCV"
+  specialAction?: "switchTab" | "none" | "clear" | "downloadCV" | "chatMode"
   tabName?: string
   timelineSection?: string
+  chatMode?: boolean
 }
 
 export interface Project {

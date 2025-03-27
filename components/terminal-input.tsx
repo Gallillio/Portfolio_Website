@@ -7,6 +7,7 @@ import { availableCommands } from "@/lib/commands"
 
 interface TerminalInputProps {
   onCommand: (command: string) => void
+  isChatMode?: boolean
 }
 
 export interface TerminalInputRef {
@@ -14,7 +15,7 @@ export interface TerminalInputRef {
   focus: () => void;
 }
 
-const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ onCommand }, ref) => {
+const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ onCommand, isChatMode = false }, ref) => {
   const [input, setInput] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
@@ -162,6 +163,11 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
       e.preventDefault()
       setInput(prev => prev + suggestion)
       setSuggestion("")
+    } else if (e.ctrlKey && e.key === "c") {
+      // Exit chatbot mode when Ctrl + C is pressed
+      if (isChatMode) {
+        onCommand("exit") // Call the onCommand function with "exit"
+      }
     }
   }
 
@@ -210,8 +216,17 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     <div onClick={focusInput} className="cursor-text">
       <form onSubmit={handleSubmit} className="flex items-center mt-2">
         <div className="flex items-center text-green-500 mr-2">
-          <span className="mr-1">$</span>
-          <ArrowRight size={14} />
+          {isChatMode ? (
+            <span className="text-blue-400 font-bold flex items-center">
+              <span className="animate-pulse mr-1">•</span>
+              <span>You:</span>
+            </span>
+          ) : (
+            <>
+              <span className="mr-1">$</span>
+              <ArrowRight size={14} />
+            </>
+          )}
         </div>
         <div 
           className="flex-1 relative"
@@ -228,11 +243,12 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full bg-transparent border-none outline-none text-green-500 font-mono"
+            className={`w-full bg-transparent border-none outline-none font-mono ${isChatMode ? "text-blue-300" : "text-green-500"}`}
             autoFocus
             aria-label="Terminal input"
+            placeholder={isChatMode ? "Type your message..." : ""}
           />
-          {suggestion && (
+          {suggestion && !isChatMode && (
             <div className="absolute left-0 top-0 flex items-center pointer-events-none">
               <span className="text-green-500/30 font-mono">
                 {input}

@@ -40,6 +40,7 @@ export interface AchievementState {
   projectCodesClicked: Set<string>
   terminalClosed: boolean
   terminalMinimized: boolean
+  chatModeActivated: boolean
 }
 
 // User progress for an individual achievement
@@ -73,6 +74,7 @@ export interface AchievementsContextType {
   clickProjectCode: (projectId: string) => void
   registerTerminalClosed: () => void
   registerTerminalMinimized: () => void
+  activateChatMode: () => void
   
   // Additional methods for terminal component
   markCommandExecuted: (command?: string) => void
@@ -244,7 +246,17 @@ const achievementsList: Achievement[] = [
       const otherAchievements = achievements.filter(a => a.id !== "portfolio_grandmaster");
       return otherAchievements.every(a => progress[a.id]?.unlocked);
     },
-  }
+  },
+  // Add new chatbot achievement
+  {
+    id: "ai_conversationalist",
+    title: "AI Conversationalist",
+    description: "Activated chat assistant mode to talk with the Gallillio AI",
+    icon: <MessageSquare className="h-6 w-6" />,
+    category: AchievementCategory.INTERACTION,
+    condition: (state) => state.chatModeActivated,
+    hint: "Try switching to another mode besides the terminal",
+  },
 ];
 
 // Storage keys
@@ -290,7 +302,8 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     totalCommands: 0,
     projectCodesClicked: new Set<string>(),
     terminalClosed: false,
-    terminalMinimized: false
+    terminalMinimized: false,
+    chatModeActivated: false
   });
 
   // Last unlocked achievement for notification
@@ -729,6 +742,14 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  // Add a new function for activating chat mode
+  const activateChatMode = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      chatModeActivated: true
+    }));
+  }, []);
+
   // Create the context value
   const contextValue = {
     achievements: achievementsList,
@@ -747,6 +768,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     clickProjectCode,
     registerTerminalClosed,
     registerTerminalMinimized,
+    activateChatMode,
     
     // Additional methods for terminal component
     markCommandExecuted,

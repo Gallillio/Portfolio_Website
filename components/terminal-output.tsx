@@ -6,9 +6,10 @@ import { Tooltip } from "@/components/ui/tooltip"
 interface TerminalOutputProps {
   history: Array<Command & CommandResponse>
   onCommandClick?: (command: string) => void
+  isChatMode?: boolean
 }
 
-const TerminalLink = ({ href }: { href: string }) => {
+const TerminalLink = ({ href, isChatMode }: { href: string; isChatMode?: boolean }) => {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
 
@@ -39,7 +40,7 @@ const TerminalLink = ({ href }: { href: string }) => {
   return (
     <Tooltip text="Follow Link: ctrl + click" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
       <span 
-        className="text-green-400 underline cursor-pointer relative"
+        className={`underline cursor-pointer relative ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
         onClick={handleClick}
       >
         {href}
@@ -48,8 +49,11 @@ const TerminalLink = ({ href }: { href: string }) => {
   )
 }
 
-const CommandLink = ({ command, onClick }: { command: string; onClick: (command: string) => void }) => {
+const CommandLink = ({ command, onClick, isChatMode }: { command: string; onClick: (command: string) => void; isChatMode?: boolean }) => {
   const handleClick = () => {
+    // If in chat mode, don't make commands clickable
+    if (isChatMode) return;
+    
     onClick(command)
     
     // Ensure the terminal input is visible after clicking
@@ -66,7 +70,8 @@ const CommandLink = ({ command, onClick }: { command: string; onClick: (command:
 
   return (
     <span 
-      className="text-green-400 hover:underline cursor-pointer"
+      // className={`${!isChatMode ? 'hover:underline cursor-pointer text-green-400' : 'text-gray-300'}`}
+      className={'hover:underline cursor-pointer text-green-400'}
       onClick={handleClick}
     >
       {command}
@@ -75,7 +80,7 @@ const CommandLink = ({ command, onClick }: { command: string; onClick: (command:
 }
 
 // Component for tab links (for Projects, Your Achievements, etc.)
-const TabLink = ({ tabName, displayName }: { tabName: string; displayName: string }) => {
+const TabLink = ({ tabName, displayName, isChatMode }: { tabName: string; displayName: string; isChatMode?: boolean }) => {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
 
@@ -137,7 +142,7 @@ const TabLink = ({ tabName, displayName }: { tabName: string; displayName: strin
   return (
     <Tooltip text="Click to switch tab" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
       <span 
-        className="text-green-400 underline cursor-pointer"
+        className={`underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
         onClick={handleClick}
       >
         {displayName}
@@ -146,7 +151,7 @@ const TabLink = ({ tabName, displayName }: { tabName: string; displayName: strin
   )
 }
 
-const CVLink = () => {
+const CVLink = ({ isChatMode }: { isChatMode?: boolean }) => {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
 
@@ -181,11 +186,11 @@ const CVLink = () => {
 
   return (
     <Tooltip text="Download CV: ctrl + click" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
-      <span className="text-green-400 hover:underline cursor-pointer">
+      <span className={`hover:underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}>
         <a
           href="#"
           onClick={handleClick}
-          className="text-green-400 underline"
+          className={`underline ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
           tabIndex={-1}
         >
           /Ahmed Elzeky Resume.pdf
@@ -196,7 +201,7 @@ const CVLink = () => {
 }
 
 // Component for email links (for Contact command)
-const EmailLink = ({ email }: { email: string }) => {
+const EmailLink = ({ email, isChatMode }: { email: string; isChatMode?: boolean }) => {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
   
@@ -234,7 +239,7 @@ const EmailLink = ({ email }: { email: string }) => {
   return (
     <Tooltip text="Click to send email" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
       <span 
-        className="text-green-400 underline cursor-pointer"
+        className={`underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
         onClick={handleClick}
       >
         {email}
@@ -244,7 +249,7 @@ const EmailLink = ({ email }: { email: string }) => {
 };
 
 // Component for phone links (for Contact command)
-const PhoneLink = ({ phone }: { phone: string }) => {
+const PhoneLink = ({ phone, isChatMode }: { phone: string; isChatMode?: boolean }) => {
   const [isMobile, setIsMobile] = useState(false)
   const [isTablet, setIsTablet] = useState(false)
   
@@ -273,7 +278,7 @@ const PhoneLink = ({ phone }: { phone: string }) => {
   return (
     <Tooltip text="Click to call" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
       <span 
-        className="text-green-400 underline cursor-pointer"
+        className={`underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
         onClick={handleClick}
       >
         {phone}
@@ -282,7 +287,7 @@ const PhoneLink = ({ phone }: { phone: string }) => {
   );
 };
 
-export default function TerminalOutput({ history, onCommandClick }: TerminalOutputProps) {
+export default function TerminalOutput({ history, onCommandClick, isChatMode = false }: TerminalOutputProps) {
   const renderLine = (line: React.ReactNode, index: number) => {
     if (typeof line === 'string') {
       // Check for email tags <email>...</email>
@@ -295,7 +300,7 @@ export default function TerminalOutput({ history, onCommandClick }: TerminalOutp
         return (
           <>
             {beforeText}
-            <EmailLink key={`email-${index}`} email={email} />
+            <EmailLink key={`email-${index}`} email={email} isChatMode={isChatMode} />
             {afterText}
           </>
         );
@@ -311,7 +316,7 @@ export default function TerminalOutput({ history, onCommandClick }: TerminalOutp
         return (
           <>
             {beforeText}
-            <PhoneLink key={`phone-${index}`} phone={fullMatch} />
+            <PhoneLink key={`phone-${index}`} phone={fullMatch} isChatMode={isChatMode} />
             {afterText}
           </>
         );
@@ -347,7 +352,7 @@ export default function TerminalOutput({ history, onCommandClick }: TerminalOutp
         return (
           <>
             {beforeText}
-            <TabLink key={`tab-${index}`} tabName={tabName} displayName={displayName} />
+            <TabLink key={`tab-${index}`} tabName={tabName} displayName={displayName} isChatMode={isChatMode} />
             {afterText}
           </>
         )
@@ -359,19 +364,19 @@ export default function TerminalOutput({ history, onCommandClick }: TerminalOutp
         return (
           <>
             {line.substring(0, urlMatch.index)}
-            <TerminalLink key={index} href={urlMatch[1]} />
+            <TerminalLink key={index} href={urlMatch[1]} isChatMode={isChatMode} />
           </>
         )
       }
 
       // Handle URLs without prefix
       if (line.startsWith('http') || line.startsWith('https')) {
-        return <TerminalLink key={index} href={line} />
+        return <TerminalLink key={index} href={line} isChatMode={isChatMode} />
       }
 
       // Handle CV download link
       if (line === "/Ahmed Elzeky Resume.pdf") {
-        return <CVLink key={index} />
+        return <CVLink isChatMode={isChatMode} />
       }
 
       // Handle commands in help text
@@ -380,7 +385,7 @@ export default function TerminalOutput({ history, onCommandClick }: TerminalOutp
       return parts.map((part, index) => {
         const trimmedPart = part.trim()
         if (availableCommands.includes(trimmedPart.toLowerCase() as typeof availableCommands[number]) && onCommandClick) {
-          return <CommandLink key={index} command={trimmedPart} onClick={onCommandClick} />
+          return <CommandLink key={index} command={trimmedPart} onClick={onCommandClick} isChatMode={isChatMode} />
         }
         return part
       })
@@ -400,6 +405,15 @@ export default function TerminalOutput({ history, onCommandClick }: TerminalOutp
             </div>
           )}
           <div className={`mt-1 whitespace-pre-wrap ${item.isError ? "text-red-500" : "text-green-400"}`}>
+            {/* Check if this is a chat response (no command but has output) */}
+            {!item.command && item.output.length > 0 && 
+              item.output[0] !== "Processing your request..." && 
+              typeof item.output[0] !== 'object' && // Don't show AI: for components like AsciiArt
+              isChatMode && (
+              <div className="flex items-start mb-1">
+                <span className="text-blue-400 mr-2 font-bold">AI:</span>
+              </div>
+            )}
             {item.output.map((line, lineIndex) => (
               <div key={lineIndex}>{renderLine(line, index)}</div>
             ))}

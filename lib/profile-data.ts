@@ -22,8 +22,9 @@ export const skills: SkillsData = {
   ],
   "Cloud & AI Platforms": [
     "Microsoft Azure",
+    "Google Cloud",
     "IBM Watsonx",
-    "IBM Cloud"
+    "IBM Cloud",
   ],
   "Web & Application Development": [
     "JavaScript",

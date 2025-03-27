@@ -9,6 +9,7 @@ export const skillLogos: { [key: string]: string } = {
   "Microsoft Azure": "https://img.icons8.com/fluency/96/azure-1.png",
   "IBM Watsonx": "https://img.icons8.com/color/96/ibm.png",
   "IBM Cloud": "https://img.icons8.com/color/96/ibm.png",
+  "Google Cloud": "https://img.icons8.com/color/96/google-cloud.png",
 
   // Web & Application Development
   "Python": "https://img.icons8.com/color/96/python.png",
@@ -32,7 +33,6 @@ export const skillLogos: { [key: string]: string } = {
   // DevOps & Tools
   "Git": "https://img.icons8.com/color/96/git.png",
   "Docker": "https://img.icons8.com/color/96/docker.png",
-  // "Cursor": "https://img.icons8.com/color/96/cursor.png",
   "Cursor": "cursor.svg",
   "Postman": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postman/postman-original.svg",
   "Vercel": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vercel/vercel-original.svg",

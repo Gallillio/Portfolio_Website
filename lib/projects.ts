@@ -5,7 +5,7 @@ export const projects: Project[] = [
     title: "GPTube",
     description:
       "An interactive tool that engages users with YouTube videos through a GPT-powered chatbot, utilizing TTS and STT for voice interaction. It features generating mock tests, correcting user answers, and creating PowerPoint presentations.",
-    technologies: ["Microsoft Azure", "Google Gemini", "ReactJS", "Django", "Langchain", "Vector Database", "RAG", "OpenAI Function Calling"],
+    technologies: ["Microsoft Azure", "Google Cloud", "ReactJS", "Django", "Langchain", "Vector Database", "RAG", "OpenAI Function Calling"],
     images: [
       { src: "/GPTube/main.png", alt: "Main Page" },
       { src: "/GPTube/question.png", alt: "Question Example" },
@@ -109,7 +109,7 @@ export const projects: Project[] = [
   {
     title: '"Brillium" AI SaaS',
     description: "Brillium is an AI-powered LMS that converts PDF textbooks into interactive learning experiences. It generates quizzes, flashcards, and presentations, analyze student performance, and dynamically create questions for improvement. Teachers can monitor and edit content, while a chatbot serves as a personal assistant for students.\n\n⚠️ This project is currently under development ⚠️",
-    technologies: ["Google Gemini", "FastAPI","Tesseract OCR", "Python", "ReactJS", "NextJS","NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
+    technologies: ["Google Cloud", "FastAPI","Tesseract OCR", "Python", "ReactJS", "NextJS","NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
     images: [
       { src: "/in-development.png", alt: "Still In Development" },
     ],
