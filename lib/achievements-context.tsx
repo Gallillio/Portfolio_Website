@@ -83,7 +83,7 @@ export interface AchievementsContextType {
   
   // Unlock all achievements at once (cheat code)
   unlockAllAchievements: () => void
-
+  
   // Enable Night Owl achievement
   enableNightOwl: () => void
 }
@@ -111,6 +111,15 @@ const achievementsList: Achievement[] = [
     category: AchievementCategory.INTERACTION,
     condition: (state) => state.commandsExecuted.size >= 7,
     hint: "Try using different commands in the terminal",
+  },
+  {
+    id: "ai_conversationalist",
+    title: "AI Conversationalist",
+    description: "Activated chat assistant mode to talk with the Gallillio AI",
+    icon: <MessageSquare className="h-6 w-6" />,
+    category: AchievementCategory.INTERACTION,
+    condition: (state) => state.chatModeActivated,
+    hint: "Try switching to another mode besides the terminal",
   },
   {
     id: "interested_arent_we",
@@ -152,6 +161,15 @@ const achievementsList: Achievement[] = [
     hint: "Unlock more achievements to get this one",
   },
   {
+    id: "demo_explorer",
+    title: "Demo Explorer",
+    description: "Clicked on a project demo link",
+    icon: <Eye className="h-6 w-6" />,
+    category: AchievementCategory.INTERACTION,
+    condition: (state) => state.projectDemoClicked,
+    hint: "Try clicking on a project's demo link",
+  },
+  {
     id: "site_explorer",
     title: "Site Explorer",
     description: "Visited all sections of the portfolio",
@@ -162,15 +180,6 @@ const achievementsList: Achievement[] = [
       return requiredTabs.every(tab => state.tabsVisited.has(tab));
     },
     hint: "Try visiting all the tabs in the site",
-  },
-  {
-    id: "demo_explorer",
-    title: "Demo Explorer",
-    description: "Clicked on a project demo link",
-    icon: <Eye className="h-6 w-6" />,
-    category: AchievementCategory.INTERACTION,
-    condition: (state) => state.projectDemoClicked,
-    hint: "Try clicking on a project's demo link",
   },
   
   // Secret achievements
@@ -191,6 +200,26 @@ const achievementsList: Achievement[] = [
       state.secretCommandsExecuted.has('heyy') ||
       state.secretCommandsExecuted.has('whats up') ||
       state.secretCommandsExecuted.has('whats up'),
+  },
+  {
+    id: "terminal_escape_artist",
+    title: "Terminal Escape Artist",
+    description: "Tried to close the terminal, but couldn't escape!",
+    icon: <X className="h-6 w-6" />,
+    category: AchievementCategory.SECRET,
+    isSecret: true,
+    hint: "Oh I thought these buttons were just for decoration.",
+    condition: (state) => state.terminalClosed,
+  },
+  {
+    id: "found_the_bottom_of_the_rabbit_hole",
+    title: "Found the Bottom of the Rabbit Hole",
+    description: "Discovered the secret minimized terminal screen",
+    icon: <ArrowLeftRight className="h-6 w-6" />,
+    category: AchievementCategory.SECRET,
+    isSecret: true,
+    hint: "There's more than one way to hide a terminal...",
+    condition: (state) => state.terminalMinimized,
   },
   {
     id: "night_owl",
@@ -214,26 +243,6 @@ const achievementsList: Achievement[] = [
     condition: (state) => state.projectCodesClicked.size >= projects.filter(project => project.code_available).length,
   },
   {
-    id: "terminal_escape_artist",
-    title: "Terminal Escape Artist",
-    description: "Tried to close the terminal, but couldn't escape!",
-    icon: <X className="h-6 w-6" />,
-    category: AchievementCategory.SECRET,
-    isSecret: true,
-    hint: "Oh I thought these buttons were just for decoration.",
-    condition: (state) => state.terminalClosed,
-  },
-  {
-    id: "found_the_bottom_of_the_rabbit_hole",
-    title: "Found the Bottom of the Rabbit Hole",
-    description: "Discovered the secret minimized terminal screen",
-    icon: <ArrowLeftRight className="h-6 w-6" />,
-    category: AchievementCategory.SECRET,
-    isSecret: true,
-    hint: "There's more than one way to hide a terminal...",
-    condition: (state) => state.terminalMinimized,
-  },
-  {
     id: "portfolio_grandmaster",
     title: "Portfolio Grandmaster",
     description: "Unlocked all other achievements",
@@ -246,16 +255,6 @@ const achievementsList: Achievement[] = [
       const otherAchievements = achievements.filter(a => a.id !== "portfolio_grandmaster");
       return otherAchievements.every(a => progress[a.id]?.unlocked);
     },
-  },
-  // Add new chatbot achievement
-  {
-    id: "ai_conversationalist",
-    title: "AI Conversationalist",
-    description: "Activated chat assistant mode to talk with the Gallillio AI",
-    icon: <MessageSquare className="h-6 w-6" />,
-    category: AchievementCategory.INTERACTION,
-    condition: (state) => state.chatModeActivated,
-    hint: "Try switching to another mode besides the terminal",
   },
 ];
 
@@ -306,7 +305,9 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     chatModeActivated: false
   });
 
-  // Last unlocked achievement for notification
+  // Achievement notification queue instead of just the last one
+  const [achievementQueue, setAchievementQueue] = useState<Achievement[]>([]);
+  // Last unlocked achievement for notification (the one currently showing)
   const [lastUnlockedAchievement, setLastUnlockedAchievement] = useState<Achievement | null>(null);
   
   // Initialize achievements on first load
@@ -456,6 +457,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
   // Function to check for newly unlocked achievements
   const checkAchievements = useCallback(() => {
     let newlyUnlocked = false;
+    let newlyUnlockedAchievements: Achievement[] = [];
     
     // Make a copy of the current progress
     const updatedProgress = { ...achievementProgress };
@@ -476,8 +478,8 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
           unlockedAt: new Date()
         };
         
-        // Set the last unlocked achievement for notification
-        setLastUnlockedAchievement(achievement);
+        // Add to newly unlocked achievements
+        newlyUnlockedAchievements.push(achievement);
         
         newlyUnlocked = true;
 
@@ -488,13 +490,27 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     // Update progress if any achievements were unlocked
     if (newlyUnlocked) {
       setAchievementProgress(updatedProgress);
+      
+      // Add newly unlocked achievements to the queue
+      setAchievementQueue(prev => [...prev, ...newlyUnlockedAchievements]);
     }
-  }, [achievementProgress, state, setLastUnlockedAchievement, setAchievementProgress]);
+  }, [achievementProgress, state, setAchievementProgress]);
 
   // Check for achievements when state changes
   useEffect(() => {
     checkAchievements();
   }, [state, checkAchievements]);
+
+  // Handle showing the next achievement in the queue
+  useEffect(() => {
+    // If no achievement is currently showing and there are achievements in the queue
+    if (!lastUnlockedAchievement && achievementQueue.length > 0) {
+      // Show the first achievement in the queue
+      setLastUnlockedAchievement(achievementQueue[0]);
+      // Remove it from the queue
+      setAchievementQueue(prev => prev.slice(1));
+    }
+  }, [lastUnlockedAchievement, achievementQueue]);
 
   // Clear the last unlocked achievement (after notification is shown)
   const clearLastUnlockedAchievement = useCallback(() => {
@@ -716,6 +732,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
   const unlockAllAchievements = useCallback(() => {
     // Create an updated version of progress with all achievements unlocked
     const updatedProgress = { ...achievementProgress };
+    const newlyUnlockedAchievements: Achievement[] = [];
     
     // Mark each achievement as unlocked
     achievementsList.forEach(achievement => {
@@ -725,11 +742,17 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
           unlocked: true,
           unlockedAt: new Date()
         };
+        
+        // Add to newly unlocked achievements
+        newlyUnlockedAchievements.push(achievement);
       }
     });
     
     // Update the achievement progress state
     setAchievementProgress(updatedProgress);
+    
+    // Add all newly unlocked achievements to the queue
+    setAchievementQueue(prev => [...prev, ...newlyUnlockedAchievements]);
     
     console.log("🎮 Cheat code activated: All achievements unlocked!");
   }, [achievementProgress, setAchievementProgress]);

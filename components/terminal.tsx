@@ -48,7 +48,6 @@ function TerminalContent(): React.ReactNode {
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLDivElement>(null)
   const scrollTimer = useRef<NodeJS.Timeout | null>(null)
-  // const geminiApiKey = "AIzaSyCys5v04iZ5gvXwN7ek7gN8NJcRzjlB_Uk"
   const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY as string;
 
   // Initial setup on component mount
