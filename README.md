@@ -88,6 +88,6 @@ This will compile the project and prepare it for deployment.
 
 Once the application is running, you can interact with the terminal by typing commands. Type `help` to see a list of available commands. You can navigate through different sections by typing commands like `about`, `projects`, `contact`, etc.
 
-### Feel Free to Fork and Use
+## Feel Free to Fork and Use
 
 This project is open-source and available for anyone to use. If you find this portfolio terminal interesting, feel free to fork the repository and customize it for your own needs!
