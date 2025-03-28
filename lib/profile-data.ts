@@ -15,10 +15,13 @@ export const skills: SkillsData = {
     "Computer Vision",
     "Deep Learning",
     "Machine Learning",
-    "TensorFlow",
-    "OpenCV",
     "LangChain",
-    "PowerBI"
+    "OpenCV",
+    "TensorFlow",
+    "Scikit-learn",
+    "Keras",
+    "Pandas",
+    "Numpy",
   ],
   "Cloud & AI Platforms": [
     "Microsoft Azure",
@@ -46,12 +49,14 @@ export const skills: SkillsData = {
   "DevOps & Tools": [
     "Git",
     "Cursor",
+    "Jupyter Notebook",
     "Vercel",
     "V0",
     "Postman",
     "Linux",
     "Agile/Scrum",
-    "Notion"
+    "Notion",
+    "PowerBI",
   ],
   "Design & Collaboration": [
     "Figma",

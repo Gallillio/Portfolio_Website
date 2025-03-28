@@ -58,20 +58,6 @@ export default function Projects() {
     };
   }, []);
 
-  // Close modal if isMobile becomes true
-  useEffect(() => {
-    if (isMobile && isModalOpen) {
-      closeModal();
-    }
-  }, [isMobile, isModalOpen]);
-
-  // Close modal if isMobile becomes false
-  useEffect(() => {
-    if (!isMobile && modalOpen) {
-      setModalOpen(false);
-    }
-  }, [isMobile, modalOpen]);
-
   // Handle click outside dropdown and modal to close them
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -142,12 +128,9 @@ export default function Projects() {
   }
 
   const handleImageClick = (imageSrc: string) => {
-    if (isMobile && isModalOpen) {
-      closeModal();
-    } else if (!isMobile) {
-      setSelectedImage(imageSrc);
-      setIsModalOpen(true);
-    }
+    // Always set the selected image and open the modal
+    setSelectedImage(imageSrc);
+    setIsModalOpen(true);
   };
 
   const closeModal = () => {

@@ -3,7 +3,10 @@ export const skillLogos: { [key: string]: string } = {
   "TensorFlow": "https://img.icons8.com/color/96/tensorflow.png",
   "OpenCV": "https://img.icons8.com/color/96/opencv.png",
   "LangChain": "https://img.icons8.com/color/96/chain.png",
-  "PowerBI": "https://img.icons8.com/color/96/power-bi.png",
+  "Scikit-learn": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/scikitlearn/scikitlearn-original.svg",
+  "Keras": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/keras/keras-original.svg",
+  "Pandas": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg",
+  "Numpy": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/numpy/numpy-original.svg",
 
   // Cloud & AI Platforms
   "Microsoft Azure": "https://img.icons8.com/fluency/96/azure-1.png",
@@ -38,7 +41,9 @@ export const skillLogos: { [key: string]: string } = {
   "Vercel": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vercel/vercel-original.svg",
   "V0": "https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/v0.png",
   "Linux": "https://img.icons8.com/color/96/linux.png",
+  "PowerBI": "https://img.icons8.com/color/96/power-bi.png",
   "Agile/Scrum": "https://www.edureka.co/blog/wp-content/uploads/2019/07/ScrumLogo-293x300.png",
+  "Jupyter Notebook": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jupyter/jupyter-original.svg",
 
   // Design & Collaboration
   "Figma": "https://img.icons8.com/color/96/figma.png",
