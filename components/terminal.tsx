@@ -50,6 +50,8 @@ function TerminalContent(): React.ReactNode {
   const scrollTimer = useRef<NodeJS.Timeout | null>(null)
   // const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY as string;
   const geminiApiKey = process.env.GEMINI_API_KEY as string;
+  // console.log("process.env.GEMINI_API_KEY", process.env.GEMINI_API_KEY)
+  // console.log("geminiApiKey", geminiApiKey)
 
   // Initial setup on component mount
   useEffect(() => {
@@ -225,89 +227,99 @@ function TerminalContent(): React.ReactNode {
   }, [history, activeTab])
 
   const handleCommand = async (input: string) => {
-    const trimmedInput = input.trim()
+    const trimmedInput = input.trim();
 
     if (isChatMode) {
       if (trimmedInput.toLowerCase() === 'exit') {
-        setIsChatMode(false)
-        setChatHistory([])
+        setIsChatMode(false);
+        setChatHistory([]);
         setHistory(prev => [
-          ...prev, 
+          ...prev,
           {
             command: trimmedInput,
             output: ["Exiting chat mode. Returning to terminal."],
             timestamp: new Date(),
             isError: false
           }
-        ])
-        return
+        ]);
+        return;
       }
-      
+
       setHistory(prev => [
-        ...prev, 
+        ...prev,
         {
           command: trimmedInput,
           output: [],
           timestamp: new Date(),
           isError: false
         }
-      ])
-      
-      // setIsProcessingChat(true)
+      ]);
+
       setHistory(prev => [
-        ...prev, 
+        ...prev,
         {
           command: "",
           output: ["Processing your request..."],
           timestamp: new Date(),
           isError: false
         }
-      ])
-      
+      ]);
+
       try {
-        const response = await sendMessageToGemini(
-          trimmedInput,
-          geminiApiKey,
-          chatHistory
-        )
-        
-        setHistory(prev => prev.slice(0, -1))
-        
+        const response = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: trimmedInput,
+            conversationHistory: chatHistory
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch response from Gemini API');
+        }
+
+        const data = await response.json();
+        const content = data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I could not generate a response.';
+
+        setHistory(prev => prev.slice(0, -1));
+
         setHistory(prev => [
-          ...prev, 
+          ...prev,
           {
             command: "",
-            output: [response.split("\n").map((line, i) => <div key={i}>{line}</div>)],
+            output: [content.split("\n").map((line: string, i: number) => <div key={i}>{line}</div>)],
             timestamp: new Date(),
             isError: false
           }
-        ])
-        
+        ]);
+
         setChatHistory(prev => [
           ...prev,
           { role: 'user', content: trimmedInput },
-          { role: 'model', content: response }
-        ])
+          { role: 'model', content: content }
+        ]);
       } catch (error) {
-        console.error('Chat error:', error)
-        
-        setHistory(prev => prev.slice(0, -1))
-        
+        console.error('Chat error:', error);
+
+        setHistory(prev => prev.slice(0, -1));
+
         setHistory(prev => [
-          ...prev, 
+          ...prev,
           {
             command: "",
             output: ["Sorry, I encountered an error. Please try again."],
             timestamp: new Date(),
             isError: true
           }
-        ])
+        ]);
       } finally {
-        // setIsProcessingChat(false)
-        ensureInputVisible()
+        ensureInputVisible();
       }
-      
-      return
+
+      return;
     }
 
     const lowerCommand = trimmedInput.toLowerCase()

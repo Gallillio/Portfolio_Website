@@ -49,9 +49,9 @@ export async function sendMessageToGemini(
         },
         // Include previous chat history
         ...conversationHistory.map(msg => ({
-          role: msg.role,
-          parts: [{ text: msg.content }]
-        })),
+        role: msg.role,
+        parts: [{ text: msg.content }]
+      })),
         // Add the new message
         {
           role: "user",
@@ -66,7 +66,7 @@ export async function sendMessageToGemini(
         responseMimeType: "text/plain"
       }
     };
-
+    
     // Call the Gemini API
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
