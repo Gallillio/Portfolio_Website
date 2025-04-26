@@ -15,8 +15,8 @@ import { executeCommand } from "@/lib/commands"
 import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command } from '@/lib/types'
+import type { ChatMessage } from "@/lib/chatbot"
 import React from "react"
-import { type ChatMessage } from "@/lib/chatbot"
 
 function TerminalContent(): React.ReactNode {
   const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>([])
@@ -29,7 +29,6 @@ function TerminalContent(): React.ReactNode {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isChatMode, setIsChatMode] = useState(false)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
-  // const [isProcessingChat, setIsProcessingChat] = useState(false)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
@@ -48,7 +47,6 @@ function TerminalContent(): React.ReactNode {
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLDivElement>(null)
   const scrollTimer = useRef<NodeJS.Timeout | null>(null)
-  // const geminiApiKey = process.env.GEMINI_API_KEY as string;
 
   // Initial setup on component mount
   useEffect(() => {
@@ -115,6 +113,7 @@ function TerminalContent(): React.ReactNode {
     const checkIfMobile = () => {
       const isMobileNow = window.innerWidth < 768
       const wasMobile = isMobile
+      
       setIsMobile(isMobileNow)
       
       // Set fullscreen automatically when transitioning to mobile
