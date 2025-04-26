@@ -67,9 +67,6 @@ export async function sendMessageToGemini(
       }
     };
 
-    // Log the payload for debugging
-    console.log('Sending payload to Gemini API:', JSON.stringify(payload, null, 2));
-
     // Call the Gemini API
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
