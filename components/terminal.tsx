@@ -115,7 +115,6 @@ function TerminalContent(): React.ReactNode {
     const checkIfMobile = () => {
       const isMobileNow = window.innerWidth < 768
       const wasMobile = isMobile
-      
       setIsMobile(isMobileNow)
       
       // Set fullscreen automatically when transitioning to mobile
