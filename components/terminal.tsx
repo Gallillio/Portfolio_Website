@@ -16,7 +16,7 @@ import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command } from '@/lib/types'
 import React from "react"
-import { sendMessageToGemini, type ChatMessage } from "@/lib/chatbot"
+import { type ChatMessage } from "@/lib/chatbot"
 
 function TerminalContent(): React.ReactNode {
   const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>([])
@@ -48,10 +48,7 @@ function TerminalContent(): React.ReactNode {
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const hamburgerButtonRef = useRef<HTMLDivElement>(null)
   const scrollTimer = useRef<NodeJS.Timeout | null>(null)
-  // const geminiApiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY as string;
-  const geminiApiKey = process.env.GEMINI_API_KEY as string;
-  // console.log("process.env.GEMINI_API_KEY", process.env.GEMINI_API_KEY)
-  // console.log("geminiApiKey", geminiApiKey)
+  // const geminiApiKey = process.env.GEMINI_API_KEY as string;
 
   // Initial setup on component mount
   useEffect(() => {
