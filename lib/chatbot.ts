@@ -48,7 +48,7 @@ export async function sendMessageToGemini(
           ]
         },
         {
-          role: "user",
+          role: "system",
           parts: [
             {
               text: `The person using this chat is NOT Ahmed Galal Elzeky, he is a different person, interested in knowing more about Ahmed Galal Elzeky, so talk to the user in the first person, not as Ahmed Galal Elzeky, also, if the user asks about my projects, you should answer the question using the data provided.
