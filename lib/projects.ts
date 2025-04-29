@@ -73,7 +73,9 @@ export const projects: Project[] = [
       "A chatbot that streamlines University admissions. Awarded The Times Highest Higher Education Award 2024 for Technological Innovation. It automates document processing and enhances communication with real-time updates. \n Note: This project is currently under development and has undergone several changes.",
     technologies: ["Microsoft Azure", "Langchain", "Django", "OpenAI Function Calling", "Vector Database", "RAG"],
     images: [
-      { src: "/ESLSCA Chatbot/example2.png", alt: "ESLSCA Chatbot Example" },
+      { src: "/ESLSCA Chatbot/intro-majors.png", alt: "ESLSCA Chatbot Majors Provided Question/Answer" },
+      { src: "/ESLSCA Chatbot/courses provided.png", alt: "ESLSCA Chatbot Courses Provided Question/Answer" },
+      { src: "/ESLSCA Chatbot/newsletter-thanks.png", alt: "ESLSCA Chatbot Newsletter Subscription / Thanks message" },
     ],
     github: "https://github.com/your-username/gptube",
     demo: "https://chatbot.eslsca.edu.eg/",
