@@ -309,108 +309,127 @@ export default function Projects() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProjects.map((project, index) => (
-          <Card
-            key={index}
-            className={`bg-gray-900 border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all hover:scale-[1.02] hover:-translate-y-1 ${project.inDevelopment ? 'border-2 border-yellow-500/50' : ''} flex flex-col`}
-            onMouseEnter={() => handleProjectView(project.title)}
-          >
-            <CardHeader>
-              <CardTitle className="text-green-400">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span>{project.title}</span>
-                  {project.inDevelopment && (
-                    <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full whitespace-nowrap">
-                      In Development
-                    </span>
-                  )}
-                </div>
-              </CardTitle>
-              <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <div className="h-40 mb-4 overflow-hidden rounded-md flex items-center justify-center">
-                {project.inDevelopment ? (
-                  <div className="h-full w-full bg-yellow-500/10 flex items-center justify-center border border-yellow-500/30 rounded-md">
-                    <div className="text-center p-4">
-                      <span className="text-yellow-500 text-lg font-bold">Under Development</span>
-                      <p className="text-yellow-500/70 text-sm mt-2">Coming Soon!</p>
-                    </div>
+        {filteredProjects.map((project) => {
+          // Determine which images to show
+          let imagesToShow = project.images; // Default to project images
+          if (project.inDevelopment) {
+            if (project.images && project.images.length === 1 && project.images[0].src === "/in-development.png") {
+              imagesToShow = [{ src: "/in-development.png", alt: "Still In Development" }];
+            } else if (project.images && project.images.length > 0 && project.images[0].src !== "/in-development.png") {
+              imagesToShow = project.images;
+            } else {
+              imagesToShow = [{ src: "/in-development.png", alt: "Still In Development" }];
+            }
+          }
+
+          return (
+            <Card 
+              key={project.title}
+              className={`bg-gray-900 border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all hover:scale-[1.02] hover:-translate-y-1 ${project.inDevelopment ? 'border-2 border-yellow-500/50' : ''} flex flex-col`}
+              onMouseEnter={() => handleProjectView(project.title)}
+            >
+              <CardHeader>
+                <CardTitle className="text-green-400">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span>{project.title}</span>
+                    {project.inDevelopment && (
+                      <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full whitespace-nowrap">
+                        In Development
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  <Slideshow images={project.images} onImageClick={handleImageClick} />
+                </CardTitle>
+                <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                {/* Image Slideshow or In Development Placeholder */}
+                <div className="mb-4 rounded-lg overflow-hidden shadow-lg relative h-40 flex items-center justify-center">
+                  <Slideshow images={imagesToShow} onImageClick={handleImageClick} />
+                  {project.inDevelopment && (
+                     imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png" && (
+                     <div className="absolute inset-0 bg-yellow-500/10 flex flex-col items-center justify-center border border-yellow-500/30 rounded-md">
+                        <span className="text-yellow-500 text-lg font-bold">Under Development</span>
+                        <p className="text-yellow-500/70 text-sm mt-2">Coming Soon!</p>
+                      </div>
+                  ))}
+                  {project.inDevelopment && (
+                     !(imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png") && (
+                    <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded shadow-md">
+                      IN DEVELOPMENT
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {project.technologies.map((tech, techIndex) => (
+                    <Badge key={techIndex} variant="outline" className="border-green-500 text-green-400">
+                      {tech}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+              
+              <CardFooter className="flex justify-between mt-auto">
+                {project.github && (
+                  <Tooltip 
+                    text="Sorry, the code is confidential and not public."
+                    isMobile={isMobile}
+                    isTablet={isTablet}
+                    showTooltip={!project.code_available}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.code_available ? '' : 'opacity-50 cursor-not-allowed'}`}
+                      asChild
+                      disabled={!project.code_available}
+                      onClick={project.code_available ? () => clickProjectCode(project.title) : undefined}
+                    >
+                      {project.code_available ? (
+                        <a href={project.github} target="_blank" rel="noopener noreferrer">
+                          <Github size={16} className="mr-2" />
+                          Code
+                        </a>
+                      ) : (
+                        <span className="text-gray-500">
+                          <Github size={16} className="mr-2" />
+                          Code
+                        </span>
+                      )}
+                    </Button>
+                  </Tooltip>
                 )}
-              </div>
-              <div className="flex flex-wrap gap-2 mt-4">
-                {project.technologies.map((tech, techIndex) => (
-                  <Badge key={techIndex} variant="outline" className="border-green-500 text-green-400">
-                    {tech}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-            
-            <CardFooter className="flex justify-between mt-auto">
-              {project.github && (
+                
                 <Tooltip 
-                  text="Sorry, the code is confidential and not public."
+                  text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
                   isMobile={isMobile}
                   isTablet={isTablet}
-                  showTooltip={!project.code_available}
+                  showTooltip={project.inDevelopment ? false : !project.demo_available}
                 >
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.code_available ? '' : 'opacity-50 cursor-not-allowed'}`}
+                    className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.demo_available ? '' : 'opacity-50 cursor-not-allowed'}`}
                     asChild
-                    disabled={!project.code_available}
-                    onClick={project.code_available ? () => clickProjectCode(project.title) : undefined}
+                    disabled={!project.demo_available || project.inDevelopment}
+                    onClick={project.demo_available && !project.inDevelopment ? handleDemoClick : undefined}
                   >
-                    {project.code_available ? (
-                      <a href={project.github} target="_blank" rel="noopener noreferrer">
-                        <Github size={16} className="mr-2" />
-                        Code
+                    {project.demo && project.demo_available ? (
+                      <a href={project.demo} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink size={16} className="mr-2" />
+                        Demo
                       </a>
                     ) : (
                       <span className="text-gray-500">
-                        <Github size={16} className="mr-2" />
-                        Code
+                        <ExternalLink size={16} className="mr-2" />
+                        Demo
                       </span>
                     )}
                   </Button>
                 </Tooltip>
-              )}
-              
-              <Tooltip 
-                text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
-                isMobile={isMobile}
-                isTablet={isTablet}
-                showTooltip={project.inDevelopment ? false : !project.demo_available}
-              >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.demo_available ? '' : 'opacity-50 cursor-not-allowed'}`}
-                  asChild
-                  disabled={!project.demo_available || project.inDevelopment}
-                  onClick={project.demo_available && !project.inDevelopment ? handleDemoClick : undefined}
-                >
-                  {project.demo && project.demo_available ? (
-                    <a href={project.demo} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink size={16} className="mr-2" />
-                      Demo
-                    </a>
-                  ) : (
-                    <span className="text-gray-500">
-                      <ExternalLink size={16} className="mr-2" />
-                      Demo
-                    </span>
-                  )}
-                </Button>
-              </Tooltip>
-            </CardFooter>
-          </Card>
-        ))}
+              </CardFooter>
+            </Card>
+          )
+        })}
       </div>
 
       {filteredProjects.length === 0 && (

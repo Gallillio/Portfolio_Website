@@ -2,6 +2,24 @@ import type { Project } from "./types"
 
 export const projects: Project[] = [
   {
+    title: "AI Language Learning App",
+    description: "This AI-driven app offers a hyper-personalized language learning experience. Key features include a dynamic Word Bank, adaptive Duolingo-style mini-games, story generation using comprehensible input (90% known, 10% new words), and an FSRS-powered Spaced Repetition flashcard system for superior retention. An AI Chatbot Assistant provides tailored guidance, like a personal tutor.",
+    technologies: ["ReactJS", "NextJS", "NodeJS", "Django", "MongoDB", "TailwindCSS", "Vercel"],
+    images: [
+      { src: "/Language Learning App/reading mode.png", alt: "Reading Tab" },
+      { src: "/Language Learning App/story.png", alt: "Story Tab" },
+      { src: "/Language Learning App/flashcards.png", alt: "Flashcards Tab" },
+      { src: "/Language Learning App/wordbank.png", alt: "Word Bank Tab" },
+      { src: "/Language Learning App/add word.png", alt: "Add Word Tab" },
+      { src: "/Language Learning App/story add word.png", alt: "Story Add Word Tab" },
+    ],
+    github: "#", 
+    demo: "#",   
+    demo_available: false,
+    code_available: false, 
+    inDevelopment: true,
+  },
+  {
     title: "GPTube",
     description:
       "An interactive tool that engages users with YouTube videos through a GPT-powered chatbot, utilizing TTS and STT for voice interaction. It features generating mock tests, correcting user answers, and creating PowerPoint presentations.",
@@ -110,7 +128,7 @@ export const projects: Project[] = [
   },
   {
     title: '"Brillium" AI SaaS',
-    description: "Brillium is an AI-powered LMS that converts PDF textbooks into interactive learning experiences. It generates quizzes, flashcards, and presentations, analyze student performance, and dynamically create questions for improvement. Teachers can monitor and edit content, while a chatbot serves as a personal assistant for students.\n\n⚠️ This project is currently under development ⚠️",
+    description: "Brillium is an AI-powered LMS that converts PDF textbooks into interactive learning experiences. It generates quizzes, flashcards, and presentations, analyze student performance, and dynamically create questions for improvement. Teachers can monitor and edit content, while a chatbot serves as a personal assistant for students.",
     technologies: ["Google Cloud", "FastAPI","Tesseract OCR", "Python", "ReactJS", "NextJS","NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
     images: [
       { src: "/in-development.png", alt: "Still In Development" },
@@ -123,7 +141,7 @@ export const projects: Project[] = [
   },
   {
     title: '"SelZeky" Company Profile Website',
-    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.\n\n⚠️ This project is currently under development ⚠️",
+    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.",
     technologies: ["TypeScript", "ReactJS", "NextJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
     images: [
       { src: "/in-development.png", alt: "Still In Development" },
