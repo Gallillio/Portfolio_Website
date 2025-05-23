@@ -29,6 +29,7 @@ function TerminalContent(): React.ReactNode {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isChatMode, setIsChatMode] = useState(false)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
+  const [isBotResponding, setIsBotResponding] = useState(false)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
@@ -237,84 +238,87 @@ function TerminalContent(): React.ReactNode {
             isError: false
           }
         ]);
+        if (terminalInputRef.current) {
+          terminalInputRef.current.focus();
+        }
         return;
       }
 
+      // Add user's message to history immediately
+      const newUserMessage: ChatMessage = { role: 'user', content: trimmedInput };
+      setChatHistory(prevChat => [...prevChat, newUserMessage]);
       setHistory(prev => [
         ...prev,
         {
-          command: trimmedInput,
-          output: [],
+          command: trimmedInput, 
+          output: [], // No direct output for user's chat message in terminal history, it's in chat UI
           timestamp: new Date(),
           isError: false
         }
       ]);
-
-      setHistory(prev => [
-        ...prev,
-        {
-          command: "",
-          output: ["Processing your request..."],
-          timestamp: new Date(),
-          isError: false
-        }
-      ]);
+      
+      setIsBotResponding(true); // Disable input
 
       try {
-        const response = await fetch('/api/gemini', {
+        const res = await fetch('/api/gemini', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            message: trimmedInput,
-            conversationHistory: chatHistory
-          }),
+          body: JSON.stringify({ message: trimmedInput, conversationHistory: chatHistory }),
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch response from Gemini API');
+        if (!res.ok) {
+          throw new Error('Failed to get response from bot');
         }
 
-        const data = await response.json();
-        const content = data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I could not generate a response.';
-
-        setHistory(prev => prev.slice(0, -1));
-
+        const data = await res.json();
+        const botResponse: ChatMessage = { 
+          role: 'model', 
+          // Ensure content is a string, even if parts are missing
+          content: data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response."
+        };
+        setChatHistory(prevChat => [...prevChat, botResponse]);
+        
+        // Add bot's response to terminal history as well, formatted
         setHistory(prev => [
           ...prev,
           {
-            command: "",
-            output: [content.split("\n").map((line: string, i: number) => <div key={i}>{line}</div>)],
+            command: "", // Bot response doesn't originate from a user command line
+            output: [
+              <div key={Date.now()} className="whitespace-pre-wrap font-normal text-sm">
+                <span className="text-purple-400">Gallillio Assistant:</span> {botResponse.content}
+              </div>
+            ],
             timestamp: new Date(),
             isError: false
           }
         ]);
 
-        setChatHistory(prev => [
-          ...prev,
-          { role: 'user', content: trimmedInput },
-          { role: 'model', content: content }
-        ]);
       } catch (error) {
-        console.error('Chat error:', error);
-
-        setHistory(prev => prev.slice(0, -1));
-
+        console.error("Error fetching bot response:", error);
+        const errorMessage: ChatMessage = { role: 'model', content: "Sorry, something went wrong. Please try again." };
+        setChatHistory(prevChat => [...prevChat, errorMessage]);
         setHistory(prev => [
           ...prev,
           {
-            command: "",
-            output: ["Sorry, I encountered an error. Please try again."],
+            command: "", 
+            output: [
+              <div key={Date.now()} className="whitespace-pre-wrap font-normal text-sm text-red-400">
+                <span className="text-purple-400">Chatbot Error:</span> {errorMessage.content}
+              </div>
+            ],
             timestamp: new Date(),
             isError: true
           }
         ]);
       } finally {
-        ensureInputVisible();
+        setIsBotResponding(false); // Re-enable input
+        if (terminalInputRef.current) {
+          terminalInputRef.current.focus();
+        }
       }
-
-      return;
+      return; // Chat mode handled, exit function
     }
 
     const lowerCommand = trimmedInput.toLowerCase()
@@ -1101,7 +1105,14 @@ function TerminalContent(): React.ReactNode {
                 )}
                 <TerminalOutput history={history} onCommandClick={handleCommandClick} isChatMode={isChatMode} />
                 <div ref={outputEndRef} />
-                <TerminalInput ref={terminalInputRef} onCommand={handleCommand} isChatMode={isChatMode} />
+                {!isClosing && (
+                  <TerminalInput 
+                    ref={terminalInputRef} 
+                    onCommand={handleCommand} 
+                    isChatMode={isChatMode}
+                    isBotResponding={isBotResponding}
+                  />
+                )}
               </div>
             </TabsContent>
 

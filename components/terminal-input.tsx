@@ -8,6 +8,7 @@ import { availableCommands } from "@/lib/commands"
 interface TerminalInputProps {
   onCommand: (command: string) => void
   isChatMode?: boolean
+  isBotResponding?: boolean
 }
 
 export interface TerminalInputRef {
@@ -15,7 +16,7 @@ export interface TerminalInputRef {
   focus: () => void;
 }
 
-const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ onCommand, isChatMode = false }, ref) => {
+const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ onCommand, isChatMode = false, isBotResponding = false }, ref) => {
   const [input, setInput] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
@@ -243,10 +244,11 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className={`w-full bg-transparent border-none outline-none font-mono ${isChatMode ? "text-blue-300" : "text-green-500"}`}
+            className={`w-full bg-transparent border-none outline-none font-mono ${isChatMode ? "text-blue-300" : "text-green-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
             autoFocus
             aria-label="Terminal input"
-            placeholder={isChatMode ? "Type your message..." : ""}
+            placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking..." : "Type your message...") : ""}
+            disabled={isBotResponding}
           />
           {suggestion && !isChatMode && (
             <div className="absolute left-0 top-0 flex items-center pointer-events-none">
