@@ -499,7 +499,7 @@ function TerminalContent(): React.ReactNode {
       setIsFullscreen(false)
       setAnimationClass("animate-contract")
     }
-    executeSecretCommand("closed");
+      executeSecretCommand("closed");
     setTimeout(() => {
       registerTerminalClosed();
     }, 500);
@@ -912,13 +912,13 @@ function TerminalContent(): React.ReactNode {
                   <MessageSquare size={16} />
                 )}
               </button>
-              <button 
-                onClick={toggleFullscreen} 
+            <button 
+              onClick={toggleFullscreen} 
                 className={`transition-colors duration-300
                   ${isChatMode && activeTab === "terminal" ? 'text-gray-400 hover:text-gray-300' : 'text-green-500 hover:text-green-400'}`}
-              >
-                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-              </button>
+            >
+              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
             </div>
           )}
         </div>
@@ -947,8 +947,8 @@ function TerminalContent(): React.ReactNode {
               <div className="hidden md:block">
                 <TabsList className={`bg-transparent border-none rounded-none h-auto 
                   ${isChatMode && activeTab === "terminal" ? 'chat-tabs' : ''}`}>
-                  <TabsTrigger
-                    value="terminal"
+                <TabsTrigger
+                  value="terminal"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
@@ -962,44 +962,44 @@ function TerminalContent(): React.ReactNode {
                     ) : (
                       "Terminal"
                     )}
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="projects"
+                </TabsTrigger>
+                <TabsTrigger
+                  value="projects"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                  >
-                    Projects
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="about"
+                >
+                  Projects
+                </TabsTrigger>
+                <TabsTrigger
+                  value="about"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                  >
+                >
                     About / Experience
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="contact"
+                </TabsTrigger>
+                <TabsTrigger
+                  value="contact"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                  >
+                >
                     Contact / CV
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="my-achievements"
+                </TabsTrigger>
+                <TabsTrigger
+                  value="my-achievements"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                  >
+                >
                     My Achievements / Publications / Certifications
-                  </TabsTrigger>
-                </TabsList>
+                </TabsTrigger>
+              </TabsList>
               </div>
 
               <TabsList className={`bg-transparent border-none rounded-none h-auto ml-auto flex-grow hidden md:flex

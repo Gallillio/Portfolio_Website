@@ -98,7 +98,7 @@ const achievementsList: Achievement[] = [
     id: "first_step",
     title: "First Step",
     description: "Execute your first command in the terminal",
-    icon: <Trophy className="h-6 w-6" />,
+      icon: <Trophy className="h-6 w-6" />,
     category: AchievementCategory.INTERACTION,
     condition: (state) => state.totalCommands >= 1,
     hint: "Try typing a command in the terminal",
@@ -141,9 +141,9 @@ const achievementsList: Achievement[] = [
   },
   {
     id: "persistent_visitor",
-    title: "Persistent Visitor",
+      title: "Persistent Visitor",
     description: "Spent more than 5 minutes exploring the portfolio",
-    icon: <Zap className="h-6 w-6" />,
+      icon: <Zap className="h-6 w-6" />,
     category: AchievementCategory.PERSISTENCE,
     condition: (state) => state.visitDuration >= 5,
     hint: "Spend more time exploring the site",
@@ -322,10 +322,10 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     const loadAchievementProgress = () => {
       if (typeof window === "undefined") return {};
       
-      try {
-        const savedProgress = localStorage.getItem(ACHIEVEMENT_PROGRESS_KEY);
-        if (savedProgress) {
-          const parsed = JSON.parse(savedProgress);
+    try {
+      const savedProgress = localStorage.getItem(ACHIEVEMENT_PROGRESS_KEY);
+      if (savedProgress) {
+        const parsed = JSON.parse(savedProgress);
           
           // Convert dates from strings back to Date objects
           Object.values(parsed).forEach((progress) => {
@@ -349,8 +349,8 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
       if (typeof window === "undefined") return null;
       
       try {
-        const savedState = localStorage.getItem(ACHIEVEMENT_STATE_KEY);
-        if (savedState) {
+      const savedState = localStorage.getItem(ACHIEVEMENT_STATE_KEY);
+      if (savedState) {
           const parsed = JSON.parse(savedState);
           
           // Convert sets from arrays back to Sets
@@ -474,8 +474,8 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
         // Mark as unlocked and set timestamp
         updatedProgress[achievement.id] = {
           ...updatedProgress[achievement.id],
-          unlocked: true,
-          unlockedAt: new Date()
+              unlocked: true,
+              unlockedAt: new Date()
         };
         
         // Add to newly unlocked achievements
@@ -552,7 +552,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
       updatedSecretCommands.add(command.toLowerCase());
       
       return {
-        ...prev,
+      ...prev,
         secretCommandsExecuted: updatedSecretCommands
       };
     });
@@ -624,7 +624,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
 
   const registerTerminalMinimized = useCallback(() => {
     setState(prev => ({
-      ...prev,
+        ...prev,
       terminalMinimized: true
     }));
   }, []);
@@ -707,9 +707,9 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
       }
         
       case "achievement_hunter": {
-        const unlockedCount = Object.values(achievementProgress).filter(a => a.unlocked).length;
-        return { current: unlockedCount, target: 5 };
-      }
+      const unlockedCount = Object.values(achievementProgress).filter(a => a.unlocked).length;
+      return { current: unlockedCount, target: 5 };
+    }
         
       case "persistent_visitor":
         return { current: Math.min(Math.floor(state.visitDuration), 5), target: 5 };
@@ -777,8 +777,8 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
   const contextValue = {
     achievements: achievementsList,
     unlockedAchievements,
-    lastUnlockedAchievement,
-    clearLastUnlockedAchievement,
+        lastUnlockedAchievement,
+        clearLastUnlockedAchievement,
     viewAchievement: viewProject,
     
     // Track actions for unlocking achievements

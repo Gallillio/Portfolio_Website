@@ -238,11 +238,23 @@ export const personalAchievements: PersonalAchievement[] = [
     - Microsoft Azure AI Fundamentals
     - Designing and Implementing a Microsoft Azure AI Solution`,
     icon: "shieldCheck",
-    year: "Apr. 2025",
+    year: "May. 2025",
     category: "Certification",
-    link: "/azure-certification",
+    link: "https://learn.microsoft.com/api/credentials/share/en-us/Gallillio/FA9AAA1E4EAF1DC?sharingId=BF374C9707F46C52",
     linkText: "View Certification"
   },
+  {
+    id: "stakpak-hackathon",
+    title: "Winner at the GenAI Hackathon",
+    description: `Won the Stakpak Hackathon.
+    hosted by Stakpak, for presenting the AI-powered Language Learning App shown under the Projects Section`,
+    icon: "star",
+    year: "May. 2025",
+    category: "Award",
+    link: "https://www.linkedin.com/feed/update/urn:li:activity:7330556317721432068/",
+    linkText: "View LinkedIn Post"
+  },
+
   {
     id: "times-higher-education-eslsca",
     title: "Awarded The Times Highest Higher Education",
