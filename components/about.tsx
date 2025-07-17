@@ -336,22 +336,18 @@ export default function About() {
             <div className={`relative ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
               <div className={`space-y-4 ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
                 <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  I approach innovation with an AI-first mindset, I firmly believe in using AI tools along side with 
-                  Software Engineering to bring advanced technology to life quickly and efficiently.
+                  I architect and deploy enterprise-grade AI solutions that transform how organizations operate. From building secure, on-premises LLM assistants for banks and telecom giants using IBM Watsonx, to developing computer vision systems that save companies thousands in operational costs, my work spans the full spectrum of AI engineering—NLP, computer vision, deep learning, and cloud-native applications.
                 </p>
-                <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  Drawing on diverse international experiences, I design and deploy cutting-edge AI
-                  Solutions and Software Systems designed to streamline complex processes and deliver substantial value.
-                </p>
-                <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  Leveraging robust technologies like Azure, IBM Watsonx, React.js, Next.js, and Cursor.
-                </p>
-                <p className={`${!isBioExpanded ? 'hidden' : ''}`}>
-                  My work has consistently delivered transformative results, earning recognition in esteemed International
-                  Publications like Elsevier&apos;s Procedia, Awards such as the Times Higher Education Award 2024, and through
-                  my startup, GPTuBE, which was recognized as a Top 3 finalist in the GESAwards Africa, respresing Egypt,
-                  and the entirety of North Africa internationally.
-                </p>
+                <div className={`overflow-hidden transition-all duration-500 ease-in-out ${
+                  !isBioExpanded ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'
+                }`}>
+                  <p className="mb-4">
+                    Leveraging Python, React.js, Microsoft Azure, and IBM Watsonx, I&apos;ve delivered solutions that earned international recognition—including the Times Higher Education Award 2024 for technological innovation and representing Egypt & North Africa in the GESAwards Global Finals with my startup GPTuBE.
+                  </p>
+                  <p>
+                    My research on Arabic LLM reasoning was published in Elsevier Procedia, and I&apos;ve led enterprise AI workshops for C-suite executives across leading organizations.
+                  </p>
+                </div>
               </div>
               {/* Gradient overlay for collapsed state */}
               <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none transition-opacity duration-300 ${

@@ -36,26 +36,9 @@ export const projects: Project[] = [
     code_available: true,
   },
   {
-    title: "Real-Time Facial Emotion Classification",
-    description:
-    "Developed a real-time facial emotion classification system using transfer learning (MobileNetV2, VGG) and a custom CNN, achieving 83% accuracy on FER-2013 dataset using fine-tuned MobileNetV2 model.",
-    technologies: ["OpenCV", "CNN", "MobileNetV2", "VGG", "Flask"],
-    images: [
-      { src: "/RealTime Facial Emotion Classification Results Slideshow/neutral.png", alt: "Neutral Expression" },
-      { src: "/RealTime Facial Emotion Classification Results Slideshow/happy.png", alt: "Happy Expression" },
-      { src: "/RealTime Facial Emotion Classification Results Slideshow/fearful.png", alt: "Fearful Expression" },
-      { src: "/RealTime Facial Emotion Classification Results Slideshow/sad.png", alt: "Sad Expression" },
-      { src: "/RealTime Facial Emotion Classification Results Slideshow/surprised.png", alt: "Surprised Expression" },
-    ],
-    github: "https://github.com/Gallillio/RealTime_Facial_Emotion_Classification",
-    demo: "You think I'm going to host a demo for this one? Hahaha",
-    demo_available: false,
-    code_available: true,
-  },
-  {
     title: "IIG-HEC Company Profile Website",
     description:
-      "A website for IIG-HEC Company Profile. With a clean and modern design, it showcases the company's services, projects, and a blog section.",
+    "A website for IIG-HEC Company Profile. With a clean and modern design, it showcases the company's services, projects, and a blog section.",
     technologies: ["JavaScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Firebase", "Vercel"],
     images: [
       { src: "/IIG-HEC Website/Projects.png", alt: "IIG-HEC Company Profile Website" },
@@ -101,6 +84,23 @@ export const projects: Project[] = [
     code_available: false,
   },
   {
+    title: "Real-Time Facial Emotion Classification",
+    description:
+    "Developed a real-time facial emotion classification system using transfer learning (MobileNetV2, VGG) and a custom CNN, achieving 83% accuracy on FER-2013 dataset using fine-tuned MobileNetV2 model.",
+    technologies: ["OpenCV", "CNN", "MobileNetV2", "VGG", "Flask"],
+    images: [
+      { src: "/RealTime Facial Emotion Classification Results Slideshow/neutral.png", alt: "Neutral Expression" },
+      { src: "/RealTime Facial Emotion Classification Results Slideshow/happy.png", alt: "Happy Expression" },
+      { src: "/RealTime Facial Emotion Classification Results Slideshow/fearful.png", alt: "Fearful Expression" },
+      { src: "/RealTime Facial Emotion Classification Results Slideshow/sad.png", alt: "Sad Expression" },
+      { src: "/RealTime Facial Emotion Classification Results Slideshow/surprised.png", alt: "Surprised Expression" },
+    ],
+    github: "https://github.com/Gallillio/RealTime_Facial_Emotion_Classification",
+    demo: "You think I'm going to host a demo for this one? Hahaha",
+    demo_available: false,
+    code_available: true,
+  },
+  {
     title: "My Portfolio Website",
     description:
     "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
@@ -114,14 +114,27 @@ export const projects: Project[] = [
     code_available: true,
   },
   {
-    title: '"SelZeky" AI Sales Consultant SaaS',
-    description: "SelZeky is an AI-powered sales consultant that uses NLP to understand customer needs and recommend products. It provides real-time updates and a chatbot for customer support.",
-    technologies: ["Microsoft Azure", "Django", "Vector Database", "RAG", "Python", "ReactJS", "NextJS", "NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
+    title: 'AI Quickbooks CFO Assistant – Swipelabs',
+    description: "An AI-powered virtual CFO that automates financial analysis for small businesses. Integrated with QuickBooks API for real-time financial data sync, implemented automated weekly digests via email/Slack, and developed a Financial Health Score algorithm. Built a web dashboard for KPIs and trends, enabled GPT-powered finance Q&A, and created forecast simulation tools with budget tracking and alerting systems.",
+    technologies: ["NextJS", "Python", "Supabase", "QuickBooks API", "Postmark"],
     images: [
       { src: "/in-development.png", alt: "Still In Development" },
     ],
-    github: "https://github.com/Gallillio/MERN-Leen_Company_Website",
-    demo: "https://www.leen.com/",
+    github: "#",
+    demo: "#",
+    demo_available: false,
+    code_available: false,
+    inDevelopment: true,
+  },
+  {
+    title: 'Slack AI Assistant – Swipelabs',
+    description: "A GPT-powered Slack app for client communication and workflow management. Features real-time interactions with sentiment analysis and AI-suggested replies, client package tracking with automated reminders, and full integration with Trello, ClickUp, and Asana for task management. Includes smart monitoring for unanswered messages, CRM-style reminders for account managers, and automated time tracking with performance reports.",
+    technologies: ["Python", "Flask", "Slack API", "Trello API", "ClickUp API", "Google Calendar API", "PostgreSQL", "NLP"],
+    images: [
+      { src: "/in-development.png", alt: "Still In Development" },
+    ],
+    github: "#",
+    demo: "#",
     demo_available: false,
     code_available: false,
     inDevelopment: true,
@@ -135,19 +148,6 @@ export const projects: Project[] = [
     ],
     github: "https://github.com/Gallillio/Brillium",
     demo: "https://www.Brillium.com/",
-    demo_available: false,
-    code_available: false,
-    inDevelopment: true,
-  },
-  {
-    title: '"SelZeky" Company Profile Website',
-    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.",
-    technologies: ["TypeScript", "ReactJS", "NextJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
-    images: [
-      { src: "/in-development.png", alt: "Still In Development" },
-    ],
-    github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
-    demo: "https://www.selzeky.com/",
     demo_available: false,
     code_available: false,
     inDevelopment: true,

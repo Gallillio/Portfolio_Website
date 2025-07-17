@@ -85,13 +85,21 @@ export const experiences = [
     title: "AI Engineer",
     company: "Intelligent Systems (I-Sys)",
     period: "Feb. 2025 - Present",
-    technologies: ["IBM Watsonx", "IBM Cloud", "Docker", "Kubernetes", "OpenAPI Specification (OAS)", "LLMs", "Data Pipelines"],
+    technologies: ["IBM Watsonx", "IBM Cloud", "Docker", "Kubernetes", "OpenAPI Specification (OAS)", "LLMs", "Data Pipelines", "TTS", "STT", "RAG"],
     description:
-      ` • Collaborated the deployment of Watsonx-powered self-service robots, kiosk avatars, and omni-channel conversational AI systems that enhance customer engagement across our partner Telecommunication and banking companies Vodaphone and Bank Misr
+      ` • Developed secure, on-premises AI assistant platforms for banks and telecom clients using IBM technologies (Watsonx.ai, Watsonx Orchestrate, Watsonx Discovery), enabling ChatGPT-like interaction while preserving data confidentiality and compliance.
       
-      • Developed custom NLP modules within Watsonx.ai to support multilingual interactions in Arabic's regional dialects (Egyptian and Saudi) with high accuracy—to ensure a seamless customer experience. 
+      • Created AI agents that automate common employee tasks including calendar integration, meeting scheduling, email handling, and auto-generating Word and Excel reports through conversational input.
       
-      • Leveraged IBM Watsonx to power event robots that enabling features like automated registration (with ID QR code scanning and instant photo printing, interactive demonstrations, and real-time feedback collection.
+      • Created custom LLM-based solutions capable of handling document uploads (.docx, .pdf, etc.) and performing RAG (Retrieval-Augmented Generation) over internal knowledge to answer user questions with precision.
+      
+      • Trained Text-to-Speech (TTS) and Speech-to-Text (STT) models tailored for Egyptian and Saudi Arabic dialects, for use in voice assistants and customer service phone systems.
+      
+      • Integrated dialect-specific NLP and speech models into client applications, enhancing accessibility and usability for local end-users in voice-based interfaces.
+      
+      • Collaborated with UK-based firm EmoTech to build conversational virtual avatars for public-facing services, delivering interactive Arabic voice assistants powered by dialectal LLMs.
+      
+      • Led client demos, and high-impact AI workshops and technical demonstrations, including presenting enterprise-grade solutions to C-suite executives from leading firms. Conducted one-on-one strategic consultations to identify pain points and tailor AI integration road-maps for each organization. Workshop Showcase: @https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/
       `,
   },
   {
@@ -175,26 +183,8 @@ export const freelanceProjects: FreelanceProject[] = [
     demo_available: true,
     code_available: true,
   },
-  {
-    title: '"SelZeky" Company Profile Website',
-    description: "Designed with a sleek and contemporary aesthetic, this website highlights SelZeky's services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.",
-    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
-    period: "Mar. 2025 - Present (In Progress)",
-    github: "https://github.com/Gallillio/MERN-SelZeky_Company_Website",
-    demo: "https://www.selzeky.com/",
-    demo_available: false,
-    code_available: false,
-  },
-  {
-    title: '"Leen" Company Profile Website',
-    description: "This ecommerce platform presents a user-friendly interface that showcases Leen's range of products and services, making it easy for customers to browse and shop online.",
-    technologies: ["TypeScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Vercel"],
-    period: "Mar. 2025 - Present (In Progress)",
-    github: "https://github.com/Gallillio/MERN-Leen_Company_Website",
-    demo: "https://www.leen.com/",
-    demo_available: false,
-    code_available: false,
-  },
+
+
 ];
 
 // Add links data

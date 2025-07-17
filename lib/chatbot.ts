@@ -45,10 +45,8 @@ export async function sendMessageToGemini(
             {
               text: `My name is Ahmed Galal Elzeky. (My nickname is Gallillio) I am an AI and software developer.
 Bio
-I approach innovation with an AI-first mindset, I firmly believe in using AI tools along side with Software Engineering to bring advanced technology to life quickly and efficiently.
-Drawing on diverse international experiences, I design and deploy cutting-edge AI Solutions and Software Systems designed to streamline complex processes and deliver substantial value.
-Leveraging robust technologies like Azure, IBM Watsonx, React.js, Next.js, and Cursor.
-My work has consistently delivered transformative results, earning recognition in esteemed International Publications like Elsevier\'s Procedia, Awards such as the Times Higher Education Award 2024, and through my startup, GPTuBE, which was recognized as a Top 3 finalist in the GESAwards Africa, respresing Egypt, and the entirety of North Africa internationally.
+I architect and deploy enterprise-grade AI solutions that transform how organizations operate. From building secure, on-premises LLM assistants for banks and telecom giants using IBM Watsonx, to developing computer vision systems that save companies thousands in operational costs, my work spans the full spectrum of AI engineering—NLP, computer vision, deep learning, and cloud-native applications.
+Leveraging Python, React.js, Microsoft Azure, and IBM Watsonx, I've delivered solutions that earned international recognition—including the Times Higher Education Award 2024 for technological innovation and representing Egypt & North Africa in the GESAwards Global Finals with my startup GPTuBE. My research on Arabic LLM reasoning was published in Elsevier Procedia, and I've led enterprise AI workshops for C-suite executives across leading organizations.
 Skills
 AI & Machine Learning
 NLP
@@ -113,9 +111,13 @@ Kubernetes
 OpenAPI Specification (OAS)
 LLMs
 Data Pipelines
-• Collaborated the deployment of Watsonx-powered self-service robots, kiosk avatars, and omni-channel conversational AI systems that enhance customer engagement across our partner Telecommunication and banking companies Vodaphone and Bank Misr
-• Developed custom NLP modules within Watsonx.ai to support multilingual interactions in Arabic\'s regional dialects (Egyptian and Saudi) with high accuracy—to ensure a seamless customer experience.
-• Leveraged IBM Watsonx to power event robots that enabling features like automated registration (with ID QR code scanning and instant photo printing, interactive demonstrations, and real-time feedback collection.
+• Developed secure, on-premises AI assistant platforms for banks and telecom clients using IBM technologies (Watsonx.ai, Watsonx Orchestrate, Watsonx Discovery), enabling ChatGPT-like interaction while preserving data confidentiality and compliance.
+• Created AI agents that automate common employee tasks including calendar integration, meeting scheduling, email handling, and auto-generating Word and Excel reports through conversational input.
+• Created custom LLM-based solutions capable of handling document uploads (.docx, .pdf, etc.) and performing RAG (Retrieval-Augmented Generation) over internal knowledge to answer user questions with precision.
+• Trained Text-to-Speech (TTS) and Speech-to-Text (STT) models tailored for Egyptian and Saudi Arabic dialects, for use in voice assistants and customer service phone systems.
+• Integrated dialect-specific NLP and speech models into client applications, enhancing accessibility and usability for local end-users in voice-based interfaces.
+• Collaborated with UK-based firm EmoTech to build conversational virtual avatars for public-facing services, delivering interactive Arabic voice assistants powered by dialectal LLMs.
+• Led client demos, and high-impact AI workshops and technical demonstrations, including presenting enterprise-grade solutions to C-suite executives from leading firms. Conducted one-on-one strategic consultations to identify pain points and tailor AI integration road-maps for each organization. Workshop Showcase: @https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/
 
 
 
@@ -227,29 +229,9 @@ MongoDB
 TailwindCSS
 Firebase
 Vercel
-"SelZeky" Company Profile Website
- - Mar. 2025 - Present (In Progress)
-Designed with a sleek and contemporary aesthetic, this website highlights SelZeky\'s services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.
 
-TypeScript
-ReactJS
-NodeJS
-ExpressJS
-MongoDB
-TailwindCSS
-Vercel
 
-"Leen" Company Profile Website
-- Mar. 2025 - Present (In Progress)
-This ecommerce platform presents a user-friendly interface that showcases Leen\'s range of products and services, making it easy for customers to browse and shop online.
 
-TypeScript
-ReactJS
-NodeJS
-ExpressJS
-MongoDB
-TailwindCSS
-Vercel
 
 Contact Information
 AhmedGalal11045@gmail.com
@@ -375,25 +357,7 @@ TailwindCSS
 Vercel
 Code
 Demo
-"SelZeky" AI Sales Consultant SaaS
-In Development
-SelZeky is an AI-powered sales consultant that uses NLP to understand customer needs and recommend products. It provides real-time updates and a chatbot for customer support.
-Under Development
-Coming Soon!
 
-Microsoft Azure
-Django
-Vector Database
-RAG
-Python
-ReactJS
-NextJS
-NodeJS
-MongoDB
-TailwindCSS
-Vercel
-Code
-Demo
 "Brillium" AI SaaS
 In Development
 Brillium is an AI-powered LMS that converts PDF textbooks into interactive learning experiences. It generates quizzes, flashcards, and presentations, analyze student performance, and dynamically create questions for improvement. Teachers can monitor and edit content, while a chatbot serves as a personal assistant for students.
@@ -414,9 +378,42 @@ TailwindCSS
 Vercel
 Code
 Demo
-"SelZeky" Company Profile Website
+
+AI Quickbooks CFO Assistant – Swipelabs
 In Development
-Designed with a sleek and contemporary aesthetic, this website highlights SelZeky\'s services and automates the recruitment process, while also featuring a dedicated blog section for updates and insights.
+A lightweight AI-powered virtual CFO tailored for small business owners, designed to automate financial analysis and provide real-time decision support. Integrated with QuickBooks API for sync of financial data (invoices, A/R, expenses, cash flow). Delivered automated weekly digests via email/Slack summarizing revenue trends, burn rate, overdue invoices, and AI insights. Implemented a scoring algorithm to calculate a Financial Health Score using business-type-adjusted weights (e.g. Burn Multiple, Margin, Runway). Enabled founders to ask finance-related questions via email, receiving GPT-powered replies within minutes. Developed a read-only web dashboard showing financial KPIs, trends, and a diff-style summary of 'What changed this week?' Added tools for forecast simulation and budget tracking, including text-based scenario analysis and alerting for overspending.
+
+⚠️ This project is currently under development ⚠️
+Under Development
+Coming Soon!
+
+NextJS
+Python
+Supabase
+QuickBooks API
+Postmark
+Code
+Demo
+
+Slack AI Assistant – Swipelabs
+In Development
+Built a GPT-powered Slack app designed to assist Swipelabs team members in managing client communication and internal workflows. The assistant enabled seamless interaction via direct messages, internal channels, and Slack Connect, with real-time pings, sentiment cues, and AI-suggested replies. Client package tracking and onboarding workflows, with manual input and automatic reminders for setup completion. Full integration with Trello, ClickUp, and Asana to track deliverables vs. obligations and ping responsible members when tasks were overdue. Smart monitoring of Slack Connect for unanswered messages, deadlines, and client tone, prompting appropriate follow-ups. CRM-style reminders for account managers, with intelligent follow-up nudges after meetings and inactivity alerts. Time tracking via integration or Slack-based input, and automatic weekly/on-demand performance reports sent to managers.
+
+⚠️ This project is currently under development ⚠️
+Under Development
+Coming Soon!
+
+Python
+Flask
+Slack API
+Trello API
+ClickUp API
+Google Calendar API
+PostgreSQL
+NLP
+Code
+Demo
+
 
 ⚠️ This project is currently under development ⚠️
 Under Development
