@@ -380,12 +380,7 @@ Code
 Demo
 
 AI Quickbooks CFO Assistant – Swipelabs
-In Development
 A lightweight AI-powered virtual CFO tailored for small business owners, designed to automate financial analysis and provide real-time decision support. Integrated with QuickBooks API for sync of financial data (invoices, A/R, expenses, cash flow). Delivered automated weekly digests via email/Slack summarizing revenue trends, burn rate, overdue invoices, and AI insights. Implemented a scoring algorithm to calculate a Financial Health Score using business-type-adjusted weights (e.g. Burn Multiple, Margin, Runway). Enabled founders to ask finance-related questions via email, receiving GPT-powered replies within minutes. Developed a read-only web dashboard showing financial KPIs, trends, and a diff-style summary of 'What changed this week?' Added tools for forecast simulation and budget tracking, including text-based scenario analysis and alerting for overspending.
-
-⚠️ This project is currently under development ⚠️
-Under Development
-Coming Soon!
 
 NextJS
 Python

@@ -20,6 +20,25 @@ export const projects: Project[] = [
     inDevelopment: true,
   },
   {
+    title: 'AI Quickbooks CFO Assistant – Swipelabs',
+    description: "An AI-powered virtual CFO that automates financial analysis for small businesses. Integrated with QuickBooks API for real-time financial data sync, implemented automated weekly digests via email/Slack, and developed a Financial Health Score algorithm. Built a web dashboard for KPIs and trends, enabled GPT-powered finance Q&A, and created forecast simulation tools with budget tracking and alerting systems.",
+    technologies: ["NextJS", "Python", "Supabase", "QuickBooks API", "Postmark"],
+    images: [
+      { src: "/Mini CFO/dashboard 1.png", alt: "Main Dashboard Overview" },
+      { src: "/Mini CFO/dashboard 2.png", alt: "Financial KPIs Dashboard" },
+      { src: "/Mini CFO/dashboard 3.png", alt: "Analytics Dashboard" },
+      { src: "/Mini CFO/AI Assistant in Dashboard.png", alt: "AI Assistant Integration" },
+      { src: "/Mini CFO/Balance Sheet.png", alt: "Balance Sheet View" },
+      { src: "/Mini CFO/Forecasting.png", alt: "Financial Forecasting Tool" },
+      { src: "/Mini CFO/invoices.png", alt: "Invoice Management" },
+      { src: "/Mini CFO/transactions.png", alt: "Transaction Overview" },
+    ],
+    github: "#",
+    demo: "#",
+    demo_available: false,
+    code_available: false,
+  },
+  {
     title: "GPTube",
     description:
       "An interactive tool that engages users with YouTube videos through a GPT-powered chatbot, utilizing TTS and STT for voice interaction. It features generating mock tests, correcting user answers, and creating PowerPoint presentations.",
@@ -112,19 +131,6 @@ export const projects: Project[] = [
     demo: "https://gallillio.vercel.app",
     demo_available: true,
     code_available: true,
-  },
-  {
-    title: 'AI Quickbooks CFO Assistant – Swipelabs',
-    description: "An AI-powered virtual CFO that automates financial analysis for small businesses. Integrated with QuickBooks API for real-time financial data sync, implemented automated weekly digests via email/Slack, and developed a Financial Health Score algorithm. Built a web dashboard for KPIs and trends, enabled GPT-powered finance Q&A, and created forecast simulation tools with budget tracking and alerting systems.",
-    technologies: ["NextJS", "Python", "Supabase", "QuickBooks API", "Postmark"],
-    images: [
-      { src: "/in-development.png", alt: "Still In Development" },
-    ],
-    github: "#",
-    demo: "#",
-    demo_available: false,
-    code_available: false,
-    inDevelopment: true,
   },
   {
     title: 'Slack AI Assistant – Swipelabs',
