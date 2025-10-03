@@ -63,6 +63,7 @@ Microsoft Azure
 Google Cloud
 IBM Watsonx
 IBM Cloud
+Firebase
 
 Web & Application Development
 JavaScript
@@ -74,7 +75,10 @@ ExpressJS
 FastAPI
 Django
 Flask
+Flutter
 MongoDB
+PostgreSQL
+Supabase
 
 REST APIs
 
@@ -85,6 +89,9 @@ Tailwind
 
 DevOps & Tools
 Git
+Docker
+Kubernetes
+Jenkins
 Cursor
 Vercel
 V0
@@ -100,6 +107,21 @@ Trello
 Slack
 
 Professional Experience
+Software Developer
+Develop Systems
+•
+Sep. 2025 - Present
+Flutter
+Firebase
+API Integration
+Authentication
+Database Design
+Cloud Configuration
+• Built and deployed production-ready applications, delivering both Flutter frontends and Firebase backends for client projects.
+• Supported transition of applications into production by handling deployment, debugging, and cloud configuration.
+• Implemented authentication, database design, and API integrations within Firebase to support scalable mobile applications.
+
+
 AI Engineer
 Intelligent Systems (I-Sys)
 •
@@ -108,16 +130,19 @@ IBM Watsonx
 IBM Cloud
 Docker
 Kubernetes
+Jenkins
 OpenAPI Specification (OAS)
 LLMs
 Data Pipelines
-• Developed secure, on-premises AI assistant platforms for banks and telecom clients using IBM technologies (Watsonx.ai, Watsonx Orchestrate, Watsonx Discovery), enabling ChatGPT-like interaction while preserving data confidentiality and compliance.
-• Created AI agents that automate common employee tasks including calendar integration, meeting scheduling, email handling, and auto-generating Word and Excel reports through conversational input.
-• Created custom LLM-based solutions capable of handling document uploads (.docx, .pdf, etc.) and performing RAG (Retrieval-Augmented Generation) over internal knowledge to answer user questions with precision.
-• Trained Text-to-Speech (TTS) and Speech-to-Text (STT) models tailored for Egyptian and Saudi Arabic dialects, for use in voice assistants and customer service phone systems.
-• Integrated dialect-specific NLP and speech models into client applications, enhancing accessibility and usability for local end-users in voice-based interfaces.
-• Collaborated with UK-based firm EmoTech to build conversational virtual avatars for public-facing services, delivering interactive Arabic voice assistants powered by dialectal LLMs.
-• Led client demos, and high-impact AI workshops and technical demonstrations, including presenting enterprise-grade solutions to C-suite executives from leading firms. Conducted one-on-one strategic consultations to identify pain points and tailor AI integration road-maps for each organization. Workshop Showcase: @https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/
+TTS
+STT
+RAG
+CI/CD
+• Built enterprise level AI chat application integrating IBM Watsonx with scalable on-prem and cloud services for secure, explainable, and extensible deployment.
+• Created conversational agents to automate repetitive internal workflows, reducing manual task load, and created document parsing pipelines using RAG.
+• Automated all dockerization of all developed services and its architecture, as well as CI/CD pipelines using Jenkins for on-prem enterprise environment for production use.
+• Trained Egyptian and Saudi dialect-specific TTS/STT models to enable natural language voice commands.
+• Hosted AI workshops and live demos to C-suite executives, helping shape enterprise AI strategy. Workshop Showcase: @https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/
 
 
 
@@ -283,7 +308,14 @@ Language
 AI Language Learning App
 In Development
 This AI-driven app offers a hyper-personalized language learning experience. Key features include a dynamic Word Bank, adaptive Duolingo-style mini-games, story generation using comprehensible input (90% known, 10% new words), and an FSRS-powered Spaced Repetition flashcard system for superior retention. An AI Chatbot Assistant provides tailored guidance, like a personal tutor.
-Generative AI, NLP, FSRS Algorithm, Adaptive Learning, Gamification
+ReactJS
+NextJS
+NodeJS
+Django
+Google Gemini
+MongoDB
+TailwindCSS
+Vercel
 Code: Not Available
 Demo: Not Available
 
@@ -295,7 +327,7 @@ Google Cloud
 ReactJS
 Django
 Langchain
-Vector Database
+Chroma DB
 RAG
 OpenAI Function Calling
 Code
@@ -383,6 +415,7 @@ AI Quickbooks CFO Assistant – Swipelabs
 A lightweight AI-powered virtual CFO tailored for small business owners, designed to automate financial analysis and provide real-time decision support. Integrated with QuickBooks API for sync of financial data (invoices, A/R, expenses, cash flow). Delivered automated weekly digests via email/Slack summarizing revenue trends, burn rate, overdue invoices, and AI insights. Implemented a scoring algorithm to calculate a Financial Health Score using business-type-adjusted weights (e.g. Burn Multiple, Margin, Runway). Enabled founders to ask finance-related questions via email, receiving GPT-powered replies within minutes. Developed a read-only web dashboard showing financial KPIs, trends, and a diff-style summary of 'What changed this week?' Added tools for forecast simulation and budget tracking, including text-based scenario analysis and alerting for overspending.
 
 NextJS
+FastAPI
 Python
 Supabase
 QuickBooks API

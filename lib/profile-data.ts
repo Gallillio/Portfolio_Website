@@ -28,6 +28,7 @@ export const skills: SkillsData = {
     "Google Cloud",
     "IBM Watsonx",
     "IBM Cloud",
+    "Firebase",
   ],
   "Web & Application Development": [
     "JavaScript",
@@ -39,7 +40,10 @@ export const skills: SkillsData = {
     "FastAPI",
     "Django",
     "Flask",
+    "Flutter",
     "MongoDB",
+    "PostgreSQL",
+    "Supabase",
     "REST APIs",
     "OpenAPI",
     "C#",
@@ -48,6 +52,9 @@ export const skills: SkillsData = {
   ],
   "DevOps & Tools": [
     "Git",
+    "Docker",
+    "Kubernetes",
+    "Jenkins",
     "Cursor",
     "Jupyter Notebook",
     "Vercel",
@@ -82,24 +89,33 @@ export const getAllSkills = (): string[] => {
 // Experience data
 export const experiences = [
   {
+    title: "Software Developer",
+    company: "Develop Systems",
+    period: "Sep. 2025 - Present",
+    technologies: ["Flutter", "Firebase", "API Integration", "Authentication", "Database Design", "Cloud Configuration"],
+    description:
+      ` • Built and deployed production-ready applications, delivering both Flutter frontends and Firebase backends for client projects.
+
+      • Supported transition of applications into production by handling deployment, debugging, and cloud configuration.
+
+      • Implemented authentication, database design, and API integrations within Firebase to support scalable mobile applications.
+      `,
+  },
+  {
     title: "AI Engineer",
     company: "Intelligent Systems (I-Sys)",
     period: "Feb. 2025 - Present",
-    technologies: ["IBM Watsonx", "IBM Cloud", "Docker", "Kubernetes", "OpenAPI Specification (OAS)", "LLMs", "Data Pipelines", "TTS", "STT", "RAG"],
+    technologies: ["IBM Watsonx", "IBM Cloud", "Docker", "Kubernetes", "Jenkins", "OpenAPI Specification (OAS)", "LLMs", "Data Pipelines", "TTS", "STT", "RAG", "CI/CD"],
     description:
-      ` • Developed secure, on-premises AI assistant platforms for banks and telecom clients using IBM technologies (Watsonx.ai, Watsonx Orchestrate, Watsonx Discovery), enabling ChatGPT-like interaction while preserving data confidentiality and compliance.
-      
-      • Created AI agents that automate common employee tasks including calendar integration, meeting scheduling, email handling, and auto-generating Word and Excel reports through conversational input.
-      
-      • Created custom LLM-based solutions capable of handling document uploads (.docx, .pdf, etc.) and performing RAG (Retrieval-Augmented Generation) over internal knowledge to answer user questions with precision.
-      
-      • Trained Text-to-Speech (TTS) and Speech-to-Text (STT) models tailored for Egyptian and Saudi Arabic dialects, for use in voice assistants and customer service phone systems.
-      
-      • Integrated dialect-specific NLP and speech models into client applications, enhancing accessibility and usability for local end-users in voice-based interfaces.
-      
-      • Collaborated with UK-based firm EmoTech to build conversational virtual avatars for public-facing services, delivering interactive Arabic voice assistants powered by dialectal LLMs.
-      
-      • Led client demos, and high-impact AI workshops and technical demonstrations, including presenting enterprise-grade solutions to C-suite executives from leading firms. Conducted one-on-one strategic consultations to identify pain points and tailor AI integration road-maps for each organization. Workshop Showcase: @https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/
+      ` • Built enterprise level AI chat application integrating IBM Watsonx with scalable on-prem and cloud services for secure, explainable, and extensible deployment.
+
+      • Created conversational agents to automate repetitive internal workflows, reducing manual task load, and created document parsing pipelines using RAG.
+
+      • Automated all dockerization of all developed services and its architecture, as well as CI/CD pipelines using Jenkins for on-prem enterprise environment for production use.
+
+      • Trained Egyptian and Saudi dialect-specific TTS/STT models to enable natural language voice commands.
+
+      • Hosted AI workshops and live demos to C-suite executives, helping shape enterprise AI strategy. Workshop Showcase: @https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/
       `,
   },
   {

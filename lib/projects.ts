@@ -4,7 +4,7 @@ export const projects: Project[] = [
   {
     title: "AI Language Learning App",
     description: "This AI-driven app offers a hyper-personalized language learning experience. Key features include a dynamic Word Bank, adaptive Duolingo-style mini-games, story generation using comprehensible input (90% known, 10% new words), and an FSRS-powered Spaced Repetition flashcard system for superior retention. An AI Chatbot Assistant provides tailored guidance, like a personal tutor.",
-    technologies: ["ReactJS", "NextJS", "NodeJS", "Django", "MongoDB", "TailwindCSS", "Vercel"],
+    technologies: ["ReactJS", "NextJS", "NodeJS", "Django", "Google Gemini", "MongoDB", "TailwindCSS", "Vercel"],
     images: [
       { src: "/Language Learning App/reading mode.png", alt: "Reading Tab" },
       { src: "/Language Learning App/story.png", alt: "Story Tab" },
@@ -22,7 +22,7 @@ export const projects: Project[] = [
   {
     title: 'AI Quickbooks CFO Assistant – Swipelabs',
     description: "An AI-powered virtual CFO that automates financial analysis for small businesses. Integrated with QuickBooks API for real-time financial data sync, implemented automated weekly digests via email/Slack, and developed a Financial Health Score algorithm. Built a web dashboard for KPIs and trends, enabled GPT-powered finance Q&A, and created forecast simulation tools with budget tracking and alerting systems.",
-    technologies: ["NextJS", "Python", "Supabase", "QuickBooks API", "Postmark"],
+    technologies: ["NextJS", "FastAPI", "Python", "Supabase", "QuickBooks API", "Postmark"],
     images: [
       { src: "/Mini CFO/dashboard 1.png", alt: "Main Dashboard Overview" },
       { src: "/Mini CFO/dashboard 2.png", alt: "Financial KPIs Dashboard" },
@@ -42,7 +42,7 @@ export const projects: Project[] = [
     title: "GPTube",
     description:
       "An interactive tool that engages users with YouTube videos through a GPT-powered chatbot, utilizing TTS and STT for voice interaction. It features generating mock tests, correcting user answers, and creating PowerPoint presentations.",
-    technologies: ["Microsoft Azure", "Google Cloud", "ReactJS", "Django", "Langchain", "Vector Database", "RAG", "OpenAI Function Calling"],
+    technologies: ["Microsoft Azure", "Google Cloud", "ReactJS", "Django", "Langchain", "Chroma DB", "RAG", "OpenAI Function Calling"],
     images: [
       { src: "/GPTube/main.png", alt: "Main Page" },
       { src: "/GPTube/question.png", alt: "Question Example" },
