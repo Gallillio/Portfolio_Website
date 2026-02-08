@@ -1,11 +1,34 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { SYSTEM_INSTRUCTION, PORTFOLIO_CONTEXT, GENERATION_CONFIG, GEMINI_MODEL } from '@/lib/portfolio-context';
+import { SYSTEM_INSTRUCTION, PORTFOLIO_CONTEXT, GENERATION_CONFIG, GEMINI_MODEL, isGemmaModel } from '@/lib/portfolio-context';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const apiKey = process.env.GEMINI_API_KEY!;
   const { message, conversationHistory } = req.body;
 
   try {
+    const systemContext = `${SYSTEM_INSTRUCTION}\n\n${PORTFOLIO_CONTEXT}`;
+    const historyContents = conversationHistory.map((msg: { role: string; content: string }) => ({
+      role: msg.role,
+      parts: [{ text: msg.content }],
+    }));
+    const userContent = { role: "user", parts: [{ text: message }] };
+
+    const payload = isGemmaModel(GEMINI_MODEL)
+      ? {
+          contents: [
+            { role: "user", parts: [{ text: systemContext }] },
+            { role: "model", parts: [{ text: "Understood. I am Ahmed Galal Elzeky's portfolio assistant. How can I help you learn about Ahmed?" }] },
+            ...historyContents,
+            userContent,
+          ],
+          generationConfig: GENERATION_CONFIG,
+        }
+      : {
+          systemInstruction: { parts: [{ text: systemContext }] },
+          contents: [...historyContents, userContent],
+          generationConfig: GENERATION_CONFIG,
+        };
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
@@ -13,26 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [
-              {
-                text: `${SYSTEM_INSTRUCTION}\n\n${PORTFOLIO_CONTEXT}`
-              }
-            ]
-          },
-          contents: [
-            ...conversationHistory.map((msg: { role: string; content: string }) => ({
-              role: msg.role,
-              parts: [{ text: msg.content }]
-            })),
-            {
-              role: "user",
-              parts: [{ text: message }]
-            }
-          ],
-          generationConfig: GENERATION_CONFIG,
-        }),
+        body: JSON.stringify(payload),
       }
     );
 

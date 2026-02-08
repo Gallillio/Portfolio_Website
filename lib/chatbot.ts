@@ -5,7 +5,7 @@ export interface ChatMessage {
   content: string;
 }
 
-import { SYSTEM_INSTRUCTION, PORTFOLIO_CONTEXT, GENERATION_CONFIG, GEMINI_MODEL } from './portfolio-context';
+import { SYSTEM_INSTRUCTION, PORTFOLIO_CONTEXT, GENERATION_CONFIG, GEMINI_MODEL, isGemmaModel } from './portfolio-context';
 
 /**
  * Send a message to Google's Gemini API and get a response
@@ -20,26 +20,28 @@ export async function sendMessageToGemini(
   conversationHistory: ChatMessage[] = []
 ): Promise<string> {
   try {
-    const payload = {
-      systemInstruction: {
-        parts: [
-          {
-            text: `${SYSTEM_INSTRUCTION}\n\n${PORTFOLIO_CONTEXT}`
-          }
-        ]
-      },
-      contents: [
-        ...conversationHistory.map(msg => ({
-          role: msg.role,
-          parts: [{ text: msg.content }]
-        })),
-        {
-          role: "user",
-          parts: [{ text: message }]
+    const systemContext = `${SYSTEM_INSTRUCTION}\n\n${PORTFOLIO_CONTEXT}`;
+    const historyContents = conversationHistory.map(msg => ({
+      role: msg.role,
+      parts: [{ text: msg.content }],
+    }));
+    const userContent = { role: "user", parts: [{ text: message }] };
+
+    const payload = isGemmaModel(GEMINI_MODEL)
+      ? {
+          contents: [
+            { role: "user", parts: [{ text: systemContext }] },
+            { role: "model", parts: [{ text: "Understood. I am Ahmed Galal Elzeky's portfolio assistant. How can I help you learn about Ahmed?" }] },
+            ...historyContents,
+            userContent,
+          ],
+          generationConfig: GENERATION_CONFIG,
         }
-      ],
-      generationConfig: GENERATION_CONFIG,
-    };
+      : {
+          systemInstruction: { parts: [{ text: systemContext }] },
+          contents: [...historyContents, userContent],
+          generationConfig: GENERATION_CONFIG,
+        };
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${API_KEY}`,

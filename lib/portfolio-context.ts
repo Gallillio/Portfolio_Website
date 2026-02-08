@@ -4,7 +4,13 @@
 /**
  * The Gemini model identifier.
  */
-export const GEMINI_MODEL = "gemini-2.5-flash";
+export const GEMINI_MODEL = "gemma-3-27b-it";
+
+/**
+ * Gemma models don't support the systemInstruction API field.
+ * System context must be prepended as the first user turn instead.
+ */
+export const isGemmaModel = (model: string) => model.toLowerCase().startsWith("gemma");
 
 /**
  * Generation config shared between API callers.
