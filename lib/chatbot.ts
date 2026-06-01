@@ -6,6 +6,7 @@ export interface ChatMessage {
 }
 
 import { SYSTEM_INSTRUCTION, PORTFOLIO_CONTEXT, GENERATION_CONFIG, GEMINI_MODEL, isGemmaModel } from './portfolio-context';
+import { extractAnswerText } from './gemini-response';
 
 /**
  * Send a message to Google's Gemini API and get a response
@@ -61,7 +62,8 @@ export async function sendMessageToGemini(
 
     const data = await response.json();
 
-    const content = data.candidates[0]?.content?.parts[0]?.text || 'Sorry, I could not generate a response.';
+    // Skip "thought" parts (Gemma 4 thinking models) and use the answer text
+    const content = extractAnswerText(data) || 'Sorry, I could not generate a response.';
 
     return content;
   } catch (error) {

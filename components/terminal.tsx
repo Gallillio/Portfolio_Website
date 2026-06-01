@@ -16,6 +16,7 @@ import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command } from '@/lib/types'
 import type { ChatMessage } from "@/lib/chatbot"
+import { extractAnswerText } from "@/lib/gemini-response"
 import React from "react"
 
 function TerminalContent(): React.ReactNode {
@@ -273,10 +274,10 @@ function TerminalContent(): React.ReactNode {
         }
 
         const data = await res.json();
-        const botResponse: ChatMessage = { 
-          role: 'model', 
-          // Ensure content is a string, even if parts are missing
-          content: data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response."
+        const botResponse: ChatMessage = {
+          role: 'model',
+          // Skip "thought" parts (Gemma 4 thinking models) and use the answer text
+          content: extractAnswerText(data) || "Sorry, I couldn't generate a response."
         };
         setChatHistory(prevChat => [...prevChat, botResponse]);
         

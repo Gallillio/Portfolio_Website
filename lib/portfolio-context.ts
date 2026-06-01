@@ -4,7 +4,7 @@
 /**
  * The Gemini model identifier.
  */
-export const GEMINI_MODEL = "gemma-3-27b-it";
+export const GEMINI_MODEL = "gemma-4-26b-a4b-it";
 
 /**
  * Gemma models don't support the systemInstruction API field.
