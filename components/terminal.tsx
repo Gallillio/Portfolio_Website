@@ -8,6 +8,8 @@ import Projects from "./projects"
 import Contact from "./contact"
 import About from "./about"
 import AsciiArt from "./ascii-art"
+import WelcomeBanner from "./terminal-welcome"
+import ChatIntro from "./chat-intro"
 import MyAchievements from "./my-achievements"
 import YourAchievements from "./your-achievements"
 import AchievementNotification from "@/components/achievement-notification"
@@ -35,6 +37,10 @@ function TerminalContent(): React.ReactNode {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [isBotResponding, setIsBotResponding] = useState(false)
   const streamingRef = useRef<StreamingMessageRef>(null)
+  // Starter-question buttons are created in the render that enters chat mode, so
+  // capturing handleCommand directly would freeze isChatMode at false. Resolve
+  // the handler at click time instead.
+  const handleCommandRef = useRef<(input: string) => void>(() => {})
   const abortRef = useRef<AbortController | null>(null)
   // Guards against a late stream completion resurrecting a chat the user already exited.
   const requestGenRef = useRef(0)
@@ -202,14 +208,7 @@ function TerminalContent(): React.ReactNode {
         command: "",
         output: [
           <AsciiArt key="ascii-art" />,
-          "Welcome to my interactive portfolio terminal! \n",
-          "You can learn everything you want about me by interacting with this terminal via typing commands,",
-          "by using natural language in chat mode,",
-          "Or by simply selecting a tab from the menu above.",
-          "\n",
-          "Type 'help' to see available commands.",
-          "",
-          "Type 'chat' to open my AI chatbot for natural language questions.",
+          <WelcomeBanner key="welcome" onRun={handleCommandClick} />,
         ],
         timestamp: new Date(),
         isError: false,
@@ -218,7 +217,16 @@ function TerminalContent(): React.ReactNode {
   }
 
   useEffect(() => {
+    handleCommandRef.current = handleCommand
+  })
+
+  // Mount-only on purpose: this seeds the opening banner. Re-running it would
+  // wipe the transcript. initializeTerminal now closes over handleCommandClick
+  // (for the banner's clickable commands), which is why the dep is flagged;
+  // including it would reset the terminal on every render.
+  useEffect(() => {
     initializeTerminal()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Called on every streamed repaint. Uses "auto" rather than "smooth" (a
@@ -477,6 +485,9 @@ function TerminalContent(): React.ReactNode {
     if (response.chatMode) {
       setIsChatMode(true)
       activateChatMode()
+      response.output = [
+        <ChatIntro key="chat-intro" onAsk={(question) => handleCommandRef.current(question)} />,
+      ]
     } else if (response.specialAction === "switchTab" && response.tabName) {
       setActiveTab(response.tabName)
       
