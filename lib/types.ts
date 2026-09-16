@@ -16,6 +16,12 @@ export interface CommandResponse {
 export interface Project {
   title: string
   description: string
+  /**
+   * Fuller write-up used only for the AI assistant's context (lib/ai/context.ts).
+   * The UI keeps rendering `description`; this preserves detail that used to live
+   * solely in the old hand-written chatbot context.
+   */
+  detailedDescription?: string
   technologies: string[]
   images: { src: string; alt: string }[]
   github?: string
@@ -25,3 +31,8 @@ export interface Project {
   inDevelopment?: boolean
 }
 
+
+export interface ChatMessage {
+  role: "user" | "model"
+  content: string
+}
