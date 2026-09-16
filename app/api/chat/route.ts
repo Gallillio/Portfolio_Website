@@ -42,6 +42,15 @@ function errorResponse(
   return new Response(JSON.stringify(body), { status, headers });
 }
 
+/** Seconds until the Gemini free-tier daily quota resets (midnight US/Pacific). */
+function secondsUntilPacificMidnight(): number {
+  const now = new Date();
+  const pacificNow = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+  const nextMidnight = new Date(pacificNow);
+  nextMidnight.setHours(24, 0, 0, 0);
+  return Math.max(60, Math.round((nextMidnight.getTime() - pacificNow.getTime()) / 1000));
+}
+
 interface ValidBody {
   message: string;
   conversationHistory: ChatMessage[];
@@ -260,11 +269,20 @@ export async function POST(request: Request): Promise<Response> {
   } catch (error) {
     if (error instanceof UpstreamError) {
       if (error.status === 429) {
+        if (error.quotaScope === "per-day") {
+          return errorResponse(
+            429,
+            "UPSTREAM_QUOTA_EXHAUSTED",
+            "The daily AI quota has been used up. It resets at midnight Pacific.",
+            // Not retryable in any useful sense: the cap will not clear for hours.
+            { retryable: false, detail: error.detail, retryAfterSec: secondsUntilPacificMidnight() }
+          );
+        }
         return errorResponse(
           429,
           "UPSTREAM_RATE_LIMITED",
-          "The AI service is rate-limited right now. Try again in a minute.",
-          { retryable: true, detail: error.detail, retryAfterSec: 30 }
+          "The AI service hit its per-minute limit. Try again in a minute.",
+          { retryable: true, detail: error.detail, retryAfterSec: 60 }
         );
       }
       if (error.status === 503 || error.status === 500 || error.status === 504) {

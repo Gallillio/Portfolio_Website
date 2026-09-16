@@ -15,9 +15,16 @@ export interface DisplayMessage {
 }
 
 const DISPLAY: Record<ChatErrorCode, DisplayMessage> = {
-  // Google's free-tier quota is spent. The visitor did nothing wrong.
+  // Google's per-minute limit (RPM/TPM). Clears within about a minute, so do NOT
+  // tell the visitor to come back later — they'd leave when a retry would work.
   UPSTREAM_RATE_LIMITED: {
-    text: "Ah — it looks like Gallillio has burned through his AI quota for now. He's been notified and will hopefully top it up soon. In the meantime, feel free to explore the rest of the portfolio — try 'projects', 'experience', or 'about'.",
+    text: "I'm thinking faster than I'm allowed to right now. Give me a minute and ask me again.",
+    tone: "assistant",
+  },
+  // Google's per-day cap (RPD), which resets at midnight Pacific. This one
+  // genuinely is "come back later".
+  UPSTREAM_QUOTA_EXHAUSTED: {
+    text: "Ah — Gallillio has burned through his AI quota for today. He's been notified, and it resets in the morning. In the meantime, feel free to explore the rest of the portfolio — try 'projects', 'experience', or 'about'.",
     tone: "assistant",
   },
   // Our own per-IP limiter: this one IS the visitor, so nudge them gently.
