@@ -17,6 +17,7 @@ import { AchievementsProvider, useAchievements } from "@/lib/achievements-contex
 import type { Command, ChatMessage } from '@/lib/types'
 import { streamChat } from "@/lib/ai/chat-client"
 import { displayMessageFor } from "@/lib/ai/messages"
+import { renderTerminalMarkdown } from "@/lib/ai/markdown"
 import StreamingMessage, { type StreamingMessageRef } from "@/components/streaming-message"
 import React from "react"
 
@@ -237,6 +238,9 @@ function TerminalContent(): React.ReactNode {
   }, [])
 
   useEffect(() => {
+    // While streaming, followStream owns the scroll position frame by frame;
+    // a competing smooth animation here fights it for the whole response.
+    if (isBotResponding) return
     // Scroll to bottom when history changes
     outputEndRef.current?.scrollIntoView({ behavior: "smooth" })
     
@@ -245,7 +249,7 @@ function TerminalContent(): React.ReactNode {
     if (window.innerWidth < 768 && activeTab === "terminal") {
       ensureInputVisible();
     }
-  }, [history, activeTab])
+  }, [history, activeTab, isBotResponding])
 
   const handleCommand = async (input: string) => {
     const trimmedInput = input.trim();
@@ -308,7 +312,10 @@ function TerminalContent(): React.ReactNode {
             command: "",
             output: [
               <div key={key} className={`whitespace-pre-wrap font-normal text-sm ${bodyClass}`}>
-                <span className="text-purple-400">{label}</span> {content}
+                {renderTerminalMarkdown(
+                  content,
+                  <span className="text-purple-400">{label} </span>
+                )}
               </div>
             ],
             timestamp: new Date(),
@@ -321,13 +328,17 @@ function TerminalContent(): React.ReactNode {
         { message: trimmedInput, history: chatHistory, signal: abortRef.current.signal },
         {
           onDelta: (text) => streamingRef.current?.append(text),
-          onDone: (full) => {
+          onDone: async (full) => {
+            if (generation !== requestGenRef.current) return;
+            await streamingRef.current?.finish();
             if (generation !== requestGenRef.current) return;
             setChatHistory(prevChat => [...prevChat, { role: 'model', content: full }]);
             commitAssistant(full, "normal");
             streamingRef.current?.reset();
           },
-          onError: (error) => {
+          onError: async (error) => {
+            if (generation !== requestGenRef.current) return;
+            await streamingRef.current?.finish();
             if (generation !== requestGenRef.current) return;
             // Keep whatever already streamed — a stream that died after 40 tokens
             // should not throw those 40 tokens away.
