@@ -7,6 +7,7 @@ export type ChatErrorCode =
   | "BAD_REQUEST"
   | "RATE_LIMITED"
   | "UPSTREAM_RATE_LIMITED"
+  | "UPSTREAM_QUOTA_EXHAUSTED"
   | "UPSTREAM_UNAVAILABLE"
   | "UPSTREAM_ERROR"
   | "TIMEOUT"
@@ -53,6 +54,7 @@ export function isChatErrorCode(value: unknown): value is ChatErrorCode {
       "BAD_REQUEST",
       "RATE_LIMITED",
       "UPSTREAM_RATE_LIMITED",
+      "UPSTREAM_QUOTA_EXHAUSTED",
       "UPSTREAM_UNAVAILABLE",
       "UPSTREAM_ERROR",
       "TIMEOUT",
