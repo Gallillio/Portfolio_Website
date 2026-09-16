@@ -18,9 +18,15 @@ export class ChatError extends Error {
 
 export interface StreamChatHandlers {
   onDelta: (text: string) => void;
-  onDone: (full: string, meta?: { finishReason?: string }) => void;
+  /** May be async: the UI awaits its typewriter buffer draining before committing. */
+  onDone: (full: string, meta?: { finishReason?: string }) => void | Promise<void>;
   /** `partial` carries whatever text had already streamed before the failure. */
-  onError: (error: { code: ChatErrorCode; message: string; retryable: boolean; partial: string }) => void;
+  onError: (error: {
+    code: ChatErrorCode;
+    message: string;
+    retryable: boolean;
+    partial: string;
+  }) => void | Promise<void>;
 }
 
 export async function streamChat(
@@ -77,12 +83,12 @@ export async function streamChat(
       }
     }
 
-    handlers.onDone(full, { finishReason });
+    await handlers.onDone(full, { finishReason });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") return;
 
     if (error instanceof ChatError) {
-      handlers.onError({
+      await handlers.onError({
         code: error.code,
         message: error.message,
         retryable: error.retryable,
@@ -91,7 +97,7 @@ export async function streamChat(
       return;
     }
 
-    handlers.onError({
+    await handlers.onError({
       code: "UNKNOWN",
       message: error instanceof Error ? error.message : "Something went wrong.",
       retryable: true,
