@@ -68,10 +68,17 @@ const CommandLink = ({ command, onClick, isChatMode }: { command: string; onClic
     }, 100)
   }
 
+  // In chat mode handleClick above is a no-op, so the styling must not promise a
+  // click. Otherwise every command word in a chat reply looks interactive and
+  // does nothing. Elsewhere, use a brighter green than the surrounding
+  // text-green-400 body so the affordance is actually visible.
   return (
-    <span 
-      // className={`${!isChatMode ? 'hover:underline cursor-pointer text-green-400' : 'text-gray-300'}`}
-      className={'hover:underline cursor-pointer text-green-400'}
+    <span
+      className={
+        isChatMode
+          ? 'text-gray-300'
+          : 'cursor-pointer text-green-300 hover:text-green-200 hover:underline'
+      }
       onClick={handleClick}
     >
       {command}

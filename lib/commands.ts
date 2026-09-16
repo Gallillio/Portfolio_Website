@@ -8,7 +8,7 @@ import { getAchievementsData } from "./achievements-context"
 commandRegistry.register("about", "View my background and Bio", async () => ({
   output: [
     "╔═════════════════════════════════════╗",
-    "║              About Me               ",
+    "║              About Me               ║",
     "╚═════════════════════════════════════╝",
     "",
     "┌─ Bio",
@@ -18,10 +18,10 @@ commandRegistry.register("about", "View my background and Bio", async () => ({
     "│  developing computer vision systems that save companies thousands in operational costs, my work spans",
     "│  the full spectrum of AI engineering—NLP, computer vision, deep learning, and cloud-native applications.",
     "│",
-    "│  Leveraging Python, React.js, Microsoft Azure, and IBM Watsonx, I&apos;ve delivered solutions that",
+    "│  Leveraging Python, React.js, Microsoft Azure, and IBM Watsonx, I've delivered solutions that",
     "│  earned international recognition—including the Times Higher Education Award 2024 for technological",
     "│  innovation and representing Egypt & North Africa in the GESAwards Global Finals with my startup",
-    "│  GPTuBE. My research on Arabic LLM reasoning was published in Elsevier Procedia, and I&apos;ve led",
+    "│  GPTuBE. My research on Arabic LLM reasoning was published in Elsevier Procedia, and I've led",
     "│  enterprise AI workshops for C-suite executives across leading organizations.",
     "└────────────────────────────────────",
     "",
@@ -35,7 +35,7 @@ commandRegistry.register("about", "View my background and Bio", async () => ({
 commandRegistry.register("projects", "View my projects gallery", async () => {
   const projectsOutput = [
     "╔═════════════════════════════════════╗",
-    "║              Projects               ",
+    "║              Projects               ║",
     "╚═════════════════════════════════════╝",
     ""
   ]
@@ -75,7 +75,7 @@ commandRegistry.register("projects", "View my projects gallery", async () => {
 commandRegistry.register("contact", "Get my contact information", async () => ({
   output: [
     "╔═════════════════════════════════════╗",
-    "║             Contact Information     ",
+    "║         Contact Information         ║",
     "╚═════════════════════════════════════╝",
     "",
     "┌─ Email",
@@ -110,7 +110,7 @@ commandRegistry.register("your-achievements", "View your unlocked achievements",
   
   const achievementsOutput = [
     "╔═════════════════════════════════════╗",
-    "║            Your Achievements        ",
+    "║          Your Achievements          ║",
     "╚═════════════════════════════════════╝",
     "",
   ];
@@ -160,7 +160,7 @@ commandRegistry.register("your-achievements", "View your unlocked achievements",
 commandRegistry.register("skills", "View my technical skills", async () => {
   const skillsOutput = [
     "╔═════════════════════════════════════╗",
-    "║            Technical Skills        ",
+    "║          Technical Skills           ║",
     "╚═════════════════════════════════════╝",
     ""
   ]
@@ -205,7 +205,7 @@ commandRegistry.register("skills", "View my technical skills", async () => {
 commandRegistry.register("experience", "View my work experience", async () => {
   const experienceOutput = [
     "╔═════════════════════════════════════╗",
-    "║             Work Experience        ",
+    "║           Work Experience           ║",
     "╚═════════════════════════════════════╝",
     ""
   ]
@@ -252,7 +252,7 @@ commandRegistry.register("experience", "View my work experience", async () => {
 commandRegistry.register("education", "View my educational background", async () => {
   const educationOutput = [
     "╔═════════════════════════════════════╗",
-    "║               Education            ",
+    "║              Education              ║",
     "╚═════════════════════════════════════╝",
     ""
   ]
@@ -288,7 +288,7 @@ commandRegistry.register("clear", "Clear the terminal", async () => ({
 commandRegistry.register("links", "View my professional links", async () => ({
   output: [
     "╔═════════════════════════════════════╗",
-    "║                 Links              ",
+    "║                Links                ║",
     "╚═════════════════════════════════════╝",
     "",
     "┌─ GitHub",
@@ -314,7 +314,7 @@ commandRegistry.register("links", "View my professional links", async () => ({
 commandRegistry.register("hello", "Secret welcome message", async () => ({
   output: [
     "╔═════════════════════════════════════╗",
-    "║               Welcome!               ",
+    "║              Welcome!               ║",
     "╚═════════════════════════════════════╝",
     "",
     "┌─",
@@ -330,7 +330,7 @@ commandRegistry.register("hello", "Secret welcome message", async () => ({
 commandRegistry.register("freelance", "View my freelance projects", async () => {
   const freelanceOutput = [
     "╔═════════════════════════════════════╗",
-    "║            Freelance Projects        ",
+    "║         Freelance Projects          ║",
     "╚═════════════════════════════════════╝",
     ""
   ]
@@ -384,7 +384,7 @@ commandRegistry.register("freelance", "View my freelance projects", async () => 
 commandRegistry.register("languages", "View my language proficiencies", async () => ({
   output: [
     "╔═════════════════════════════════════╗",
-    "║         Language Proficiencies     ",
+    "║       Language Proficiencies        ║",
     "╚═════════════════════════════════════╝",
     "",
     "┌─ English",
@@ -423,7 +423,7 @@ commandRegistry.register("help", "Show available commands", async () => ({
 commandRegistry.register("courses", "View my taken courses", async () => {
   const coursesOutput = [
     "╔═════════════════════════════════════╗",
-    "║                 Courses              ",
+    "║               Courses               ║",
     "╚═════════════════════════════════════╝",
     ""
   ];
@@ -456,7 +456,7 @@ commandRegistry.register("courses", "View my taken courses", async () => {
 commandRegistry.register("timeline", "View my career timeline", async () => ({
   output: [
     "╔═════════════════════════════════════╗",
-    "║                Timeline            ",
+    "║              Timeline               ║",
     "╚═════════════════════════════════════╝",
     "",
     "Exploring my professional journey in chronological order...",
@@ -472,20 +472,10 @@ commandRegistry.register("timeline", "View my career timeline", async () => ({
 // Register chat command
 commandRegistry.register("chat", "Start a conversation with Gallillio, my personal AI that knows everything about me", async () => {
   return {
-    output: [
-      "╔═════════════════════════════════════╗",
-      "║       Gallillio Chat Assistant     ",
-      "╚═════════════════════════════════════╝",
-      "",
-      "Hello! I'm Gallillio, Ahmed's personal AI assistant.",
-      "I know all about Ahmed's skills, experience, and projects.",
-      "Feel free to ask me anything about him in natural language!",
-      "\n",
-      "Type your message and press Enter to chat with me.",
-      "Type 'exit' to end our conversation and return to the terminal.",
-      "\n",
-      "What would you like to know about Ahmed?",
-    ],
+    // The intro is rendered by components/chat-intro.tsx and injected in
+    // terminal.tsx: this file is .ts and cannot hold JSX, and the starter
+    // questions need a React callback to send themselves.
+    output: [],
     timestamp: new Date(),
     chatMode: true,
     specialAction: "chatMode"
