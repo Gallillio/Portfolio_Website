@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useImperativeHandle } from "react"
 import { ArrowRight } from "lucide-react"
 import { useAchievements } from "@/lib/achievements-context"
 import { availableCommands } from "@/lib/commands"
+import { hasTextSelection } from "@/lib/utils"
 
 interface TerminalInputProps {
   onCommand: (command: string) => void
@@ -31,7 +32,11 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
 
   // Expose methods through ref
   useImperativeHandle(ref, () => ({
-    focus: () => inputRef.current?.focus(),
+    // preventScroll matters: the input sits at the bottom of the output, so the
+    // browser's default "scroll the focused element into view" turns any focus
+    // into a jump to the bottom. Callers that genuinely want to move the view
+    // there scroll explicitly.
+    focus: () => inputRef.current?.focus({ preventScroll: true }),
     setValue: (value: string) => setInput(value)
   }))
 
@@ -45,7 +50,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
 
   useEffect(() => {
     // Focus input on mount
-    inputRef.current?.focus()
+    inputRef.current?.focus({ preventScroll: true })
   }, [])
 
   // Pulse the arrow animation periodically when suggestion is present
@@ -87,6 +92,11 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   useEffect(() => {
     const currentInputRef = inputRef.current; // Capture the current ref value
     const handleFocus = () => {
+      // Mobile only, on purpose. This exists so the on-screen keyboard does not
+      // cover the input. On desktop there is no keyboard to avoid, and it was
+      // the reason clicking anywhere in the output yanked the view to the
+      // bottom — every other mobile path in this file is gated the same way.
+      if (window.innerWidth >= 768) return
       setTimeout(() => {
         if (currentInputRef) {
           // Scroll the terminal input into view
@@ -177,7 +187,9 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   }
 
   const focusInput = () => {
-    inputRef.current?.focus()
+    // Don't steal focus out from under a selection the user is making.
+    if (hasTextSelection()) return
+    inputRef.current?.focus({ preventScroll: true })
   }
 
   // Handle touch events for swipe gesture
