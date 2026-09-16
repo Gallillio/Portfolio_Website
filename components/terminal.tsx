@@ -16,6 +16,7 @@ import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command, ChatMessage } from '@/lib/types'
 import { streamChat } from "@/lib/ai/chat-client"
+import { displayMessageFor } from "@/lib/ai/messages"
 import StreamingMessage, { type StreamingMessageRef } from "@/components/streaming-message"
 import React from "react"
 
@@ -300,7 +301,7 @@ function TerminalContent(): React.ReactNode {
         const key = `chat-${messageKeyRef.current++}`;
         const label = tone === "error" ? "Chatbot Error:" : "Gallillio Assistant:";
         const bodyClass =
-          tone === "error" ? "text-red-400" : tone === "soft" ? "text-amber-400" : "";
+          tone === "error" ? "text-red-400" : tone === "soft" ? "text-amber-300" : "";
         setHistory(prev => [
           ...prev,
           {
@@ -334,11 +335,13 @@ function TerminalContent(): React.ReactNode {
               setChatHistory(prevChat => [...prevChat, { role: 'model', content: error.partial }]);
               commitAssistant(error.partial, "normal");
             }
-            // EMPTY and BLOCKED mean the model answered with nothing usable.
-            // That is not a crash and must not look like one.
-            const soft = error.code === "EMPTY" || error.code === "BLOCKED";
-            if (!error.partial || !soft) {
-              commitAssistant(error.message, soft ? "soft" : "error");
+            // Quota, overload and misconfiguration are Ahmed's problem, not the
+            // visitor's — those read as the assistant talking, not as a red error.
+            // The precise server message stays in the console and the network tab.
+            console.error("[chat]", error.code, error.message);
+            const display = displayMessageFor(error.code, error.message);
+            if (!error.partial || display.tone === "error") {
+              commitAssistant(display.text, display.tone === "error" ? "error" : "soft");
             }
             streamingRef.current?.reset();
           },
