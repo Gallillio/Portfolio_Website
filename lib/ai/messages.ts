@@ -17,8 +17,9 @@ export interface DisplayMessage {
 const DISPLAY: Record<ChatErrorCode, DisplayMessage> = {
   // Google's per-minute limit (RPM/TPM). Clears within about a minute, so do NOT
   // tell the visitor to come back later — they'd leave when a retry would work.
+  // Name the quota explicitly: otherwise this reads as the site being broken.
   UPSTREAM_RATE_LIMITED: {
-    text: "I'm thinking faster than I'm allowed to right now. Give me a minute and ask me again.",
+    text: "I've hit the per-minute cap on Gallillio's free AI quota — nothing's broken on my end, I just need a breather. Give me a minute and ask me again.",
     tone: "assistant",
   },
   // Google's per-day cap (RPD), which resets at midnight Pacific. This one
