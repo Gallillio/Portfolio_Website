@@ -12,6 +12,7 @@ import MyAchievements from "./my-achievements"
 import YourAchievements from "./your-achievements"
 import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
+import { hasTextSelection } from "@/lib/utils"
 import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command, ChatMessage } from '@/lib/types'
@@ -223,24 +224,35 @@ function TerminalContent(): React.ReactNode {
   // Called on every streamed repaint. Uses "auto" rather than "smooth" (a
   // restarting smooth animation per frame looks broken) and stays put if the
   // user has scrolled up to re-read something.
+  // Auto-scrolling is only welcome when the user is already following along at
+  // the bottom. If they have scrolled up to read something, moving the view is
+  // an interruption.
+  const isPinnedToBottom = useCallback(() => {
+    const scroller = outputEndRef.current?.closest(
+      "[data-terminal-scroll]"
+    ) as HTMLElement | null
+    if (!scroller) return true
+    return scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 80
+  }, [])
+
   const followStream = useCallback(() => {
     const anchor = outputEndRef.current
     if (!anchor) return
     const scroller = anchor.closest("[data-terminal-scroll]") as HTMLElement | null
     if (scroller) {
-      const distanceFromBottom =
-        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight
-      if (distanceFromBottom > 80) return
+      if (!isPinnedToBottom()) return
       scroller.scrollTop = scroller.scrollHeight
       return
     }
     anchor.scrollIntoView({ behavior: "auto", block: "end" })
-  }, [])
+  }, [isPinnedToBottom])
 
   useEffect(() => {
     // While streaming, followStream owns the scroll position frame by frame;
     // a competing smooth animation here fights it for the whole response.
     if (isBotResponding) return
+    // Only follow new output if the user hasn't scrolled up to read something.
+    if (!isPinnedToBottom()) return
     // Scroll to bottom when history changes
     outputEndRef.current?.scrollIntoView({ behavior: "smooth" })
     
@@ -249,7 +261,7 @@ function TerminalContent(): React.ReactNode {
     if (window.innerWidth < 768 && activeTab === "terminal") {
       ensureInputVisible();
     }
-  }, [history, activeTab, isBotResponding])
+  }, [history, activeTab, isBotResponding, isPinnedToBottom])
 
   const handleCommand = async (input: string) => {
     const trimmedInput = input.trim();
@@ -585,6 +597,11 @@ function TerminalContent(): React.ReactNode {
   }, [isFullscreen])
 
   const focusInput = useCallback(() => {
+    // This runs on every click anywhere in the output. Focusing an input
+    // collapses the document selection, so bail out while the user is
+    // selecting text — otherwise double-click-to-select can never work.
+    if (hasTextSelection()) return;
+
     terminalInputRef.current?.focus();
     
     if (window.innerWidth < 768) {
