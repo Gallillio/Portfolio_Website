@@ -14,9 +14,10 @@ import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
 import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
-import type { Command } from '@/lib/types'
-import type { ChatMessage } from "@/lib/chatbot"
-import { extractAnswerText } from "@/lib/gemini-response"
+import type { Command, ChatMessage } from '@/lib/types'
+import { streamChat } from "@/lib/ai/chat-client"
+import { displayMessageFor } from "@/lib/ai/messages"
+import StreamingMessage, { type StreamingMessageRef } from "@/components/streaming-message"
 import React from "react"
 
 function TerminalContent(): React.ReactNode {
@@ -31,6 +32,12 @@ function TerminalContent(): React.ReactNode {
   const [isChatMode, setIsChatMode] = useState(false)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [isBotResponding, setIsBotResponding] = useState(false)
+  const streamingRef = useRef<StreamingMessageRef>(null)
+  const abortRef = useRef<AbortController | null>(null)
+  // Guards against a late stream completion resurrecting a chat the user already exited.
+  const requestGenRef = useRef(0)
+  // Date.now() collides when two entries commit in the same millisecond.
+  const messageKeyRef = useRef(0)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
@@ -212,6 +219,23 @@ function TerminalContent(): React.ReactNode {
     initializeTerminal()
   }, [])
 
+  // Called on every streamed repaint. Uses "auto" rather than "smooth" (a
+  // restarting smooth animation per frame looks broken) and stays put if the
+  // user has scrolled up to re-read something.
+  const followStream = useCallback(() => {
+    const anchor = outputEndRef.current
+    if (!anchor) return
+    const scroller = anchor.closest("[data-terminal-scroll]") as HTMLElement | null
+    if (scroller) {
+      const distanceFromBottom =
+        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight
+      if (distanceFromBottom > 80) return
+      scroller.scrollTop = scroller.scrollHeight
+      return
+    }
+    anchor.scrollIntoView({ behavior: "auto", block: "end" })
+  }, [])
+
   useEffect(() => {
     // Scroll to bottom when history changes
     outputEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -228,6 +252,11 @@ function TerminalContent(): React.ReactNode {
 
     if (isChatMode) {
       if (trimmedInput.toLowerCase() === 'exit') {
+        requestGenRef.current++;
+        abortRef.current?.abort();
+        abortRef.current = null;
+        streamingRef.current?.reset();
+        setIsBotResponding(false);
         setIsChatMode(false);
         setChatHistory([]);
         setHistory(prev => [
@@ -260,60 +289,66 @@ function TerminalContent(): React.ReactNode {
       
       setIsBotResponding(true); // Disable input
 
-      try {
-        const res = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      const generation = ++requestGenRef.current;
+      abortRef.current?.abort();
+      abortRef.current = new AbortController();
+      streamingRef.current?.reset();
+
+      // Responses are committed as a JSX element, never a raw string:
+      // TerminalOutput.renderLine() rewrites bare strings, turning words like
+      // "projects" into clickable commands and bare URLs into links.
+      const commitAssistant = (content: string, tone: "normal" | "soft" | "error") => {
+        const key = `chat-${messageKeyRef.current++}`;
+        const label = tone === "error" ? "Chatbot Error:" : "Gallillio Assistant:";
+        const bodyClass =
+          tone === "error" ? "text-red-400" : tone === "soft" ? "text-amber-300" : "";
+        setHistory(prev => [
+          ...prev,
+          {
+            command: "",
+            output: [
+              <div key={key} className={`whitespace-pre-wrap font-normal text-sm ${bodyClass}`}>
+                <span className="text-purple-400">{label}</span> {content}
+              </div>
+            ],
+            timestamp: new Date(),
+            isError: tone === "error"
+          }
+        ]);
+      };
+
+      await streamChat(
+        { message: trimmedInput, history: chatHistory, signal: abortRef.current.signal },
+        {
+          onDelta: (text) => streamingRef.current?.append(text),
+          onDone: (full) => {
+            if (generation !== requestGenRef.current) return;
+            setChatHistory(prevChat => [...prevChat, { role: 'model', content: full }]);
+            commitAssistant(full, "normal");
+            streamingRef.current?.reset();
           },
-          body: JSON.stringify({ message: trimmedInput, conversationHistory: chatHistory }),
-        });
-
-        if (!res.ok) {
-          throw new Error('Failed to get response from bot');
+          onError: (error) => {
+            if (generation !== requestGenRef.current) return;
+            // Keep whatever already streamed — a stream that died after 40 tokens
+            // should not throw those 40 tokens away.
+            if (error.partial) {
+              setChatHistory(prevChat => [...prevChat, { role: 'model', content: error.partial }]);
+              commitAssistant(error.partial, "normal");
+            }
+            // Quota, overload and misconfiguration are Ahmed's problem, not the
+            // visitor's — those read as the assistant talking, not as a red error.
+            // The precise server message stays in the console and the network tab.
+            console.error("[chat]", error.code, error.message);
+            const display = displayMessageFor(error.code, error.message);
+            if (!error.partial || display.tone === "error") {
+              commitAssistant(display.text, display.tone === "error" ? "error" : "soft");
+            }
+            streamingRef.current?.reset();
+          },
         }
+      );
 
-        const data = await res.json();
-        const botResponse: ChatMessage = {
-          role: 'model',
-          // Skip "thought" parts (Gemma 4 thinking models) and use the answer text
-          content: extractAnswerText(data) || "Sorry, I couldn't generate a response."
-        };
-        setChatHistory(prevChat => [...prevChat, botResponse]);
-        
-        // Add bot's response to terminal history as well, formatted
-        setHistory(prev => [
-          ...prev,
-          {
-            command: "", // Bot response doesn't originate from a user command line
-            output: [
-              <div key={Date.now()} className="whitespace-pre-wrap font-normal text-sm">
-                <span className="text-purple-400">Gallillio Assistant:</span> {botResponse.content}
-              </div>
-            ],
-            timestamp: new Date(),
-            isError: false
-          }
-        ]);
-
-      } catch (error) {
-        console.error("Error fetching bot response:", error);
-        const errorMessage: ChatMessage = { role: 'model', content: "Sorry, something went wrong. Please try again." };
-        setChatHistory(prevChat => [...prevChat, errorMessage]);
-        setHistory(prev => [
-          ...prev,
-          {
-            command: "", 
-            output: [
-              <div key={Date.now()} className="whitespace-pre-wrap font-normal text-sm text-red-400">
-                <span className="text-purple-400">Chatbot Error:</span> {errorMessage.content}
-              </div>
-            ],
-            timestamp: new Date(),
-            isError: true
-          }
-        ]);
-      } finally {
+      if (generation === requestGenRef.current) {
         setIsBotResponding(false); // Re-enable input
         if (terminalInputRef.current) {
           terminalInputRef.current.focus();
@@ -1091,6 +1126,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div
+                data-terminal-scroll
                 className={`${contentHeight} overflow-y-auto overflow-x-auto p-4 pt-6 font-mono cursor-text custom-scrollbar transition-all duration-700 ease-in-out
                   ${isChatMode ? 'bg-gray-900 text-gray-300 chat-terminal-content' : 'bg-black text-green-500'}`}
                 onClick={focusInput}
@@ -1105,6 +1141,7 @@ function TerminalContent(): React.ReactNode {
                   </div>
                 )}
                 <TerminalOutput history={history} onCommandClick={handleCommandClick} isChatMode={isChatMode} />
+                <StreamingMessage ref={streamingRef} active={isBotResponding} onGrow={followStream} />
                 <div ref={outputEndRef} />
                 {!isClosing && (
                   <TerminalInput 

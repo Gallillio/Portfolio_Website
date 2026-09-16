@@ -64,6 +64,18 @@ To run this project locally, follow these steps:
    npm install
    ```
 
+4. Configure environment variables. Copy the example file and fill in your key:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   | Variable | Required | Purpose |
+   | --- | --- | --- |
+   | `GEMINI_API_KEY` | Yes, for the `chat` command | Google Generative Language API key powering the terminal's AI assistant. Get one from [Google AI Studio](https://aistudio.google.com/apikey). |
+
+   The rest of the site works without it; only the AI chat needs the key.
+
 ### Running the Project
 
 To start the development server, run:

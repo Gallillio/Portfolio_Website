@@ -106,6 +106,10 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
+    // Ignore submits while a response streams. We gate here rather than on the
+    // input's `disabled` attribute, because a disabled input fires no keydown —
+    // which silently swallowed the Ctrl+C cancel below for the whole response.
+    if (isBotResponding) return
 
     const trimmedInput = input.trim()
     
@@ -247,8 +251,8 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             className={`w-full bg-transparent border-none outline-none font-mono ${isChatMode ? "text-blue-300" : "text-green-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
             autoFocus
             aria-label="Terminal input"
-            placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking..." : "Type your message...") : ""}
-            disabled={isBotResponding}
+            placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking... (Ctrl+C to stop)" : "Type your message...") : ""}
+            readOnly={isBotResponding}
           />
           {suggestion && !isChatMode && (
             <div className="absolute left-0 top-0 flex items-center pointer-events-none">
