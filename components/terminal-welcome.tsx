@@ -1,6 +1,7 @@
 "use client"
 
 import React from "react"
+import { title } from "@/lib/profile-extras"
 
 interface WelcomeBannerProps {
   /** Puts a command into the input, matching what command links elsewhere do. */
@@ -26,7 +27,7 @@ export default function WelcomeBanner({ onRun }: WelcomeBannerProps) {
     <div className="font-mono text-sm">
       <div>
         <span className="font-semibold text-white">Ahmed Galal Elzeky</span>
-        <span className="text-gray-500"> · AI &amp; Software Developer</span>
+        <span className="text-gray-500"> · {title}</span>
       </div>
 
       {/* Grid rather than space-padded columns: padding wraps raggedly on narrow screens. */}

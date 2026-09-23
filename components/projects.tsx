@@ -399,8 +399,10 @@ export default function Projects() {
                   </Tooltip>
                 )}
                 
-                <Tooltip 
-                  text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                <Tooltip
+                  text={project.code_available
+                    ? "This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                    : "This project isn't publicly hosted."}
                   isMobile={isMobile}
                   isTablet={isTablet}
                   showTooltip={project.inDevelopment ? false : !project.demo_available}

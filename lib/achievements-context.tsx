@@ -4,6 +4,15 @@ import { createContext, useContext, useState, useEffect, type ReactNode, useCall
 import { Code, Zap, Trophy, Star, Mail, Eye, Coffee, MessageSquare, Book, Award, ChevronsUp, Search, X, ArrowLeftRight } from "lucide-react"
 import { projects } from "./projects"
 
+// Project Expert is measured against the projects whose code is public. Clicks are
+// counted against current titles rather than the raw saved set, so a title stored
+// under an old name in a returning visitor's localStorage can't push progress past
+// the target.
+const CODE_PROJECT_TITLES = new Set(projects.filter(project => project.code_available).map(project => project.title))
+const CODE_PROJECT_COUNT = CODE_PROJECT_TITLES.size
+const countCodeProjectsClicked = (clicked: Set<string>) =>
+  Array.from(clicked).filter(title => CODE_PROJECT_TITLES.has(title)).length
+
 // Define achievement types and categories
 export enum AchievementCategory {
   EXPLORATION = "exploration",
@@ -240,7 +249,7 @@ const achievementsList: Achievement[] = [
     isSecret: true,
     // hint: "Explore all the projects' code repositories",
     hint: "Since you're interested in my projects, you should check out how they're built! All of them.",
-    condition: (state) => state.projectCodesClicked.size >= projects.filter(project => project.code_available).length,
+    condition: (state) => countCodeProjectsClicked(state.projectCodesClicked) >= CODE_PROJECT_COUNT,
   },
   {
     id: "portfolio_grandmaster",
@@ -660,11 +669,8 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
       case "persistent_visitor":
         return Math.min(Math.floor((state.visitDuration / 5) * 100), 99);
         
-      case "project_expert": {
-        // Assuming 4 projects with code available
-        const codeProjects = 4;
-        return Math.min(Math.floor((state.projectCodesClicked.size / codeProjects) * 100), 99);
-      }
+      case "project_expert":
+        return Math.min(Math.floor((countCodeProjectsClicked(state.projectCodesClicked) / CODE_PROJECT_COUNT) * 100), 99);
         
       default:
         // Binary achievements (either done or not)
@@ -686,7 +692,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
         case "persistent_visitor":
           return { current: 5, target: 5 };
         case "project_expert":
-          return { current: 4, target: 4 };
+          return { current: CODE_PROJECT_COUNT, target: CODE_PROJECT_COUNT };
         default:
           return { current: 1, target: 1 };
       }
@@ -715,7 +721,7 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
         return { current: Math.min(Math.floor(state.visitDuration), 5), target: 5 };
         
       case "project_expert":
-        return { current: state.projectCodesClicked.size, target: 4 };
+        return { current: countCodeProjectsClicked(state.projectCodesClicked), target: CODE_PROJECT_COUNT };
         
       default:
         // Binary achievements (either done or not)

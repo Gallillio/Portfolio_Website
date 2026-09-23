@@ -14,6 +14,7 @@ import MyAchievements from "./my-achievements"
 import YourAchievements from "./your-achievements"
 import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
+import { contact, cv } from "@/lib/profile-extras"
 import { hasTextSelection } from "@/lib/utils"
 import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
@@ -451,9 +452,9 @@ function TerminalContent(): React.ReactNode {
 
     if (trimmedInput.toLowerCase() === "contact") {
       const contactInfo = [
-        "Email: AhmedGalal11045@gmail.com",
-        "Phone: +20 1110333933",
-        "Location: New Cairo, Egypt",
+        `Email: <email>${contact.email}</email>`,
+        `Phone: ${contact.phone}`,
+        `Location: ${contact.location}`,
         "If you would like to see more, click on",
         "",
         <span 
@@ -509,8 +510,8 @@ function TerminalContent(): React.ReactNode {
       return
     } else if (response.specialAction === "downloadCV") {
       const link = document.createElement('a')
-      link.href = '/Ahmed Elzeky Resume.pdf'
-      link.download = 'Ahmed Elzeky Resume.pdf'
+      link.href = cv.path
+      link.download = cv.downloadName
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)

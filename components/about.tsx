@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { experiences, education, freelanceProjects, personalAchievements, getSkillsAsCategories, courses } from "@/lib/profile-data"
+import { bio, title, languages } from "@/lib/profile-extras"
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"
@@ -336,17 +337,18 @@ export default function About() {
             <div className={`relative ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
               <div className={`space-y-4 ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
                 <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  I architect and deploy enterprise-grade AI solutions that transform how organizations operate. From building secure, on-premises LLM assistants for banks and telecom giants using IBM Watsonx, to developing computer vision systems that save companies thousands in operational costs, my work spans the full spectrum of AI engineering—NLP, computer vision, deep learning, and cloud-native applications.
+                  {bio[0]}
                 </p>
-                <div className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  !isBioExpanded ? 'max-h-0 opacity-0' : 'max-h-96 opacity-100'
+                {/* grid-rows collapse instead of a fixed max-height: the text is taller than
+                    any fixed cap on narrow phones, and overflow-hidden would clip it silently. */}
+                <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
+                  !isBioExpanded ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
                 }`}>
-                  <p className="mb-4">
-                    Leveraging Python, React.js, Microsoft Azure, and IBM Watsonx, I&apos;ve delivered solutions that earned international recognition—including the Times Higher Education Award 2024 for technological innovation and representing Egypt & North Africa in the GESAwards Global Finals with my startup GPTuBE.
-                  </p>
-                  <p>
-                    My research on Arabic LLM reasoning was published in Elsevier Procedia, and I&apos;ve led enterprise AI workshops for C-suite executives across leading organizations.
-                  </p>
+                  <div className="overflow-hidden space-y-4">
+                    {bio.slice(1).map((paragraph, i) => (
+                      <p key={i}>{paragraph}</p>
+                    ))}
+                  </div>
                 </div>
               </div>
               {/* Gradient overlay for collapsed state */}
@@ -395,7 +397,7 @@ export default function About() {
             </div>
             <div className="text-center text-green-300">
               <h3 className="text-lg md:text-xl font-bold">Ahmed Galal Elzeky</h3>
-              <p className="text-sm md:text-base text-green-400">AI & Software Engineer</p>
+              <p className="text-sm md:text-base text-green-400">{title}</p>
             </div>
           </CardContent>
         </Card>
@@ -728,7 +730,7 @@ export default function About() {
                                 <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                   {item.type === 'achievement' ? item.subtitle
                                     : item.type === 'experience' ? item.company
-                                    : item.type === 'freelance' ? item.description
+                                    : item.type === 'freelance' ? item.description.split('\n')[0]
                                     : item.institution}
                                 </span>
                               </h3>
@@ -863,7 +865,7 @@ export default function About() {
                                     <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                       {item.type === 'achievement' ? item.subtitle
                                         : item.type === 'experience' ? item.company
-                                        : item.type === 'freelance' ? item.description
+                                        : item.type === 'freelance' ? item.description.split('\n')[0]
                                         : item.institution}
                                     </span>
                                   </h3>
@@ -920,7 +922,7 @@ export default function About() {
                                     <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                       {item.type === 'achievement' ? item.subtitle
                                         : item.type === 'experience' ? item.company
-                                        : item.type === 'freelance' ? item.description
+                                        : item.type === 'freelance' ? item.description.split('\n')[0]
                                         : item.institution}
                                     </span>
                                   </h3>
@@ -973,19 +975,20 @@ export default function About() {
                           {exp.description.split('\n')[0]}
                         </p>
                         
-                        {/* Full description with bullet points */}
-                        <div 
-                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            expandedExperiences.has(index) 
-                              ? 'max-h-[1000px] opacity-100 mt-2' 
-                              : 'max-h-0 opacity-0'
+                        {/* Full description with bullet points. grid-rows collapse instead of a
+                            fixed max-height, which clipped long entries on narrow phones. */}
+                        <div
+                          className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-in-out ${
+                            expandedExperiences.has(index)
+                              ? 'grid-rows-[1fr] opacity-100 mt-2'
+                              : 'grid-rows-[0fr] opacity-0'
                           }`}
                         >
-                          <div className="space-y-2">
+                          <div className="overflow-hidden space-y-3">
                             {exp.description.split('\n').slice(1).map((paragraph, i) => (
-                              <p 
-                                key={i} 
-                                className="pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200"
+                              <p
+                                key={i}
+                                className="pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200 [overflow-wrap:anywhere]"
                                 style={{
                                   transform: expandedExperiences.has(index) ? 'translateX(0)' : 'translateX(-10px)',
                                   opacity: expandedExperiences.has(index) ? 1 : 0,
@@ -1046,6 +1049,11 @@ export default function About() {
                       <div className="text-green-300/90 pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200">
                         Focus: {edu.focus}
                       </div>
+                      {edu.gpa && (
+                        <div className="text-green-300/90 pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200">
+                          GPA: {edu.gpa}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1066,18 +1074,14 @@ export default function About() {
                   
                   <div className="space-y-4">
                     <div className="pl-4 border-l border-green-500/20 group-hover:border-green-400/30 transition-colors duration-200">
-                      <div className="mb-4 hover:translate-x-1 transition-all duration-300 ease-in-out">
-                        <h3 className="text-lg font-bold text-green-400 mb-1 group-hover:text-green-300 transition-colors duration-200">English</h3>
-                        <p className="text-green-300/90 group-hover:text-green-300/80 transition-colors duration-200">Native Language (IELTS 7.5)</p>
-                      </div>
-                      <div className="mb-4 hover:translate-x-1 transition-all duration-300 ease-in-out">
-                        <h3 className="text-lg font-bold text-green-400 mb-1 group-hover:text-green-300 transition-colors duration-200">Arabic</h3>
-                        <p className="text-green-300/90 group-hover:text-green-300/80 transition-colors duration-200">Native Language</p>
-                      </div>
-                      <div className="hover:translate-x-1 transition-all duration-300 ease-in-out">
-                        <h3 className="text-lg font-bold text-green-400 mb-1 group-hover:text-green-300 transition-colors duration-200">Japanese</h3>
-                        <p className="text-green-300/90 group-hover:text-green-300/80 transition-colors duration-200">Conversational Level (JLPT N4)</p>
-                      </div>
+                      {languages.map((language, i) => (
+                        <div key={language.name} className={`${i < languages.length - 1 ? 'mb-4 ' : ''}hover:translate-x-1 transition-all duration-300 ease-in-out`}>
+                          <h3 className="text-lg font-bold text-green-400 mb-1 group-hover:text-green-300 transition-colors duration-200">{language.name}</h3>
+                          <p className="text-green-300/90 group-hover:text-green-300/80 transition-colors duration-200">
+                            {language.level}{language.certification ? ` (${language.certification})` : ""}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -1117,7 +1121,7 @@ export default function About() {
                         showTooltip={!project.code_available}
                       >
                         <a
-                          href={project.github}
+                          href={project.code_available ? project.github : undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md ${project.code_available ? '' : 'cursor-not-allowed opacity-50'}`}
@@ -1129,14 +1133,16 @@ export default function About() {
                       </Tooltip>
                       
                       {/* Demo Button */}
-                      <Tooltip 
-                        text="This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                      <Tooltip
+                        text={project.code_available
+                          ? "This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                          : "This project isn't publicly hosted."}
                         isMobile={isMobile}
                         isTablet={isTablet}
                         showTooltip={!project.demo_available}
                       >
                         <a
-                          href={project.demo}
+                          href={project.demo_available ? project.demo : undefined}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md ${project.demo_available ? '' : 'cursor-not-allowed opacity-50'}`}
