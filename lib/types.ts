@@ -22,6 +22,12 @@ export interface Project {
    * solely in the old hand-written chatbot context.
    */
   detailedDescription?: string
+  /**
+   * When the work happened, e.g. "Jul. 2026 - Present". Read only by the AI context
+   * so the assistant can answer "what has he built recently"; nothing in the UI
+   * parses it, so year-only values are fine here (unlike timeline dates).
+   */
+  period?: string
   technologies: string[]
   images: { src: string; alt: string }[]
   github?: string

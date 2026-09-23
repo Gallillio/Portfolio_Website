@@ -1,29 +1,50 @@
 import type { Project } from "./types"
 
+// Order is deliberate: strongest and newest first. The terminal `projects` command
+// previews the first 3, and the AI context presents them in this order.
 export const projects: Project[] = [
   {
-    title: "AI Language Learning App",
-    description: "This AI-driven app offers a hyper-personalized language learning experience. Key features include a dynamic Word Bank, adaptive Duolingo-style mini-games, story generation using comprehensible input (90% known, 10% new words), and an FSRS-powered Spaced Repetition flashcard system for superior retention. An AI Chatbot Assistant provides tailored guidance, like a personal tutor.",
-    technologies: ["ReactJS", "NextJS", "NodeJS", "Django", "Google Gemini", "MongoDB", "TailwindCSS", "Vercel"],
+    title: "Comic Stop",
+    period: "Jul. 2026 - Present",
+    description: "Live bilingual English/Arabic comics storefront at comicstop.co. Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Built on Next.js and Cloudflare Workers with headless Shopify, D1 and R2: cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
+    technologies: ["NextJS", "TypeScript", "Cloudflare Workers", "Cloudflare D1", "Cloudflare R2", "Shopify", "Drizzle ORM", "Playwright", "TailwindCSS"],
     images: [
-      { src: "/Language Learning App/reading mode.png", alt: "Reading Tab" },
-      { src: "/Language Learning App/story.png", alt: "Story Tab" },
-      { src: "/Language Learning App/flashcards.png", alt: "Flashcards Tab" },
-      { src: "/Language Learning App/wordbank.png", alt: "Word Bank Tab" },
-      { src: "/Language Learning App/add word.png", alt: "Add Word Tab" },
-      { src: "/Language Learning App/story add word.png", alt: "Story Add Word Tab" },
+      { src: "/Comic Stop/home.png", alt: "Comic Stop home page in English" },
+      { src: "/Comic Stop/home-arabic.png", alt: "Comic Stop home page in Arabic, right to left" },
+      { src: "/Comic Stop/product.png", alt: "Comic Stop product page" },
+      { src: "/Comic Stop/storylines.png", alt: "Comic Stop reading orders page" },
     ],
-    github: "#", 
-    demo: "#",   
+    github: "#",
+    demo: "https://comicstop.co",
+    demo_available: true,
+    code_available: false,
+  },
+  {
+    title: "Lango",
+    period: "2025 - Present",
+    description: "Language-learning app built on comprehensible input: stories generated at 90% known / 10% new vocabulary, with that ratio validated after generation instead of trusting the model. A self-hosted Python NLP service on Fly.io handles Japanese (spaCy + SudachiPy), Chinese and Korean grapheme-to-phoneme. The React Native/Expo app is offline-first on SQLite with a sync layer, backed by Supabase. Grew from the prototype that won the Stakpak GenAI Hackathon.",
+    technologies: ["React Native", "Expo", "TypeScript", "Supabase", "SQLite", "Python", "spaCy", "SudachiPy", "Fly.io"],
+    // Web-prototype screenshots until app screenshots land in public/Lango/.
+    images: [
+      { src: "/Language Learning App/reading mode.png", alt: "Web prototype: reading tab" },
+      { src: "/Language Learning App/story.png", alt: "Web prototype: story tab" },
+      { src: "/Language Learning App/flashcards.png", alt: "Web prototype: flashcards tab" },
+      { src: "/Language Learning App/wordbank.png", alt: "Web prototype: word bank tab" },
+      { src: "/Language Learning App/add word.png", alt: "Web prototype: add word tab" },
+      { src: "/Language Learning App/story add word.png", alt: "Web prototype: adding a word from a story" },
+    ],
+    github: "#",
+    demo: "#",
     demo_available: false,
-    code_available: false, 
+    code_available: false,
     inDevelopment: true,
   },
   {
-    title: 'AI Quickbooks CFO Assistant – Swipelabs',
-    description: "An AI-powered virtual CFO that automates financial analysis for small businesses. Integrated with QuickBooks API for real-time financial data sync, implemented automated weekly digests via email/Slack, and developed a Financial Health Score algorithm. Built a web dashboard for KPIs and trends, enabled GPT-powered finance Q&A, and created forecast simulation tools with budget tracking and alerting systems.",
-    detailedDescription: "A lightweight AI-powered virtual CFO tailored for small business owners, designed to automate financial analysis and provide real-time decision support. Integrated with QuickBooks API for sync of financial data (invoices, A/R, expenses, cash flow). Delivered automated weekly digests via email/Slack summarizing revenue trends, burn rate, overdue invoices, and AI insights. Implemented a scoring algorithm to calculate a Financial Health Score using business-type-adjusted weights (e.g. Burn Multiple, Margin, Runway). Enabled founders to ask finance-related questions via email, receiving GPT-powered replies within minutes. Developed a read-only web dashboard showing financial KPIs, trends, and a diff-style summary of 'What changed this week?' Added tools for forecast simulation and budget tracking, including text-based scenario analysis and alerting for overspending.",
-    technologies: ["NextJS", "FastAPI", "Python", "Supabase", "QuickBooks API", "Postmark"],
+    title: "Swipelabs AI CFO and Slack Assistant",
+    period: "Jun. 2025 - Sep. 2025",
+    description: "Weekly CFO reporting automated over the QuickBooks API: revenue, burn rate, overdue invoices and natural-language forecasting, delivered by email and Slack. Includes a Financial Health Score weighted by business type, a KPI dashboard with a 'what changed this week' summary, and forecast and budget simulations with overspend alerts. A companion GPT-powered Slack assistant, wired to Trello, ClickUp and Google Calendar, tracks client packages, flags unanswered messages and sends CRM-style follow-up reminders.",
+    detailedDescription: "An AI virtual CFO and a Slack assistant built for Swipelabs. The CFO tool syncs invoices, accounts receivable, expenses and cash flow from the QuickBooks API and sends automated weekly digests by email and Slack covering revenue trends, burn rate, overdue invoices and AI insights. A Financial Health Score uses business-type-adjusted weights (burn multiple, margin, runway). Founders can ask finance questions by email and get GPT-powered replies within minutes. A read-only web dashboard shows financial KPIs, trends and a diff-style 'What changed this week?' summary, with forecast simulation, text-based scenario analysis, budget tracking and overspend alerts. The companion GPT-powered Slack app works across direct messages, internal channels and Slack Connect, with real-time pings, sentiment cues and AI-suggested replies. It tracks client packages and onboarding with automatic reminders, integrates with Trello, ClickUp and Google Calendar to compare deliverables against obligations and ping owners of overdue tasks, monitors Slack Connect for unanswered messages, deadlines and client tone, sends CRM-style follow-up nudges to account managers, and produces weekly or on-demand performance reports from time tracking.",
+    technologies: ["NextJS", "FastAPI", "Python", "Supabase", "QuickBooks API", "Postmark", "Flask", "Slack API", "Trello API", "ClickUp API", "Google Calendar API", "PostgreSQL", "NLP"],
     images: [
       { src: "/Mini CFO/dashboard 1.png", alt: "Main Dashboard Overview" },
       { src: "/Mini CFO/dashboard 2.png", alt: "Financial KPIs Dashboard" },
@@ -41,8 +62,9 @@ export const projects: Project[] = [
   },
   {
     title: "GPTube",
+    period: "2024",
     description:
-      "An interactive tool that engages users with YouTube videos through a GPT-powered chatbot, utilizing TTS and STT for voice interaction. It features generating mock tests, correcting user answers, and creating PowerPoint presentations.",
+      "Graduation project and top-3 finalist at GESAwards Africa 2024: turns YouTube videos into quizzes, summaries and slides. A GPT-powered chatbot answers questions about the video by voice (TTS/STT), generates mock tests, marks answers and builds PowerPoint decks.",
     technologies: ["Microsoft Azure", "Google Cloud", "ReactJS", "Django", "Langchain", "Chroma DB", "RAG", "OpenAI Function Calling"],
     images: [
       { src: "/GPTube/main.png", alt: "Main Page" },
@@ -51,56 +73,25 @@ export const projects: Project[] = [
       { src: "/GPTube/powerpoint.png", alt: "Presentation Example" },
     ],
     github: "https://github.com/Gallillio/GPTube",
-    demo: "https://gptube-demo.com",
-    demo_available: false,
-    code_available: true,
-  },
-  {
-    title: "IIG-HEC Company Profile Website",
-    description:
-    "A website for IIG-HEC Company Profile. With a clean and modern design, it showcases the company's services, projects, and a blog section.",
-    technologies: ["JavaScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Firebase", "Vercel"],
-    images: [
-      { src: "/IIG-HEC Website/Projects.png", alt: "IIG-HEC Company Profile Website" },
-      { src: "/IIG-HEC Website/Contact us.png", alt: "IIG-HEC Company Profile Website" },
-      { src: "/IIG-HEC Website/Blog.png", alt: "IIG-HEC Company Profile Website" },
-      { src: "/IIG-HEC Website/Main.png", alt: "IIG-HEC Company Profile Website" },
-    ],
-    github: "https://github.com/Gallillio/MERN-IIG_HEC_Company_Website",
-    demo: "https://www.iig.land/",
-    demo_available: true,
-    code_available: true,
-  },
-  {
-    title: "Data Visualer and Analysis Tool",
-    description:
-    "An old-school tool to visualize and analyze data. It provides a user-friendly interface for data exploration and model training, with features for data preprocessing.",
-    technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn", "Tkinter"],
-    images: [
-      { src: "/Data Visualizer Tool/Main.png", alt: "Main" },
-      { src: "/Data Visualizer Tool/Histogram EDA.png", alt: "Histogram EDA" },
-      { src: "/Data Visualizer Tool/Encode Column.png", alt: "Encode Column" },
-      { src: "/Data Visualizer Tool/Detailed EDA.png", alt: "Detailed EDA" },
-      { src: "/Data Visualizer Tool/Handle NA.png", alt: "Handle NA" },
-    ],
-    github: "https://github.com/Gallillio/Data_Science-Data_Visualizer_Tool?tab=readme-ov-file",
-    demo: "https://your-portfolio-demo.com",
+    demo: "#",
     demo_available: false,
     code_available: true,
   },
   {
     title: "ESLSCA University Chatbot",
+    period: "Feb. 2024 - Apr. 2024",
     description:
-      "A chatbot that streamlines University admissions. Awarded The Times Highest Higher Education Award 2024 for Technological Innovation. It automates document processing and enhances communication with real-time updates. \n Note: This project is currently under development and has undergone several changes.",
+      "Admissions chatbot for ESLSCA University, part of the AI system that won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024. Guides prospective students, sends real-time updates and automates document processing and verification.",
     technologies: ["Microsoft Azure", "Langchain", "Django", "OpenAI Function Calling", "Vector Database", "RAG"],
     images: [
       { src: "/ESLSCA Chatbot/intro-majors.png", alt: "ESLSCA Chatbot Majors Provided Question/Answer" },
       { src: "/ESLSCA Chatbot/courses provided.png", alt: "ESLSCA Chatbot Courses Provided Question/Answer" },
       { src: "/ESLSCA Chatbot/newsletter-thanks.png", alt: "ESLSCA Chatbot Newsletter Subscription / Thanks message" },
     ],
-    github: "https://github.com/your-username/gptube",
+    github: "#",
+    // The hosted demo currently fails its TLS handshake (HTTP 525); flip back when it recovers.
     demo: "https://chatbot.eslsca.edu.eg/",
-    demo_available: true,
+    demo_available: false,
     code_available: false,
   },
   {
@@ -121,6 +112,40 @@ export const projects: Project[] = [
     code_available: true,
   },
   {
+    title: "IIG-HEC Company Profile Website",
+    period: "Jun. 2023 - Dec. 2023",
+    description:
+    "Company website for IIG-HEC, built during a software development internship: services, projects and a real-time blog. Live at iig.land.",
+    technologies: ["JavaScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Firebase", "Vercel"],
+    images: [
+      { src: "/IIG-HEC Website/Projects.png", alt: "IIG-HEC Company Profile Website" },
+      { src: "/IIG-HEC Website/Contact us.png", alt: "IIG-HEC Company Profile Website" },
+      { src: "/IIG-HEC Website/Blog.png", alt: "IIG-HEC Company Profile Website" },
+      { src: "/IIG-HEC Website/Main.png", alt: "IIG-HEC Company Profile Website" },
+    ],
+    github: "https://github.com/Gallillio/MERN-IIG_HEC_Company_Website",
+    demo: "https://www.iig.land/",
+    demo_available: true,
+    code_available: true,
+  },
+  {
+    title: "Data Visualiser and Analysis Tool",
+    description:
+    "Desktop tool for exploratory data analysis and preprocessing ahead of supervised machine learning: load a CSV, visualise distributions, handle missing values, encode columns and train models from a Tkinter interface.",
+    technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn", "Tkinter"],
+    images: [
+      { src: "/Data Visualizer Tool/Main.png", alt: "Main" },
+      { src: "/Data Visualizer Tool/Histogram EDA.png", alt: "Histogram EDA" },
+      { src: "/Data Visualizer Tool/Encode Column.png", alt: "Encode Column" },
+      { src: "/Data Visualizer Tool/Detailed EDA.png", alt: "Detailed EDA" },
+      { src: "/Data Visualizer Tool/Handle NA.png", alt: "Handle NA" },
+    ],
+    github: "https://github.com/Gallillio/Data_Science-Data_Visualizer_Tool?tab=readme-ov-file",
+    demo: "#",
+    demo_available: false,
+    code_available: true,
+  },
+  {
     title: "My Portfolio Website",
     description:
     "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
@@ -129,36 +154,8 @@ export const projects: Project[] = [
       { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
     ],
     github: "https://github.com/Gallillio/Portfolio_Website",
-    demo: "https://gallillio.vercel.app",
+    demo: "https://portfolio.gallillio.com",
     demo_available: true,
     code_available: true,
   },
-  {
-    title: 'Slack AI Assistant – Swipelabs',
-    description: "A GPT-powered Slack app for client communication and workflow management. Features real-time interactions with sentiment analysis and AI-suggested replies, client package tracking with automated reminders, and full integration with Trello, ClickUp, and Asana for task management. Includes smart monitoring for unanswered messages, CRM-style reminders for account managers, and automated time tracking with performance reports.",
-    detailedDescription: "Built a GPT-powered Slack app designed to assist Swipelabs team members in managing client communication and internal workflows. The assistant enabled seamless interaction via direct messages, internal channels, and Slack Connect, with real-time pings, sentiment cues, and AI-suggested replies. Client package tracking and onboarding workflows, with manual input and automatic reminders for setup completion. Full integration with Trello, ClickUp, and Asana to track deliverables vs. obligations and ping responsible members when tasks were overdue. Smart monitoring of Slack Connect for unanswered messages, deadlines, and client tone, prompting appropriate follow-ups. CRM-style reminders for account managers, with intelligent follow-up nudges after meetings and inactivity alerts. Time tracking via integration or Slack-based input, and automatic weekly/on-demand performance reports sent to managers.",
-    technologies: ["Python", "Flask", "Slack API", "Trello API", "ClickUp API", "Google Calendar API", "PostgreSQL", "NLP"],
-    images: [
-      { src: "/in-development.png", alt: "Still In Development" },
-    ],
-    github: "#",
-    demo: "#",
-    demo_available: false,
-    code_available: false,
-    inDevelopment: true,
-  },
-  {
-    title: '"Brillium" AI SaaS',
-    description: "Brillium is an AI-powered LMS that converts PDF textbooks into interactive learning experiences. It generates quizzes, flashcards, and presentations, analyze student performance, and dynamically create questions for improvement. Teachers can monitor and edit content, while a chatbot serves as a personal assistant for students.",
-    technologies: ["Google Cloud", "FastAPI","Tesseract OCR", "Python", "ReactJS", "NextJS","NodeJS", "MongoDB", "TailwindCSS", "Vercel"],
-    images: [
-      { src: "/in-development.png", alt: "Still In Development" },
-    ],
-    github: "https://github.com/Gallillio/Brillium",
-    demo: "https://www.Brillium.com/",
-    demo_available: false,
-    code_available: false,
-    inDevelopment: true,
-  },
 ];
-
