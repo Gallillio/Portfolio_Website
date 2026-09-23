@@ -12,13 +12,14 @@ interface ChatIntroProps {
  * calls the "articulation barrier" — new users don't know what the assistant can
  * do and often leave without asking anything.
  *
- * Chosen for breadth (a role, a portfolio, a skill area) and grounded in real
- * lib/profile-data.ts content so none of them can return "I don't know".
+ * Chosen for breadth (the current role, a ranking, recency) and grounded in the
+ * generated context: the ISYS experience entry, and the Highlights section and
+ * project periods in lib/ai/context.ts, so none of them can return "I don't know".
  */
 const STARTERS = [
-  "What did he build at IBM?",
-  "Show me his best projects",
-  "What's his AI experience?",
+  "What does he do at ISYS?",
+  "What's his most impressive project?",
+  "What has he built recently?",
 ]
 
 export default function ChatIntro({ onAsk }: ChatIntroProps) {
