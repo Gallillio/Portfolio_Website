@@ -16,7 +16,16 @@ import {
   courses,
 } from "@/lib/profile-data";
 import { projects } from "@/lib/projects";
-import { bio, languages, contact, coursesNote, siteMap } from "@/lib/profile-extras";
+import {
+  headline,
+  bio,
+  highlights,
+  languages,
+  contact,
+  workEligibility,
+  coursesNote,
+  siteMap,
+} from "@/lib/profile-extras";
 
 /**
  * Descriptions in profile-data.ts are indented template literals carrying bullet
@@ -46,7 +55,23 @@ export function buildPortfolioContext(): string {
   const parts: string[] = [];
 
   parts.push(
-    section("Bio", `My name is Ahmed Galal Elzeky (nickname: Gallillio). I am an AI and software developer.\n${bio.join("\n")}`)
+    section(
+      "Bio",
+      [`Ahmed Galal Elzeky (nickname: Gallillio). ${headline}.`, "In his own words:", ...bio].join("\n")
+    )
+  );
+
+  // The ranking is Ahmed's, not the model's. Without it, "most impressive" and "what has he
+  // built recently" were answered from arbitrary array order. Pointers only: the facts live
+  // in the sections below, so the ranking cannot drift from them.
+  parts.push(
+    section(
+      "Highlights",
+      [
+        "Ranked by Ahmed. Use this order for his most impressive work, and the periods for recent work. SIA is his main project even though it is listed under Professional Experience, not Projects.",
+        ...highlights.map((h, i) => `${i + 1}. ${h.title} (${h.period}): ${h.pointer}`),
+      ].join("\n")
+    )
   );
 
   parts.push(
@@ -64,8 +89,9 @@ export function buildPortfolioContext(): string {
       experiences
         .map((e) =>
           [
-            `### ${e.title} — ${e.company}`,
+            `### ${e.title}, ${e.company}`,
             `Period: ${e.period}`,
+            ...(e.location ? [`Location: ${e.location}`] : []),
             `Technologies: ${e.technologies.join(", ")}`,
             normalizeText(e.description),
           ].join("\n")
@@ -81,7 +107,8 @@ export function buildPortfolioContext(): string {
         .map((e) =>
           [
             `### ${e.degree}`,
-            `${e.institution} (${e.year}) — ${e.location}`,
+            `${e.institution} (${e.year}), ${e.location}`,
+            ...(e.gpa ? [`GPA: ${e.gpa}`] : []),
             `Focus: ${e.focus}`,
           ].join("\n")
         )
@@ -90,23 +117,30 @@ export function buildPortfolioContext(): string {
   );
 
   parts.push(
-    section("Languages", languages.map((l) => `- ${l.name}: ${l.level}`).join("\n"))
+    section(
+      "Languages",
+      languages
+        .map((l) => `- ${l.name}: ${l.level}${l.certification ? ` (${l.certification})` : ""}`)
+        .join("\n")
+    )
   );
 
   parts.push(
     section(
       "Projects",
-      projects
-        .map((p) =>
+      [
+        "Listed in Ahmed's order, strongest and newest first.",
+        ...projects.map((p) =>
           [
             `### ${p.title}${p.inDevelopment ? " (In Development)" : ""}`,
+            ...(p.period ? [`Period: ${p.period}`] : []),
             normalizeText(p.detailedDescription ?? p.description),
             `Technologies: ${p.technologies.join(", ")}`,
             linkLine("Code", p.github, p.code_available),
             linkLine("Demo", p.demo, p.demo_available),
           ].join("\n")
-        )
-        .join("\n\n")
+        ),
+      ].join("\n\n")
     )
   );
 
@@ -159,7 +193,7 @@ export function buildPortfolioContext(): string {
   parts.push(
     section(
       "Courses",
-      [coursesNote, ...courses.map((c) => `- ${c.title} — ${c.provider} (${c.date})`)].join("\n")
+      [coursesNote, ...courses.map((c) => `- ${c.title}, ${c.provider} (${c.date})`)].join("\n")
     )
   );
 
@@ -170,6 +204,8 @@ export function buildPortfolioContext(): string {
         `Email: ${contact.email}`,
         `Phone: ${contact.phone}`,
         `Location: ${contact.location}`,
+        `Work eligibility: ${workEligibility}`,
+        `Portfolio: ${links.portfolio}`,
         `GitHub: ${links.github}`,
         `LinkedIn: ${links.linkedin}`,
         `Credly: ${links.credly}`,

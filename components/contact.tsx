@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Mail, Phone, MapPin, Github, Linkedin } from "lucide-react"
 import { useAchievements } from "@/lib/achievements-context"
 import { links } from "@/lib/profile-data"
+import { contact, cv } from "@/lib/profile-extras"
 import { useForm, ValidationError } from '@formspree/react'
 import ThankYouPopup from "./thank-you-popup"
 import Image from "next/image"
@@ -177,26 +178,26 @@ export default function Contact() {
               <CardContent className="space-y-4">
                 <div className="flex items-center">
                   <Mail className="mr-3 text-green-400" size={20} />
-                  <a 
-                    href="mailto:ahmedgalal11045@gmail.com" 
+                  <a
+                    href={`mailto:${contact.email}`}
                     className="text-green-300 hover:text-green-400 underline"
                     onClick={() => sendContact()}
                   >
-                    AhmedGalal11045@gmail.com
+                    {contact.email}
                   </a>
                 </div>
                 <div className="flex items-center">
                   <Phone className="mr-3 text-green-400" size={20} />
-                  <a 
-                    href="tel:+20 1110333933" 
+                  <a
+                    href={contact.phoneHref}
                     className="text-green-300 hover:text-green-400 underline"
                   >
-                    +20 1110333933
+                    {contact.phone}
                   </a>
                 </div>
                 <div className="flex items-center">
                   <MapPin className="mr-3 text-green-400" size={20} />
-                  <span className="text-green-300">New Cairo, Egypt</span>
+                  <span className="text-green-300">{contact.location}</span>
                 </div>
                 <div className="pt-2">
                   <Button
@@ -204,11 +205,11 @@ export default function Contact() {
                     className="w-full border-green-500 text-green-400 bg-black hover:bg-green-500/20"
                     asChild
                   >
-                    <a 
-                      href="/Ahmed Elzeky Resume.pdf" 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      download
+                    <a
+                      href={cv.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={cv.downloadName}
                       onClick={() => downloadCV()}
                     >
                       Download CV

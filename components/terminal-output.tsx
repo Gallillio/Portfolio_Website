@@ -1,6 +1,7 @@
 import type { Command, CommandResponse } from "@/lib/types"
 import { useState, useCallback, useEffect } from "react"
 import { availableCommands } from "@/lib/commands"
+import { cv } from "@/lib/profile-extras"
 import { Tooltip } from "@/components/ui/tooltip"
 
 interface TerminalOutputProps {
@@ -183,8 +184,8 @@ const CVLink = ({ isChatMode }: { isChatMode?: boolean }) => {
     event.preventDefault()
     if (isMobile || event.ctrlKey) {
       const link = document.createElement('a')
-      link.href = "/Ahmed Elzeky Resume.pdf"
-      link.download = "Ahmed Elzeky Resume.pdf"
+      link.href = cv.path
+      link.download = cv.downloadName
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -200,7 +201,7 @@ const CVLink = ({ isChatMode }: { isChatMode?: boolean }) => {
           className={`underline ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
           tabIndex={-1}
         >
-          /Ahmed Elzeky Resume.pdf
+          {cv.path}
         </a>
       </span>
     </Tooltip>
@@ -278,8 +279,8 @@ const PhoneLink = ({ phone, isChatMode }: { phone: string; isChatMode?: boolean 
   }, [])
 
   const handleClick = () => {
-    // Open phone dialer
-    window.location.href = `tel:${phone}`;
+    // Open phone dialer (tel: URIs must not contain the display spacing)
+    window.location.href = `tel:${phone.replace(/\s+/g, "")}`;
   };
 
   return (
@@ -314,7 +315,8 @@ export default function TerminalOutput({ history, onCommandClick, isChatMode = f
       }
       
       // Check for phone numbers in Contact command
-      const phoneMatch = line.match(/\+\d{2}\s\d{10}/);
+      // Accepts grouped formats such as "+20 111 033 3933" as well as "+20 1110333933"
+      const phoneMatch = line.match(/\+\d{1,3}(?:\s?\d){8,12}/);
       if (phoneMatch && phoneMatch.index !== undefined) {
         const [fullMatch] = phoneMatch;
         const beforeText = line.substring(0, phoneMatch.index);
@@ -382,8 +384,15 @@ export default function TerminalOutput({ history, onCommandClick, isChatMode = f
       }
 
       // Handle CV download link
-      if (line === "/Ahmed Elzeky Resume.pdf") {
+      if (line === cv.path) {
         return <CVLink isChatMode={isChatMode} />
+      }
+
+      // Box content lines ("│  ...") carry prose from the profile data; linking every
+      // word that happens to be a command name ("about", "freelance", "chat") there
+      // produces stray links. Command links belong to help and hint lines only.
+      if (line.startsWith("│")) {
+        return line
       }
 
       // Handle commands in help text

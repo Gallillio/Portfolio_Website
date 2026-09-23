@@ -8,69 +8,87 @@ export type SkillsData = {
   [key: string]: string[];
 };
 
-// Main skills data
+// Main skills data. Groups and leading entries follow the CV; site-only skills sit
+// at the end of each group. The terminal `skills` command shows the first 3 groups
+// and the first 5 skills of each, so order matters.
 export const skills: SkillsData = {
-  "AI & Machine Learning": [
+  "AI & LLM": [
+    "OpenAI",
+    "Anthropic Claude",
+    "Google Gemini",
+    "IBM watsonx",
+    "LangChain",
+    "RAG",
+    "pgvector",
+    "Agentic Tool Use",
+    "Prompt Engineering & Tuning",
+    "LLM Evaluation",
+    "TensorFlow",
     "NLP",
     "Computer Vision",
     "Deep Learning",
     "Machine Learning",
-    "LangChain",
     "OpenCV",
-    "TensorFlow",
     "Scikit-learn",
     "Keras",
     "Pandas",
     "Numpy",
   ],
-  "Cloud & AI Platforms": [
-    "Microsoft Azure",
-    "Google Cloud",
-    "IBM Watsonx",
-    "IBM Cloud",
-    "Firebase",
-  ],
-  "Web & Application Development": [
-    "JavaScript",
+  "Programming": [
+    "Python",
     "TypeScript",
-    "ReactJS",
-    "NextJS",
-    "Node.js",
-    "ExpressJS",
+    "JavaScript",
+    "C#",
+    "SQL",
+  ],
+  "Backend & Data": [
     "FastAPI",
     "Django",
-    "Flask",
-    "Flutter",
-    "MongoDB",
+    "NestJS",
+    "Microservices",
     "PostgreSQL",
-    "Supabase",
+    "MongoDB",
+    "Redis",
+    "Node.js",
+    "ExpressJS",
+    "Flask",
+    "Firebase",
     "REST APIs",
     "OpenAPI",
-    "C#",
-    "Unity",
-    "Tailwind"
   ],
-  "DevOps & Tools": [
-    "Git",
+  "Frontend & Mobile": [
+    "ReactJS",
+    "NextJS",
+    "React Native/Expo",
+    "Tailwind",
+    "Flutter",
+  ],
+  "Cloud & DevOps": [
+    "Microsoft Azure",
+    "Google Cloud",
+    "IBM Cloud",
     "Docker",
-    "Kubernetes",
     "Jenkins",
-    "Cursor",
-    "Jupyter Notebook",
+    "Cloudflare Workers",
+    "Supabase",
+    "Git",
+    "Kubernetes",
     "Vercel",
+    "Linux",
+  ],
+  "Tools & Collaboration": [
+    "Cursor",
     "V0",
     "Postman",
-    "Linux",
+    "Jupyter Notebook",
+    "PowerBI",
     "Agile/Scrum",
     "Notion",
-    "PowerBI",
-  ],
-  "Design & Collaboration": [
     "Figma",
     "Jira",
     "Trello",
-    "Slack"
-  ]
+    "Slack",
+  ],
 };
 
 // Helper function to get skills as an array of categories
@@ -86,85 +104,74 @@ export const getAllSkills = (): string[] => {
   return Object.values(skills).flat();
 };
 
-// Experience data
+// Experience data.
+// `description` is one line per entry: line 1 is the summary shown before "Learn More"
+// (and first in the terminal `experience` preview, which shows 3 lines), then "• " bullets.
+// No blank lines: they render as empty bordered paragraphs and waste the terminal preview.
+// `period` must stay "Mmm. yyyy - ..." with a plain hyphen: the About timeline sorts on it.
+// `location` is read only by the chatbot context.
 export const experiences = [
   {
-    title: "Software Developer",
-    company: "Develop Systems",
-    period: "Sep. 2025 - Present",
-    technologies: ["Flutter", "Firebase", "API Integration", "Authentication", "Database Design", "Cloud Configuration"],
-    description:
-      ` • Built and deployed production-ready applications, delivering both Flutter frontends and Firebase backends for client projects.
-
-      • Supported transition of applications into production by handling deployment, debugging, and cloud configuration.
-
-      • Implemented authentication, database design, and API integrations within Firebase to support scalable mobile applications.
-      `,
-  },
-  {
     title: "AI Engineer",
-    company: "Intelligent Systems (I-Sys)",
+    company: "Intelligent Systems (ISYS), IBM partner",
     period: "Feb. 2025 - Present",
-    technologies: ["IBM Watsonx", "IBM Cloud", "Docker", "Kubernetes", "Jenkins", "OpenAPI Specification (OAS)", "LLMs", "Data Pipelines", "TTS", "STT", "RAG", "CI/CD"],
-    description:
-      ` • Built enterprise level AI chat application integrating IBM Watsonx with scalable on-prem and cloud services for secure, explainable, and extensible deployment.
-
-      • Created conversational agents to automate repetitive internal workflows, reducing manual task load, and created document parsing pipelines using RAG.
-
-      • Automated all dockerization of all developed services and its architecture, as well as CI/CD pipelines using Jenkins for on-prem enterprise environment for production use.
-
-      • Trained Egyptian and Saudi dialect-specific TTS/STT models to enable natural language voice commands.
-
-      • Hosted AI workshops and live demos to C-suite executives, helping shape enterprise AI strategy. Workshop Showcase: @https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/
-      `,
+    location: "Smart Village, Egypt",
+    technologies: ["IBM watsonx", "Anthropic Claude", "OpenAI", "FastAPI", "NextJS", "Microservices", "pgvector", "RAG", "Multi-tenancy", "SSO (OIDC/SAML)", "SCIM", "Docker", "Kubernetes", "Jenkins", "TTS", "STT", "IBM Cloud", "OpenAPI Specification (OAS)"],
+    description: [
+      "SIA, an enterprise multi-tenant AI assistant: 22 microservices, ~470K lines of code, 4,800+ automated tests, built by a 7-engineer team.",
+      "• Live for about 70 staff and sized for a 1,000-seat client rollout: 22 FastAPI microservices and a Next.js front end, per-tenant databases and encryption keys, SSO (OIDC/SAML), SCIM, MFA, and GDPR export and erasure.",
+      "• Vendor lock-in removed from the LLM layer: IBM watsonx (Llama 4), Anthropic Claude and OpenAI sit behind one interface with automatic failover, and a task-aware router across 20 task types, measured against production prompts, stamps the cost on every call.",
+      "• Answer-confidence scoring raised from AUROC 0.35, worse than chance, to a measured 0.994. Chat is grounded in a pgvector knowledge base with per-department access control, and answers now cite their source page; none of 1,614 answers carried a citation before.",
+      "• 45 department-gated agent tools (email, calendar, Word and Excel authoring, document comparison, web search), plus an AI recruitment pipeline for CV parsing, candidate matching and deduplication that re-queues automatically after a provider outage.",
+      "• Bilingual English/Arabic with full RTL and Arabic-dialect speech in and out, using Egyptian and Saudi dialect TTS/STT models trained for voice commands.",
+      "• Vodafone's engineering team trained on IBM watsonx.ai over a 9-hour course: prompt engineering, tuning, LoRA/QLoRA, synthetic data, evaluation and RAG.",
+      "• C-suite audiences at ISYS conferences: SIA pitched alongside IBM watsonx.ai and watsonx Orchestrate. Workshop showcase: https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/",
+      "• Every service containerised with Docker, shipped through Jenkins CI/CD pipelines for on-prem enterprise production.",
+    ].join("\n"),
   },
   {
     title: "AI Developer Intern",
     company: "Environ Adapt",
     period: "Aug. 2024 - Oct. 2024",
     technologies: ["TensorFlow", "OpenCV", "Keras", "Deep Neural Networks", "Image Processing", "Data Science"],
-    description:
-      `• Using Tensorflow and OpenCV to create Siamese Networks that was used in an image recognition model to distinguish between identical trash bales and bales viewed from different angles, automating a previously manual task and significantly reducing company costs in storage and payments by thousands of Egyptian pounds.
-      
-      • Designed and implemented a validation model to assess image quality against stakeholder-defined requirements, ensuring compliance and improving precision in image verification processes.
-      `,
+    description: [
+      "Siamese network that replaced manual trash-bale tagging, matching identical bales photographed from different angles.",
+      "• Built with TensorFlow and OpenCV; cut storage and payment costs by thousands of Egyptian pounds.",
+      "• Image quality-control model validating photos against stakeholder-defined requirements.",
+    ].join("\n"),
   },
   {
     title: "AI Developer Intern",
-    company: "Ecole Supérieure Libre des Sciences Commerciales Appliquées (ESLSCA University)",
+    company: "ESLSCA University",
     period: "Feb. 2024 - Apr. 2024",
     technologies: ["Microsoft Azure", "Langchain", "OpenAI Function Calling", "Vector Database", "RAG"],
-    description: 
-    ` • Developed a project, earning ESLSCA University The Times Highest Higher Education Award 2024 in Technological/Digital Innovation at the Arab Summit of Universities, Dubai.
-     
-    • Used Langchain Framework and OpenAI Function Calling to build a GPT-powered (using Azure OpenAI) chatbot that guides prospective students, provides real-time updates, and automates document processing and verification.
-     
-    • Streamlined admissions by reducing processing times, enhancing communication, and reallocating staff for personalized support, boosting efficiency.
-    
-    • Integrated Chroma Vector Database and RAG to provide the chatbot for contextual awareness.`,
+    description: [
+      "GPT-based admissions assistant automating applicant responses and document checks, part of the university AI system that won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024.",
+      "• Built on Azure OpenAI with LangChain and OpenAI function calling, grounded in a Chroma vector database through RAG.",
+      "• Guides prospective students and sends real-time updates, freeing admissions staff for personalised support.",
+    ].join("\n"),
   },
   {
-    title: "XR Developer",
-    company: "GMind",
-    period: "Jul. 2023 - Oct. 2023",
-    technologies: ["C#", "Unity", "Object-Oriented Programming (OOP)", "Game Development", "Game Design",],
-    description: 
-    `  • Used C# to implementing player mechanics and complex AI behavior of NPCs and player interactions.
-    
-    • Gained a clear understanding of Object-Oriented Programming
-    
-    • Refine tasks to help to achieve the vision of the game designer.`,
+    title: "Software Developer Intern",
+    company: "IIG-HEC",
+    period: "Jun. 2023 - Dec. 2023",
+    technologies: ["JavaScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Firebase", "Vercel"],
+    description: [
+      "Company website and a real-time blog publishing system on React and Firebase, live at iig.land.",
+      "• Blog publishing on Firestore and Firebase Storage.",
+    ].join("\n"),
   },
 ]
 
 // Education data
 export const education = [
   {
-    degree: "B.S. in Computer Science",
-    institution: "Ecole Supérieure Libre des Sciences Commerciales Appliquées (ESLSCA University)",
+    degree: "B.Sc. Computer Science",
+    institution: "ESLSCA University",
     year: "Sep. 2021 - Sep. 2024",
     focus: "AI & Data Science",
-    location: "Egypt",
+    location: "Cairo, Egypt",
+    gpa: "3.5/4.0",
   },
   {
     degree: "Japanese Language and Business Manner",
@@ -178,9 +185,12 @@ export const education = [
 // Add interface for freelance projects
 export interface FreelanceProject {
   title: string;
+  // First line is what the About timeline shows; keep it short.
   description: string;
   technologies: string[];
   period: string;
+  // Leave github/demo unset when private: the About card links them with
+  // target="_blank", so a "#" placeholder would reopen the portfolio in a new tab.
   github?: string;
   demo?: string;
   demo_available?: boolean;
@@ -190,21 +200,33 @@ export interface FreelanceProject {
 // Add freelance projects data
 export const freelanceProjects: FreelanceProject[] = [
   {
-    title: '"IIG-HEC" Company Profile Website',
-    description: "A website fofeatures a clean and modern design that effectively showcases the company's services, projects, and blog section, providing visitors with a comprehensive overview of IIG-HEC.",
-    technologies: ["JavaScript", "ReactJS", "NodeJS", "ExpressJS", "MongoDB", "TailwindCSS", "Firebase", "Vercel"],
-    period: "Jun. 2023 - Dec. 2023",
-    github: "https://github.com/Gallillio/MERN-IIG_HEC_Company_Website",
-    demo: "https://www.iig.land/",
+    title: "Comic Stop: bilingual comics storefront",
+    description: [
+      "Live bilingual English/Arabic storefront at comicstop.co.",
+      "Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
+    ].join("\n"),
+    technologies: ["NextJS", "TypeScript", "Cloudflare Workers", "Cloudflare D1", "Cloudflare R2", "Shopify", "Drizzle ORM", "Playwright", "TailwindCSS"],
+    period: "Jul. 2026 - Present",
+    demo: "https://comicstop.co",
     demo_available: true,
-    code_available: true,
+    code_available: false,
   },
-
-
+  {
+    title: "Swipelabs: AI CFO reporting and Slack assistant",
+    description: [
+      "Weekly CFO reports automated over the QuickBooks API.",
+      "Revenue, burn rate, overdue invoices and natural-language forecasting, plus a GPT-powered Slack assistant wired to Trello, ClickUp and Google Calendar.",
+    ].join("\n"),
+    technologies: ["NextJS", "FastAPI", "Python", "Supabase", "QuickBooks API", "Postmark", "Flask", "Slack API", "Trello API", "ClickUp API", "Google Calendar API", "PostgreSQL"],
+    period: "Jun. 2025 - Sep. 2025",
+    demo_available: false,
+    code_available: false,
+  },
 ];
 
 // Add links data
 export const links = {
+  portfolio: "https://portfolio.gallillio.com",
   github: "https://github.com/Gallillio",
   linkedin: "https://www.linkedin.com/in/ahmed-galal-123a4a196",
   credly: "https://www.credly.com/users/ahmed-galal.bbb8ea95"
@@ -214,8 +236,10 @@ export const links = {
 export interface PersonalAchievement {
   id: string
   title: string
+  // First line is the headline (timeline subtitle); later lines render dimmed.
   description: string
   icon: "trophy" | "star" | "book" | "languages" | "shieldCheck"  // Using string literals for icon types
+  // Must be "Mmm. yyyy": the About timeline sorts on it.
   year: string
   category: string
   link?: string  // Optional link to external resource
@@ -226,9 +250,11 @@ export interface PersonalAchievement {
 export const personalAchievements: PersonalAchievement[] = [
   {
     id: "elsevier-publication",
-    title: "Published Journal of Elsevier's Procedia",
-    description: `Published "Multi-Hop Arabic LLM Reasoning in Complex QA". 
-    Presented in ACLing 2024, the 6th International Conference on AI in Computational Linguistics in Dubai,UAE.`,
+    title: "Published in Procedia Computer Science (Elsevier)",
+    description: [
+      "\"Multi-Hop Arabic LLM Reasoning in Complex QA\", Procedia Computer Science 244 (2024) 66–75. Third of five authors: Abdelazim, Begemy, Galal, Sedki, Mohamed.",
+      "Presented at ACLing 2024, the 6th International Conference on AI in Computational Linguistics, in Dubai, UAE. Recognised with an ESLSCA research award.",
+    ].join("\n"),
     icon: "book",
     year: "Sep. 2024",
     category: "Publication",
@@ -236,13 +262,51 @@ export const personalAchievements: PersonalAchievement[] = [
     linkText: "View Paper"
   },
   {
+    id: "times-higher-education-eslsca",
+    title: "Times Higher Education Awards Arab World 2024",
+    description: [
+      "Technological/Digital Innovation of the Year, awarded to ESLSCA University in Dubai.",
+      "Contributed to the winning university AI system, including its admissions chatbot.",
+    ].join("\n"),
+    icon: "trophy",
+    year: "Dec. 2024",
+    category: "Award",
+    link: "https://theawardsarabworld.com/2024/en/page/2024",
+    linkText: "View Awards Page"
+  },
+  {
+    id: "stakpak-hackathon",
+    title: "Winner, Stakpak GenAI Hackathon",
+    description: [
+      "Won the GenAI Hackathon hosted by Stakpak with the prototype that became Lango.",
+      "See Lango in the Projects tab.",
+    ].join("\n"),
+    icon: "star",
+    year: "May. 2025",
+    category: "Award",
+    link: "https://www.linkedin.com/feed/update/urn:li:activity:7330556317721432068/",
+    linkText: "View LinkedIn Post"
+  },
+  {
+    id: "ges-Awards",
+    title: "Top-3 Finalist, GESAwards Africa 2024",
+    description: "Represented Egypt and North Africa with GPTube, a graduation project turning YouTube videos into quizzes and summaries with LangChain and OpenAI.",
+    icon: "star",
+    year: "Dec. 2024",
+    category: "Award",
+    link: "https://www.linkedin.com/posts/ghana-society-for-education-technology_gesawards2024-edtech-innovation-activity-7265332297669746689-uv6Z?utm",
+    linkText: "View LinkedIn Post"
+  },
+  {
     id: "azure-ai-engineer-associate",
     title: "Microsoft Certified: Azure AI Engineer Associate",
-    description: `Certified Microsoft Azure AI Engineer.
-    Studied for these 3 courses:
-    - Microsoft Azure Fundamentals
-    - Microsoft Azure AI Fundamentals
-    - Designing and Implementing a Microsoft Azure AI Solution`,
+    description: [
+      "Earned May 2025 and since renewed. Credential ID FA9AAA1E4EAF1DC.",
+      "Prepared through three Microsoft courses:",
+      "- Microsoft Azure Fundamentals",
+      "- Microsoft Azure AI Fundamentals",
+      "- Designing and Implementing a Microsoft Azure AI Solution",
+    ].join("\n"),
     icon: "shieldCheck",
     year: "May. 2025",
     category: "Certification",
@@ -250,43 +314,35 @@ export const personalAchievements: PersonalAchievement[] = [
     linkText: "View Certification"
   },
   {
-    id: "stakpak-hackathon",
-    title: "Winner at the GenAI Hackathon",
-    description: `Won the Stakpak Hackathon.
-    hosted by Stakpak, for presenting the AI-powered Language Learning App shown under the Projects Section`,
-    icon: "star",
-    year: "May. 2025",
-    category: "Award",
-    link: "https://www.linkedin.com/feed/update/urn:li:activity:7330556317721432068/",
-    linkText: "View LinkedIn Post"
-  },
-
-  {
-    id: "times-higher-education-eslsca",
-    title: "Awarded The Times Highest Higher Education",
-    description: `Recognized for innovative contributions in educational technology 
-    For my work on My University's Chatbot Project. Awarded in The Arab Summit of Universities in Dubai University`,
-    icon: "trophy",
-    year: "Dec. 2024",
-    category: "Award",
-    link: "https://theawardsarabworld.com/2024/en/page/2024",
-    linkText: "View Blog Post"
+    id: "ibm-watsonx-practitioner-advanced",
+    title: "IBM watsonx Practitioner Advanced (3 badges)",
+    description: [
+      "watsonx.ai (Nov. 2025), watsonx Orchestrate (Nov. 2025) and watsonx Assistant (Mar. 2025), at Practitioner Advanced level.",
+      "Plus 21 further IBM badges, all listed on Credly.",
+    ].join("\n"),
+    icon: "shieldCheck",
+    year: "Nov. 2025",
+    category: "Certification",
+    link: "https://www.credly.com/users/ahmed-galal.bbb8ea95",
+    linkText: "View on Credly"
   },
   {
-    id: "ges-Awards",
-    title: "Awarded Top 3 Finalist in GESAwards Africa",
-    description: `My startup GPTube won Top 3 finalist in the GESAwards Africa.
-    Representing Egypt and North Africa internationally`,
+    id: "tech-content-creator",
+    title: "Tech Content Creator: 37K Followers",
+    description: [
+      "37K followers, 484K likes and a 917K-view video on TikTok, building an Arabic-speaking tech audience.",
+      "Stats as of Sep. 2026.",
+    ].join("\n"),
     icon: "star",
-    year: "Dec. 2024",
-    category: "Entrepreneurship",
-    link: "https://www.linkedin.com/posts/ghana-society-for-education-technology_gesawards2024-edtech-innovation-activity-7265332297669746689-uv6Z?utm",
-    linkText: "View LinkedIn Post"
+    year: "Sep. 2026",
+    category: "Content Creation",
+    link: "https://www.tiktok.com/@gallillio11045",
+    linkText: "View TikTok"
   },
   {
     id: "japanese-proficiency",
     title: "Japanese Language Proficiency",
-    description: "Achieved JLPT N4 level in Japanese Language during my studies at Human Academy",
+    description: "JLPT N4 in Japanese, reached during the Human Academy Japanese Language and Business Manner programme.",
     icon: "languages",
     year: "Jan. 2025",
     category: "Language",
@@ -303,6 +359,16 @@ export interface Course {
 // Courses data
 export const courses: Course[] = [
   {
+    title: "watsonx Assistant Practitioner",
+    provider: "IBM",
+    date: "Feb. 2025"
+  },
+  {
+    title: "watsonx Orchestrate Intermediate",
+    provider: "IBM",
+    date: "Feb. 2025"
+  },
+  {
     title: "Designing and Implementing a Microsoft Azure AI Solution",
     provider: "Microsoft",
     date: "Feb. 2025"
@@ -318,19 +384,19 @@ export const courses: Course[] = [
     date: "Feb. 2025"
   },
   {
-    title: "Practitioner Watsonx Assistant",
-    provider: "IBM",
-    date: "Feb. 2025"
-  },
-  {
-    title: "Watsonx Orchestrate Intermediate",
-    provider: "IBM",
-    date: "Feb. 2025"
-  },
-  {
-    title: "Linux Adminstration",
+    title: "Linux Administration",
     provider: "New Horizons",
     date: "Jul. 2023"
+  },
+  {
+    title: "Security+",
+    provider: "CompTIA",
+    date: "Apr. 2023"
+  },
+  {
+    title: "AWS Cloud Practitioner",
+    provider: "Amazon",
+    date: "Oct. 2022"
   },
   {
     title: "Supervised Machine Learning",
@@ -338,17 +404,7 @@ export const courses: Course[] = [
     date: "Aug. 2022"
   },
   {
-    title: "Cloud AWS Practitioner",
-    provider: "Amazon",
-    date: "Oct. 2022"
-  },
-  {
-    title: "Security +",
-    provider: "CompTIA",
-    date: "Apr. 2023"
-  },
-  {
-    title: "Network +",
+    title: "Network+",
     provider: "CompTIA",
     date: "Aug. 2022"
   },
@@ -358,4 +414,3 @@ export const courses: Course[] = [
     date: "Aug. 2022"
   }
 ];
-

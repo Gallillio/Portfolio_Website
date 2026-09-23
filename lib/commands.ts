@@ -3,6 +3,23 @@ import { skills, experiences, education, freelanceProjects, links, courses } fro
 import { commandRegistry } from "./command-registry"
 import { projects } from "./projects"
 import { getAchievementsData } from "./achievements-context"
+import { bio, languages, contact, cv } from "./profile-extras"
+
+// Greedy word wrap so prose from profile-extras fits the boxed "│  " layout.
+function wrap(text: string, width: number): string[] {
+  const lines: string[] = []
+  let current = ""
+  for (const word of text.split(/\s+/)) {
+    if (current && current.length + 1 + word.length > width) {
+      lines.push(current)
+      current = word
+    } else {
+      current = current ? `${current} ${word}` : word
+    }
+  }
+  if (current) lines.push(current)
+  return lines
+}
 
 // Register all commands
 commandRegistry.register("about", "View my background and Bio", async () => ({
@@ -13,16 +30,10 @@ commandRegistry.register("about", "View my background and Bio", async () => ({
     "",
     "┌─ Bio",
     "│",
-    "│  I architect and deploy enterprise-grade AI solutions that transform how organizations operate. From",
-    "│  building secure, on-premises LLM assistants for banks and telecom giants using IBM Watsonx, to",
-    "│  developing computer vision systems that save companies thousands in operational costs, my work spans",
-    "│  the full spectrum of AI engineering—NLP, computer vision, deep learning, and cloud-native applications.",
-    "│",
-    "│  Leveraging Python, React.js, Microsoft Azure, and IBM Watsonx, I've delivered solutions that",
-    "│  earned international recognition—including the Times Higher Education Award 2024 for technological",
-    "│  innovation and representing Egypt & North Africa in the GESAwards Global Finals with my startup",
-    "│  GPTuBE. My research on Arabic LLM reasoning was published in Elsevier Procedia, and I've led",
-    "│  enterprise AI workshops for C-suite executives across leading organizations.",
+    ...bio.flatMap((paragraph, i) => [
+      ...(i > 0 ? ["│"] : []),
+      ...wrap(paragraph, 100).map((line) => `│  ${line}`),
+    ]),
     "└────────────────────────────────────",
     "",
     "To learn more about my skills, experiences, education, etc... go to about"
@@ -79,15 +90,15 @@ commandRegistry.register("contact", "Get my contact information", async () => ({
     "╚═════════════════════════════════════╝",
     "",
     "┌─ Email",
-    "│  <email>AhmedGalal11045@gmail.com</email>",
+    `│  <email>${contact.email}</email>`,
     "└────────────────────────────────────",
     "",
     "┌─ Phone",
-    "│  +20 1110333933",
+    `│  ${contact.phone}`,
     "└────────────────────────────────────",
     "",
     "┌─ Location",
-    "│  New Cairo, Egypt",
+    `│  ${contact.location}`,
     "└────────────────────────────────────",
     "",
     "Switching to Contact tab..."
@@ -387,20 +398,13 @@ commandRegistry.register("languages", "View my language proficiencies", async ()
     "║       Language Proficiencies        ║",
     "╚═════════════════════════════════════╝",
     "",
-    "┌─ English",
-    "│  Level: Native Language",
-    "│  Certification: IELTS 7.5",
-    "└────────────────────────────────────",
-    "",
-    "┌─ Arabic",
-    "│  Level: Native Language",
-    "└────────────────────────────────────",
-    "",
-    "┌─ Japanese",
-    "│  Level: Conversational",
-    "│  Certification: JLPT N4",
-    "└────────────────────────────────────",
-    ""
+    ...languages.flatMap((language) => [
+      `┌─ ${language.name}`,
+      `│  Level: ${language.level}`,
+      ...(language.certification ? [`│  Certification: ${language.certification}`] : []),
+      "└────────────────────────────────────",
+      "",
+    ]),
   ],
   timestamp: new Date(),
 }))
@@ -409,7 +413,7 @@ commandRegistry.register("cv", "Download my CV", async () => ({
   output: [
     "Downloading CV...",
     "If download doesn't start automatically, click here:",
-    "/Ahmed Elzeky Resume.pdf",
+    cv.path,
   ],
   timestamp: new Date(),
   specialAction: "downloadCV",
@@ -490,17 +494,8 @@ export async function executeCommand(input: string): Promise<CommandResponse> {
   return commandRegistry.executeCommand(input)
 }
 
-// Special handling for the contact command
-export function getContactOutput() {
-  return [
-    "Email: AhmedGalal11045@gmail.com",
-    "Phone: +20 1110333933",
-    "Location: New Cairo, Egypt",
-    "If you would like to see more, click on Contact / CV",
-  ];
-}
-
-// Handle contact command directly in terminal.tsx handle command function
+// Typed "contact" is handled directly in terminal.tsx's handleCommand, which reads
+// the same `contact` object from profile-extras.
 
 export const helpText = `
 Available commands (click to add to input):
