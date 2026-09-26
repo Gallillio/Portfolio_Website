@@ -25,6 +25,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   const [isSwiping, setIsSwiping] = useState(false)
   const [touchStartX, setTouchStartX] = useState(0)
   const [animateArrow, setAnimateArrow] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionContainerRef = useRef<HTMLDivElement>(null)
   const { executeCommand: trackCommand, markCommandExecuted, visitTab, executeSecretCommand } = useAchievements()
@@ -186,6 +187,13 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     }
   }
 
+  // The native caret vanishes whenever the input loses focus, and phones rarely
+  // honour the focus-on-mount, so the prompt reads as plain text rather than a
+  // field. Draw a block cursor in its place until the real caret is back. Not
+  // while the chat placeholder is up (it already says "type here") or while a
+  // response streams (the input is read-only then).
+  const showIdleCursor = !isFocused && !isBotResponding && (!isChatMode || input.length > 0)
+
   const focusInput = () => {
     // Don't steal focus out from under a selection the user is making.
     if (hasTextSelection()) return
@@ -260,12 +268,23 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             className={`w-full bg-transparent border-none outline-none font-mono ${isChatMode ? "text-blue-300" : "text-green-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
             autoFocus
             aria-label="Terminal input"
             placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking... (Ctrl+C to stop)" : "Type your message...") : ""}
             readOnly={isBotResponding}
           />
+          {showIdleCursor && (
+            // Invisible copy of the typed text pushes the cursor to where the
+            // next character would go. !-prefixed because .terminal-cursor in
+            // globals.css sits after the utilities and would otherwise win.
+            <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none" aria-hidden="true">
+              <span className="invisible font-mono whitespace-pre">{input}</span>
+              <span className={`terminal-cursor shrink-0 !ml-0 ${isChatMode ? "!bg-blue-300" : ""}`} />
+            </div>
+          )}
           {suggestion && !isChatMode && (
             <div className="absolute left-0 top-0 flex items-center pointer-events-none">
               <span className="text-green-500/30 font-mono">
