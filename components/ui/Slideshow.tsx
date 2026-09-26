@@ -99,6 +99,9 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, onImageClick }) => {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-contain cursor-pointer"
+            // The optimizer can't resize animated GIFs; it skipped them with a
+            // warning on every request anyway, so serve them as they are.
+            unoptimized={image.src.toLowerCase().endsWith(".gif")}
             priority={index === 0}
             onClick={() => onImageClick(image.src)}
           />

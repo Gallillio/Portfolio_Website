@@ -65,13 +65,24 @@ export function renderTerminalMarkdown(text: string, leading?: React.ReactNode):
 
   return lines.map((line, index) => {
     const key = `l${index}`
-    const lead = index === 0 ? leading : undefined
+    // Every line is dir="auto", so an Arabic line reads right-to-left. The
+    // label gets its own dir, which dir="auto" skips when it looks for the
+    // line's first letter; otherwise "Gallillio" would make every opening line
+    // left-to-right. unicode-bidi: normal drops the isolation a dir attribute
+    // normally brings, so the label's colon follows the line and lands between
+    // name and message on an Arabic line instead of at the outer edge.
+    const lead =
+      index === 0 && leading ? (
+        <span dir="ltr" style={{ unicodeBidi: "normal" }}>
+          {leading}
+        </span>
+      ) : undefined
 
     // ### Heading
     const heading = /^(#{1,6})\s+(.*)$/.exec(line)
     if (heading) {
       return (
-        <div key={key}>
+        <div key={key} dir="auto">
           {lead}
           <span className="font-semibold text-white">{renderInline(heading[2], key)}</span>
         </div>
@@ -82,9 +93,9 @@ export function renderTerminalMarkdown(text: string, leading?: React.ReactNode):
     const bullet = /^(\s*)[-*]\s+(.*)$/.exec(line)
     if (bullet) {
       return (
-        <div key={key}>
+        <div key={key} dir="auto">
           {lead}
-          <span className="select-none text-purple-400" style={{ paddingLeft: bullet[1].length * 8 }}>
+          <span className="select-none text-purple-400" style={{ paddingInlineStart: bullet[1].length * 8 }}>
             •&nbsp;
           </span>
           <span>{renderInline(bullet[2], key)}</span>
@@ -93,10 +104,10 @@ export function renderTerminalMarkdown(text: string, leading?: React.ReactNode):
     }
 
     // Preserve blank lines as real vertical space.
-    if (!line) return <div key={key}>{lead}&nbsp;</div>
+    if (!line) return <div key={key} dir="auto">{lead}&nbsp;</div>
 
     return (
-      <div key={key}>
+      <div key={key} dir="auto">
         {lead}
         {renderInline(line, key)}
       </div>

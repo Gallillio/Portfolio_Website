@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Arabic for the terminal: the Arabic glyphs of Cascadia Code (OFL, Microsoft;
+   public/fonts/CascadiaCode-OFL.txt), from Fontsource's Arabic subset of the
+   variable font. It heads the font-mono stack (tailwind.config.ts); without it,
+   Arabic fell past every mono font to Courier New's thin, stretched glyphs.
+   The unicode-range is the point: it keeps this face off every non-Arabic
+   character (spaces and punctuation included), so Latin renders exactly as
+   before, and the file is only fetched once Arabic is actually on screen.
+   Declared here rather than through next/font/local, whose Turbopack loader
+   drops the unicode-range declaration. */
+@font-face {
+  font-family: "Cascadia Arabic";
+  src: url("/fonts/CascadiaCode-Arabic.woff2") format("woff2");
+  font-weight: 200 700;
+  font-display: swap;
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1,
+    U+08E3-08FF, U+200C-200E, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
 @layer utilities {
   .transition-height {
     transition-property: height, opacity;

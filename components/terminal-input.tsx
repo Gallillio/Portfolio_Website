@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useImperativeHandle } from "react"
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo, useImperativeHandle } from "react"
 import { ArrowRight } from "lucide-react"
 import { useAchievements } from "@/lib/achievements-context"
 import { availableCommands } from "@/lib/commands"
@@ -21,12 +21,22 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   const [input, setInput] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
-  const [suggestion, setSuggestion] = useState("")
+  // The rest of the command the input is a prefix of. Derived rather than kept
+  // in state: an effect that stored it queued an extra render on every
+  // keystroke, and once the grown box made keystrokes costlier, fast typing
+  // outran those renders until React bailed with "Maximum update depth".
+  const suggestion = useMemo(() => {
+    if (!input.trim()) return ""
+    const inputLower = input.toLowerCase()
+    const matchingCommand = availableCommands.find(cmd =>
+      cmd.toLowerCase().startsWith(inputLower) && cmd.toLowerCase() !== inputLower
+    )
+    return matchingCommand ? matchingCommand.slice(input.length) : ""
+  }, [input])
   const [isSwiping, setIsSwiping] = useState(false)
   const [touchStartX, setTouchStartX] = useState(0)
   const [animateArrow, setAnimateArrow] = useState(false)
-  const [caret, setCaret] = useState({ index: 0, hasRange: false, scroll: 0 })
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const suggestionContainerRef = useRef<HTMLDivElement>(null)
   const { executeCommand: trackCommand, markCommandExecuted, visitTab, executeSecretCommand } = useAchievements()
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
@@ -54,6 +64,26 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     inputRef.current?.focus({ preventScroll: true })
   }, [])
 
+  // A terminal opens on its prompt. When the output is taller than the panel
+  // (a phone in landscape on first load, or coming back to a long conversation
+  // from another tab, which remounts the panel), start scrolled to the bottom
+  // instead of the top, where the prompt was out of sight.
+  useEffect(() => {
+    const el = inputRef.current
+    const scroller = el?.closest<HTMLElement>("[data-terminal-scroll]")
+    if (!el || !scroller) return
+    const reveal = () => {
+      if (el.getBoundingClientRect().bottom > scroller.getBoundingClientRect().bottom) {
+        scroller.scrollTop = scroller.scrollHeight
+      }
+    }
+    reveal()
+    // Again once the ASCII art has settled its scaled height, a frame later.
+    let second = 0
+    const first = requestAnimationFrame(() => { second = requestAnimationFrame(reveal) })
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second) }
+  }, [])
+
   // Pulse the arrow animation periodically when suggestion is present
   useEffect(() => {
     if (suggestion) {
@@ -69,25 +99,6 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
       return () => clearInterval(interval)
     }
   }, [suggestion])
-
-  // Update suggestion when input changes
-  useEffect(() => {
-    if (!input.trim()) {
-      setSuggestion("")
-      return
-    }
-
-    const inputLower = input.toLowerCase()
-    const matchingCommand = availableCommands.find(cmd => 
-      cmd.toLowerCase().startsWith(inputLower) && cmd.toLowerCase() !== inputLower
-    )
-
-    if (matchingCommand) {
-      setSuggestion(matchingCommand.slice(input.length))
-    } else {
-      setSuggestion("")
-    }
-  }, [input])
 
   // Scroll to view when input receives focus or a new command is input
   useEffect(() => {
@@ -114,8 +125,9 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     }
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  // Shared by the form's submit and Enter in the textarea (a textarea, unlike
+  // an input, doesn't submit its form on Enter).
+  const submit = () => {
     if (!input.trim()) return
     // Ignore submits while a response streams. We gate here rather than on the
     // input's `disabled` attribute, because a disabled input fires no keydown —
@@ -147,7 +159,6 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     setCommandHistory((prev) => [...prev, trimmedInput])
     setHistoryIndex(-1)
     setInput("")
-    setSuggestion("")
     
     // Ensure the input is visible after command execution
     setTimeout(() => {
@@ -156,16 +167,36 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     }, 100)
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    submit()
+  }
+
+  // Once the text wraps, the arrows belong to the caret, not to history.
+  const isSingleLine = () => {
+    const el = inputRef.current
+    if (!el) return true
+    return el.scrollHeight <= parseFloat(getComputedStyle(el).lineHeight) * 1.5
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter sends. Shift+Enter is a newline, but only in chat: commands are one
+    // line. isComposing leaves Enter to IME users confirming a word.
+    if (e.key === "Enter" && !e.nativeEvent.isComposing && !(isChatMode && e.shiftKey)) {
+      e.preventDefault()
+      submit()
+      return
+    }
+
     // Handle up/down arrows for command history
-    if (e.key === "ArrowUp") {
+    if (e.key === "ArrowUp" && isSingleLine()) {
       e.preventDefault()
       if (historyIndex < commandHistory.length - 1) {
         const newIndex = historyIndex + 1
         setHistoryIndex(newIndex)
         setInput(commandHistory[commandHistory.length - 1 - newIndex])
       }
-    } else if (e.key === "ArrowDown") {
+    } else if (e.key === "ArrowDown" && isSingleLine()) {
       e.preventDefault()
       if (historyIndex > 0) {
         const newIndex = historyIndex - 1
@@ -178,7 +209,6 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     } else if (e.key === "Tab" && suggestion) {
       e.preventDefault()
       setInput(prev => prev + suggestion)
-      setSuggestion("")
     } else if (e.ctrlKey && e.key === "c") {
       // Exit chatbot mode when Ctrl + C is pressed
       if (isChatMode) {
@@ -187,33 +217,31 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     }
   }
 
-  // We draw the cursor ourselves and keep the native caret transparent, rather
-  // than swapping between the two on focus. Focus state can't be trusted here:
-  // the SSR autofocus lands before hydration, so onFocus never fires, and iOS
-  // keeps a programmatically focused input "focused" with no caret on screen.
-  // Any rule keyed on focus ends up showing two cursors, or none.
-  const syncCaret = useCallback(() => {
+  // Grow with the text up to the CSS max-height, then scroll, like a chat box.
+  // Measured in JS rather than with field-sizing: content, which iOS Safari
+  // only gained in 26.2.
+  const fitHeight = useCallback(() => {
     const el = inputRef.current
     if (!el) return
-    const start = el.selectionStart ?? el.value.length
-    const end = el.selectionEnd ?? start
-    const next = { index: start, hasRange: start !== end, scroll: el.scrollLeft }
-    setCaret(prev =>
-      prev.index === next.index && prev.hasRange === next.hasRange && prev.scroll === next.scroll ? prev : next
-    )
+    el.style.height = "auto"
+    el.style.height = `${el.scrollHeight}px`
   }, [])
 
-  // Value changes made in code (history, Tab completion, setValue, clearing on
-  // submit) move the caret without a selection event.
-  useLayoutEffect(syncCaret, [input, syncCaret])
+  useLayoutEffect(fitHeight, [input, isChatMode, isBotResponding, fitHeight])
 
-  // Caret moves (arrows, taps, selecting) arrive as selectionchange. Not
-  // React's onSelect: it only fires once React has seen the input gain focus,
-  // which the SSR autofocus never gives it.
+  // Width changes (rotation, fullscreen) re-wrap the text.
   useEffect(() => {
-    document.addEventListener("selectionchange", syncCaret)
-    return () => document.removeEventListener("selectionchange", syncCaret)
-  }, [syncCaret])
+    window.addEventListener("resize", fitHeight)
+    return () => window.removeEventListener("resize", fitHeight)
+  }, [fitHeight])
+
+  // An empty box shows a block cursor and a hint, so the prompt reads as
+  // somewhere to type before anything has focus. The native caret is hidden
+  // meanwhile, or the two would sit side by side. This keys off the value, not
+  // focus: the SSR autofocus lands before hydration (no focus event), and iOS
+  // reports a programmatically focused field as focused with no caret drawn.
+  const showBlock = input === "" && !isBotResponding
+  const caretClass = showBlock ? "caret-transparent" : isChatMode ? "caret-blue-300" : "caret-green-500"
 
   const focusInput = () => {
     // Don't steal focus out from under a selection the user is making.
@@ -244,7 +272,6 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     // If swiped right more than 50px, complete the suggestion
     if (diff > 50) {
       setInput(prev => prev + suggestion)
-      setSuggestion("")
       setIsSwiping(false)
     }
   }
@@ -260,7 +287,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
 
   return (
     <div onClick={focusInput} className="cursor-text">
-      <form onSubmit={handleSubmit} className="flex items-center mt-2">
+      <form onSubmit={handleSubmit} className="flex items-start mt-2">
         <div className="flex items-center text-green-500 mr-2">
           {isChatMode ? (
             <span className="text-blue-400 font-bold flex items-center">
@@ -283,41 +310,33 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
           onTouchCancel={handleTouchEnd}
           style={{ touchAction: suggestion ? 'none' : 'auto' }}
         >
-          <input
+          <textarea
             ref={inputRef}
-            type="text"
+            rows={1}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            // Commands are one line; a pasted newline would break the match.
+            onChange={(e) => setInput(isChatMode ? e.target.value : e.target.value.replace(/\n/g, " "))}
             onKeyDown={handleKeyDown}
-            onScroll={syncCaret}
-            // pr-2 is the block's width: the browser only scrolls long text far
-            // enough for a 1px caret, which would clip the block at the edge.
-            className={`w-full pr-2 bg-transparent border-none outline-none font-mono caret-transparent ${isChatMode ? "text-blue-300 placeholder-shown:pl-3" : "text-green-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
+            // Arabic lines up right-to-left, with the caret where the phone puts it.
+            dir="auto"
+            enterKeyHint={isChatMode ? "send" : "go"}
+            // Commands aren't prose: stop phones turning "help" into "Help".
+            autoCapitalize={isChatMode ? "sentences" : "off"}
+            autoCorrect={isChatMode ? "on" : "off"}
+            spellCheck={isChatMode}
+            className={`block w-full resize-none overflow-y-auto max-h-[7.5rem] bg-transparent border-none outline-none font-mono ${caretClass} ${showBlock ? "pl-3" : ""} ${isChatMode ? "text-blue-300" : "text-green-500 placeholder:text-gray-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
             autoFocus
             aria-label="Terminal input"
-            placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking... (Ctrl+C to stop)" : "Type your message...") : ""}
+            placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking... (Ctrl+C to stop)" : "Type your message...") : "Type a command..."}
             readOnly={isBotResponding}
           />
-          {!isBotResponding && !caret.hasRange && (
-            // Invisible copy of the text up to the caret pushes the block to
-            // where the next character goes; the translate follows the input's
-            // own horizontal scroll once the text outgrows it. !-prefixed
-            // because .terminal-cursor in globals.css sits after the utilities
-            // and would otherwise win.
-            <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-              <div
-                className="flex h-full items-center font-mono whitespace-pre"
-                style={{ transform: `translateX(-${caret.scroll}px)` }}
-              >
-                <span className="invisible">{input.slice(0, caret.index)}</span>
-                {/* Remounting restarts the blink, so the block stays solid
-                    while typing instead of vanishing mid-keystroke. */}
-                <span
-                  key={`${caret.index}:${input.length}`}
-                  className={`terminal-cursor shrink-0 !ml-0 ${isChatMode ? "!bg-blue-300" : ""}`}
-                />
-              </div>
-            </div>
+          {showBlock && (
+            // !-prefixed because .terminal-cursor in globals.css sits after the
+            // utilities and would otherwise win.
+            <span
+              aria-hidden="true"
+              className={`terminal-cursor absolute left-0 top-1 !ml-0 pointer-events-none ${isChatMode ? "!bg-blue-300" : ""}`}
+            />
           )}
           {suggestion && !isChatMode && (
             <div className="absolute left-0 top-0 flex items-center pointer-events-none">

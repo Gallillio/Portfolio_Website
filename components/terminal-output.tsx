@@ -60,7 +60,7 @@ const CommandLink = ({ command, onClick, isChatMode }: { command: string; onClic
     // Ensure the terminal input is visible after clicking
     setTimeout(() => {
       // Find the terminal input field
-      const terminalInput = document.querySelector('input[aria-label="Terminal input"]')
+      const terminalInput = document.querySelector('[aria-label="Terminal input"]')
       if (terminalInput instanceof HTMLElement) {
         terminalInput.focus()
         // Scroll to the input field
@@ -415,9 +415,11 @@ export default function TerminalOutput({ history, onCommandClick, isChatMode = f
       {history.map((item, index) => (
         <div key={index} className="font-mono">
           {item.command && (
-            <div className="flex items-center">
+            <div className="flex items-start">
               <span className="text-green-500 mr-1">$</span>
-              <span className="text-green-300">{item.command}</span>
+              {/* dir="auto": an Arabic message reads right-to-left, with its
+                  punctuation in place, while the $ stays on the left. */}
+              <span dir="auto" className="text-green-300 whitespace-pre-wrap">{item.command}</span>
             </div>
           )}
           <div className={`mt-1 whitespace-pre-wrap ${item.isError ? "text-red-500" : "text-green-400"}`}>

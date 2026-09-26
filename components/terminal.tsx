@@ -25,6 +25,18 @@ import { renderTerminalMarkdown } from "@/lib/ai/markdown"
 import StreamingMessage, { type StreamingMessageRef } from "@/components/streaming-message"
 import React from "react"
 
+// The full tab labels need ~920px, but the tab bar shows from 768px (iPad
+// portrait), where it overflowed and pushed "Your Achievements" off-screen.
+// Short labels until lg, where the full ones fit.
+function TabLabel({ short, full }: { short: string; full: string }) {
+  return (
+    <>
+      <span className="lg:hidden">{short}</span>
+      <span className="hidden lg:inline">{full}</span>
+    </>
+  )
+}
+
 function TerminalContent(): React.ReactNode {
   const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>([])
   const [activeTab, setActiveTab] = useState<string>("terminal")
@@ -173,7 +185,7 @@ function TerminalContent(): React.ReactNode {
           // Scroll to make the input field visible when keyboard opens
           setTimeout(() => {
             if (terminalInputRef.current) {
-              const inputElement = document.querySelector('input[aria-label="Terminal input"]')
+              const inputElement = document.querySelector('[aria-label="Terminal input"]')
               if (inputElement) {
                 inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
               }
@@ -530,7 +542,7 @@ function TerminalContent(): React.ReactNode {
       setTimeout(() => {
         if (terminalInputRef.current) {
           terminalInputRef.current.focus();
-          const inputElement = document.querySelector('input[aria-label="Terminal input"]');
+          const inputElement = document.querySelector('[aria-label="Terminal input"]');
           if (inputElement instanceof HTMLElement) {
             inputElement.scrollIntoView({ 
               behavior: 'smooth', 
@@ -668,14 +680,20 @@ function TerminalContent(): React.ReactNode {
   }, []);
   
   const contentHeight = isFullscreen 
-    ? keyboardAdjustedHeight > 0 
-      ? `h-[${keyboardAdjustedHeight}px]` 
-      : "h-[calc(100vh-120px)]"
+    ? "h-[calc(100vh-120px)]"
     : isMobile 
-      ? keyboardAdjustedHeight > 0
-        ? `h-[${keyboardAdjustedHeight}px]` 
-        : "h-[calc(100vh-140px)]"
+      ? "h-[calc(100vh-140px)]"
       : "h-[70vh]";
+
+  // While the on-screen keyboard is up, fit the content to what is still
+  // visible. An inline style, not a class: this used to assemble an arbitrary
+  // height class at runtime, which Tailwind never generates, so with the
+  // keyboard open the panels lost their height, grew to full length inside the
+  // clipped window, and the conversation could no longer be scrolled.
+  const contentStyle =
+    keyboardAdjustedHeight > 0 && (isFullscreen || isMobile)
+      ? { height: `${keyboardAdjustedHeight}px` }
+      : undefined;
 
   const toggleMobileMenu = () => {
     if (isScrolling) {
@@ -827,7 +845,7 @@ function TerminalContent(): React.ReactNode {
             ? 'fixed inset-0 z-50 max-w-none rounded-none border-green-400' 
             : isMobile 
               ? 'fixed inset-4 z-50 rounded-md shadow-xl' 
-              : 'w-full max-w-5xl rounded-md relative'
+              : 'w-full max-w-5xl 2xl:max-w-6xl rounded-md relative'
           } ${animationClass} ${isMinimized || isClosing ? 'h-10 overflow-hidden' : ''}
           ${isChatMode && activeTab === "terminal" 
             ? 'shadow-gray-400/30 hover:shadow-gray-400/50' 
@@ -1059,7 +1077,7 @@ function TerminalContent(): React.ReactNode {
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
-                    About / Experience
+                    <TabLabel short="About" full="About / Experience" />
                 </TabsTrigger>
                 <TabsTrigger
                   value="contact"
@@ -1068,7 +1086,7 @@ function TerminalContent(): React.ReactNode {
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
-                    Contact / CV
+                    <TabLabel short="Contact" full="Contact / CV" />
                 </TabsTrigger>
                 <TabsTrigger
                   value="my-achievements"
@@ -1077,7 +1095,7 @@ function TerminalContent(): React.ReactNode {
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
-                    My Achievements / Publications / Certifications
+                    <TabLabel short="Achievements" full="My Achievements / Publications / Certifications" />
                 </TabsTrigger>
               </TabsList>
               </div>
@@ -1167,6 +1185,7 @@ function TerminalContent(): React.ReactNode {
             >
               <div
                 data-terminal-scroll
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto overflow-x-auto p-4 pt-6 font-mono cursor-text custom-scrollbar transition-all duration-700 ease-in-out
                   ${isChatMode ? 'bg-gray-900 text-gray-300 chat-terminal-content' : 'bg-black text-green-500'}`}
                 onClick={focusInput}
@@ -1199,6 +1218,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <Projects />
@@ -1210,6 +1230,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <About />
@@ -1221,6 +1242,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <Contact />
@@ -1232,6 +1254,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <MyAchievements />
@@ -1243,6 +1266,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <YourAchievements />
