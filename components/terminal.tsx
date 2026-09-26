@@ -680,14 +680,20 @@ function TerminalContent(): React.ReactNode {
   }, []);
   
   const contentHeight = isFullscreen 
-    ? keyboardAdjustedHeight > 0 
-      ? `h-[${keyboardAdjustedHeight}px]` 
-      : "h-[calc(100vh-120px)]"
+    ? "h-[calc(100vh-120px)]"
     : isMobile 
-      ? keyboardAdjustedHeight > 0
-        ? `h-[${keyboardAdjustedHeight}px]` 
-        : "h-[calc(100vh-140px)]"
+      ? "h-[calc(100vh-140px)]"
       : "h-[70vh]";
+
+  // While the on-screen keyboard is up, fit the content to what is still
+  // visible. An inline style, not a class: this used to assemble an arbitrary
+  // height class at runtime, which Tailwind never generates, so with the
+  // keyboard open the panels lost their height, grew to full length inside the
+  // clipped window, and the conversation could no longer be scrolled.
+  const contentStyle =
+    keyboardAdjustedHeight > 0 && (isFullscreen || isMobile)
+      ? { height: `${keyboardAdjustedHeight}px` }
+      : undefined;
 
   const toggleMobileMenu = () => {
     if (isScrolling) {
@@ -1179,6 +1185,7 @@ function TerminalContent(): React.ReactNode {
             >
               <div
                 data-terminal-scroll
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto overflow-x-auto p-4 pt-6 font-mono cursor-text custom-scrollbar transition-all duration-700 ease-in-out
                   ${isChatMode ? 'bg-gray-900 text-gray-300 chat-terminal-content' : 'bg-black text-green-500'}`}
                 onClick={focusInput}
@@ -1211,6 +1218,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <Projects />
@@ -1222,6 +1230,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <About />
@@ -1233,6 +1242,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <Contact />
@@ -1244,6 +1254,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <MyAchievements />
@@ -1255,6 +1266,7 @@ function TerminalContent(): React.ReactNode {
               className="p-0 m-0"
             >
               <div 
+                style={contentStyle}
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <YourAchievements />
