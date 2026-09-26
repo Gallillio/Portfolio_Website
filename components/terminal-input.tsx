@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect, useImperativeHandle } from "react"
+import React, { useState, useRef, useEffect, useLayoutEffect, useCallback, useImperativeHandle } from "react"
 import { ArrowRight } from "lucide-react"
 import { useAchievements } from "@/lib/achievements-context"
 import { availableCommands } from "@/lib/commands"
@@ -25,7 +25,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
   const [isSwiping, setIsSwiping] = useState(false)
   const [touchStartX, setTouchStartX] = useState(0)
   const [animateArrow, setAnimateArrow] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
+  const [caret, setCaret] = useState({ index: 0, hasRange: false, scroll: 0 })
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionContainerRef = useRef<HTMLDivElement>(null)
   const { executeCommand: trackCommand, markCommandExecuted, visitTab, executeSecretCommand } = useAchievements()
@@ -187,12 +187,33 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     }
   }
 
-  // The native caret vanishes whenever the input loses focus, and phones rarely
-  // honour the focus-on-mount, so the prompt reads as plain text rather than a
-  // field. Draw a block cursor in its place until the real caret is back. Not
-  // while the chat placeholder is up (it already says "type here") or while a
-  // response streams (the input is read-only then).
-  const showIdleCursor = !isFocused && !isBotResponding && (!isChatMode || input.length > 0)
+  // We draw the cursor ourselves and keep the native caret transparent, rather
+  // than swapping between the two on focus. Focus state can't be trusted here:
+  // the SSR autofocus lands before hydration, so onFocus never fires, and iOS
+  // keeps a programmatically focused input "focused" with no caret on screen.
+  // Any rule keyed on focus ends up showing two cursors, or none.
+  const syncCaret = useCallback(() => {
+    const el = inputRef.current
+    if (!el) return
+    const start = el.selectionStart ?? el.value.length
+    const end = el.selectionEnd ?? start
+    const next = { index: start, hasRange: start !== end, scroll: el.scrollLeft }
+    setCaret(prev =>
+      prev.index === next.index && prev.hasRange === next.hasRange && prev.scroll === next.scroll ? prev : next
+    )
+  }, [])
+
+  // Value changes made in code (history, Tab completion, setValue, clearing on
+  // submit) move the caret without a selection event.
+  useLayoutEffect(syncCaret, [input, syncCaret])
+
+  // Caret moves (arrows, taps, selecting) arrive as selectionchange. Not
+  // React's onSelect: it only fires once React has seen the input gain focus,
+  // which the SSR autofocus never gives it.
+  useEffect(() => {
+    document.addEventListener("selectionchange", syncCaret)
+    return () => document.removeEventListener("selectionchange", syncCaret)
+  }, [syncCaret])
 
   const focusInput = () => {
     // Don't steal focus out from under a selection the user is making.
@@ -268,21 +289,34 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            className={`w-full bg-transparent border-none outline-none font-mono ${isChatMode ? "text-blue-300" : "text-green-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
+            onScroll={syncCaret}
+            // pr-2 is the block's width: the browser only scrolls long text far
+            // enough for a 1px caret, which would clip the block at the edge.
+            className={`w-full pr-2 bg-transparent border-none outline-none font-mono caret-transparent ${isChatMode ? "text-blue-300 placeholder-shown:pl-3" : "text-green-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
             autoFocus
             aria-label="Terminal input"
             placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking... (Ctrl+C to stop)" : "Type your message...") : ""}
             readOnly={isBotResponding}
           />
-          {showIdleCursor && (
-            // Invisible copy of the typed text pushes the cursor to where the
-            // next character would go. !-prefixed because .terminal-cursor in
-            // globals.css sits after the utilities and would otherwise win.
-            <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none" aria-hidden="true">
-              <span className="invisible font-mono whitespace-pre">{input}</span>
-              <span className={`terminal-cursor shrink-0 !ml-0 ${isChatMode ? "!bg-blue-300" : ""}`} />
+          {!isBotResponding && !caret.hasRange && (
+            // Invisible copy of the text up to the caret pushes the block to
+            // where the next character goes; the translate follows the input's
+            // own horizontal scroll once the text outgrows it. !-prefixed
+            // because .terminal-cursor in globals.css sits after the utilities
+            // and would otherwise win.
+            <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+              <div
+                className="flex h-full items-center font-mono whitespace-pre"
+                style={{ transform: `translateX(-${caret.scroll}px)` }}
+              >
+                <span className="invisible">{input.slice(0, caret.index)}</span>
+                {/* Remounting restarts the blink, so the block stays solid
+                    while typing instead of vanishing mid-keystroke. */}
+                <span
+                  key={`${caret.index}:${input.length}`}
+                  className={`terminal-cursor shrink-0 !ml-0 ${isChatMode ? "!bg-blue-300" : ""}`}
+                />
+              </div>
             </div>
           )}
           {suggestion && !isChatMode && (
