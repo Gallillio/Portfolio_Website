@@ -64,6 +64,26 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     inputRef.current?.focus({ preventScroll: true })
   }, [])
 
+  // A terminal opens on its prompt. When the output is taller than the panel
+  // (a phone in landscape on first load, or coming back to a long conversation
+  // from another tab, which remounts the panel), start scrolled to the bottom
+  // instead of the top, where the prompt was out of sight.
+  useEffect(() => {
+    const el = inputRef.current
+    const scroller = el?.closest<HTMLElement>("[data-terminal-scroll]")
+    if (!el || !scroller) return
+    const reveal = () => {
+      if (el.getBoundingClientRect().bottom > scroller.getBoundingClientRect().bottom) {
+        scroller.scrollTop = scroller.scrollHeight
+      }
+    }
+    reveal()
+    // Again once the ASCII art has settled its scaled height, a frame later.
+    let second = 0
+    const first = requestAnimationFrame(() => { second = requestAnimationFrame(reveal) })
+    return () => { cancelAnimationFrame(first); cancelAnimationFrame(second) }
+  }, [])
+
   // Pulse the arrow animation periodically when suggestion is present
   useEffect(() => {
     if (suggestion) {

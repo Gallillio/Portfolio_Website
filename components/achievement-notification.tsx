@@ -104,9 +104,13 @@ export default function AchievementNotification({
   
   const isSecret = achievement.isSecret;
   
-  // Position class based on mobile or desktop
+  // Position class based on mobile or desktop. Mobile centres with
+  // inset-x-0 + mx-auto rather than left-1/2 + -translate-x-1/2: both the
+  // slide-down animation and the swipe style below set `transform`, which
+  // silently dropped the centring translate and pushed the toast half off the
+  // right edge of every phone.
   const positionClass = isMobile
-    ? "top-4 left-[45%] transform -translate-x-1/2 w-[95%] max-w-sm"
+    ? "top-4 inset-x-0 mx-auto w-[95%] max-w-sm"
     : "top-4 right-4 w-80";
 
   // Padding and styling based on mobile or desktop

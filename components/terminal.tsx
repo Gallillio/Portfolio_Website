@@ -25,6 +25,18 @@ import { renderTerminalMarkdown } from "@/lib/ai/markdown"
 import StreamingMessage, { type StreamingMessageRef } from "@/components/streaming-message"
 import React from "react"
 
+// The full tab labels need ~920px, but the tab bar shows from 768px (iPad
+// portrait), where it overflowed and pushed "Your Achievements" off-screen.
+// Short labels until lg, where the full ones fit.
+function TabLabel({ short, full }: { short: string; full: string }) {
+  return (
+    <>
+      <span className="lg:hidden">{short}</span>
+      <span className="hidden lg:inline">{full}</span>
+    </>
+  )
+}
+
 function TerminalContent(): React.ReactNode {
   const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>([])
   const [activeTab, setActiveTab] = useState<string>("terminal")
@@ -827,7 +839,7 @@ function TerminalContent(): React.ReactNode {
             ? 'fixed inset-0 z-50 max-w-none rounded-none border-green-400' 
             : isMobile 
               ? 'fixed inset-4 z-50 rounded-md shadow-xl' 
-              : 'w-full max-w-5xl rounded-md relative'
+              : 'w-full max-w-5xl 2xl:max-w-6xl rounded-md relative'
           } ${animationClass} ${isMinimized || isClosing ? 'h-10 overflow-hidden' : ''}
           ${isChatMode && activeTab === "terminal" 
             ? 'shadow-gray-400/30 hover:shadow-gray-400/50' 
@@ -1059,7 +1071,7 @@ function TerminalContent(): React.ReactNode {
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
-                    About / Experience
+                    <TabLabel short="About" full="About / Experience" />
                 </TabsTrigger>
                 <TabsTrigger
                   value="contact"
@@ -1068,7 +1080,7 @@ function TerminalContent(): React.ReactNode {
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
-                    Contact / CV
+                    <TabLabel short="Contact" full="Contact / CV" />
                 </TabsTrigger>
                 <TabsTrigger
                   value="my-achievements"
@@ -1077,7 +1089,7 @@ function TerminalContent(): React.ReactNode {
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
-                    My Achievements / Publications / Certifications
+                    <TabLabel short="Achievements" full="My Achievements / Publications / Certifications" />
                 </TabsTrigger>
               </TabsList>
               </div>

@@ -328,8 +328,10 @@ export default function About() {
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
       <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">About Me</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-3 gap-6">
-        <Card ref={bioRef} className="bg-gray-900 border-green-500 md:col-span-3 lg:col-span-2 order-2 lg:order-1">
+        {/* Thirds from md up: quarters left the profile ~150px wide on tablets,
+            wrapping the name onto three lines. */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card ref={bioRef} className="bg-gray-900 border-green-500 md:col-span-2 order-2 lg:order-1">
           <CardHeader>
             <CardTitle className="text-green-400">Bio</CardTitle>
           </CardHeader>
@@ -495,7 +497,7 @@ export default function About() {
                                 />
                               </div>
                             )}
-                            <span className="mt-2 text-green-400">{skill}</span>
+                            <span className="mt-2 text-center text-green-400">{skill}</span>
                           </div>
                         </div>
                       ))}
