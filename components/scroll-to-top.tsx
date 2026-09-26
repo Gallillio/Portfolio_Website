@@ -10,9 +10,11 @@ export const ScrollToTop = () => {
 
   // Function to detect scrollable containers
   const detectScrollableContainers = () => {
-    // Find all tab content elements that have overflow-y-auto
+    // Find all tab content elements that have overflow-y-auto. Not the chat
+    // textarea, which scrolls too once a message outgrows five lines: that
+    // would summon the button and send it scrolling the text box.
     const scrollableElements = Array.from(
-      document.querySelectorAll('[class*="overflow-y-auto"]')
+      document.querySelectorAll('[class*="overflow-y-auto"]:not(textarea)')
     );
     
     scrollableContainersRef.current = scrollableElements;
