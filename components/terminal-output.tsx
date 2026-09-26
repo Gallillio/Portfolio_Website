@@ -60,7 +60,7 @@ const CommandLink = ({ command, onClick, isChatMode }: { command: string; onClic
     // Ensure the terminal input is visible after clicking
     setTimeout(() => {
       // Find the terminal input field
-      const terminalInput = document.querySelector('input[aria-label="Terminal input"]')
+      const terminalInput = document.querySelector('[aria-label="Terminal input"]')
       if (terminalInput instanceof HTMLElement) {
         terminalInput.focus()
         // Scroll to the input field

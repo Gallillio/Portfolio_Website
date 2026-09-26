@@ -173,7 +173,7 @@ function TerminalContent(): React.ReactNode {
           // Scroll to make the input field visible when keyboard opens
           setTimeout(() => {
             if (terminalInputRef.current) {
-              const inputElement = document.querySelector('input[aria-label="Terminal input"]')
+              const inputElement = document.querySelector('[aria-label="Terminal input"]')
               if (inputElement) {
                 inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
               }
@@ -530,7 +530,7 @@ function TerminalContent(): React.ReactNode {
       setTimeout(() => {
         if (terminalInputRef.current) {
           terminalInputRef.current.focus();
-          const inputElement = document.querySelector('input[aria-label="Terminal input"]');
+          const inputElement = document.querySelector('[aria-label="Terminal input"]');
           if (inputElement instanceof HTMLElement) {
             inputElement.scrollIntoView({ 
               behavior: 'smooth', 
