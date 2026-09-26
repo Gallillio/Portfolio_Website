@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss"
+import defaultTheme from "tailwindcss/defaultTheme"
 
 const config = {
   darkMode: ["class"],
@@ -19,6 +20,11 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        // Arabic-only face first; its unicode-range lets Latin fall through to
+        // the default mono stack untouched (see app/globals.css).
+        mono: ['"Cascadia Arabic"', ...defaultTheme.fontFamily.mono],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
