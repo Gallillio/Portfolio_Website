@@ -4,18 +4,18 @@ import type { Project } from "./types"
 // previews the first 3, and the AI context presents them in this order.
 export const projects: Project[] = [
   {
-    title: "Comic Stop",
+    title: "Comic Spot",
     period: "Jul. 2026 - Present",
-    description: "Live bilingual English/Arabic comics storefront at comicstop.co. Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Built on Next.js and Cloudflare Workers with headless Shopify, D1 and R2: cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
+    description: "Comic Spot, a live bilingual English/Arabic comics storefront at comicspot.co. Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Built on Next.js and Cloudflare Workers with headless Shopify, D1 and R2: cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
     technologies: ["NextJS", "TypeScript", "Cloudflare Workers", "Cloudflare D1", "Cloudflare R2", "Shopify", "Drizzle ORM", "Playwright", "TailwindCSS"],
     images: [
-      { src: "/Comic Stop/home.png", alt: "Comic Stop home page in English" },
-      { src: "/Comic Stop/home-arabic.png", alt: "Comic Stop home page in Arabic, right to left" },
-      { src: "/Comic Stop/product.png", alt: "Comic Stop product page" },
-      { src: "/Comic Stop/storylines.png", alt: "Comic Stop reading orders page" },
+      { src: "/Comic Spot/home.png", alt: "Comic Spot home page in English" },
+      { src: "/Comic Spot/home-arabic.png", alt: "Comic Spot home page in Arabic, right to left" },
+      { src: "/Comic Spot/product.png", alt: "Comic Spot product page" },
+      { src: "/Comic Spot/storylines.png", alt: "Comic Spot reading orders page" },
     ],
     github: "#",
-    demo: "https://comicstop.co",
+    demo: "https://comicspot.co",
     demo_available: true,
     code_available: false,
   },
