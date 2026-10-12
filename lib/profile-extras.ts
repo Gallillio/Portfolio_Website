@@ -14,7 +14,7 @@ export const headline = "AI Engineer | LLMs | RAG | Agentic Systems | Arabic NLP
 export const bio: string[] = [
   "Enterprise generative AI, built end to end. At ISYS, an IBM partner, I build SIA: a multi-tenant AI assistant on 22 microservices, live for about 70 staff and sized for a 1,000-seat client rollout.",
   "The results I measure: answer-confidence scoring raised from AUROC 0.35 to 0.994, answers that cite their source page where none of 1,614 did before, and IBM watsonx, Claude and OpenAI behind one interface with automatic failover. I also trained Vodafone's engineering team on IBM watsonx.ai and pitch SIA to C-suite audiences.",
-  "Beyond ISYS: freelance builds such as comicstop.co and Lango, co-authored Arabic LLM reasoning research published by Elsevier, and Arabic tech videos for 37K followers.",
+  "Beyond ISYS: freelance builds such as Comic Spot (comicspot.co) and Lango, co-authored Arabic LLM reasoning research published by Elsevier, and Arabic tech videos for 37K followers.",
 ];
 
 export interface Language {
@@ -65,9 +65,9 @@ export const highlights: Highlight[] = [
     pointer: "His main work and largest system; details under the AI Engineer role in Professional Experience.",
   },
   {
-    title: "Comic Stop",
+    title: "Comic Spot",
     period: "Jul. 2026 - Present",
-    pointer: "His most recent build, live at comicstop.co; details under Projects.",
+    pointer: "His most recent build, Comic Spot, live at comicspot.co; details under Projects.",
   },
   {
     title: "Lango",
