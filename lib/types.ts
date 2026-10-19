@@ -35,6 +35,16 @@ export interface Project {
   demo_available?: boolean
   code_available?: boolean
   inDevelopment?: boolean
+  /**
+   * Text for the status pill and image badge while `inDevelopment` is set, e.g.
+   * "Pre-launch". The card falls back to "In Development".
+   */
+  statusLabel?: string
+  /** Where the project runs, e.g. ["iOS", "Android", "iPadOS"]; shown under the title. */
+  platforms?: string[]
+  /** Replace the disabled Demo button's label and tooltip, e.g. for an app not yet in a store. */
+  demoLabel?: string
+  demoTooltip?: string
 }
 
 

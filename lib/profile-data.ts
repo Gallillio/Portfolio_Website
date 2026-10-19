@@ -212,6 +212,17 @@ export const freelanceProjects: FreelanceProject[] = [
     code_available: false,
   },
   {
+    title: "Lango: language-learning app for iOS and Android",
+    description: [
+      "Lango, a language-learning app for iOS, Android and iPad, in pre-launch.",
+      "Learners read stories where about 90% of the words are ones they know and save the rest; a lesson path builds its exercises from their word bank. Offline-first on SQLite with a sync layer to Supabase, seven languages to learn and an Arabic right-to-left UI.",
+    ].join("\n"),
+    technologies: ["React Native", "Expo", "TypeScript", "Supabase", "SQLite", "Python", "FastAPI", "Google Gemini", "Fly.io"],
+    period: "Aug. 2025 - Present",
+    demo_available: false,
+    code_available: false,
+  },
+  {
     title: "Swipelabs: AI CFO reporting and Slack assistant",
     description: [
       "Weekly CFO reports automated over the QuickBooks API.",
@@ -278,7 +289,7 @@ export const personalAchievements: PersonalAchievement[] = [
     id: "stakpak-hackathon",
     title: "Winner, Stakpak GenAI Hackathon",
     description: [
-      "Won the GenAI Hackathon hosted by Stakpak with the prototype that became Lango.",
+      "Won the GenAI Hackathon hosted by Stakpak with a 48-hour prototype that grew into Lango, now a mobile app.",
       "See Lango in the Projects tab.",
     ].join("\n"),
     icon: "star",

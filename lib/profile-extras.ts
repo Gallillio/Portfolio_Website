@@ -14,7 +14,7 @@ export const headline = "AI Engineer | LLMs | RAG | Agentic Systems | Arabic NLP
 export const bio: string[] = [
   "Enterprise generative AI, built end to end. At ISYS, an IBM partner, I build SIA: a multi-tenant AI assistant on 22 microservices, live for about 70 staff and sized for a 1,000-seat client rollout.",
   "The results I measure: answer-confidence scoring raised from AUROC 0.35 to 0.994, answers that cite their source page where none of 1,614 did before, and IBM watsonx, Claude and OpenAI behind one interface with automatic failover. I also trained Vodafone's engineering team on IBM watsonx.ai and pitch SIA to C-suite audiences.",
-  "Beyond ISYS: freelance builds such as Comic Spot (comicspot.co) and Lango, co-authored Arabic LLM reasoning research published by Elsevier, and Arabic tech videos for 37K followers.",
+  "Beyond ISYS: freelance builds such as Comic Spot (comicspot.co) and Lango, my language-learning app for iOS and Android, co-authored Arabic LLM reasoning research published by Elsevier, and Arabic tech videos for 37K followers.",
 ];
 
 export interface Language {
@@ -71,8 +71,8 @@ export const highlights: Highlight[] = [
   },
   {
     title: "Lango",
-    period: "2025 - Present",
-    pointer: "His own product, grown from the prototype that won the Stakpak GenAI Hackathon; details under Projects.",
+    period: "Aug. 2025 - Present",
+    pointer: "His own language-learning app for iOS, Android and iPad, in pre-launch, grown from the prototype that won the Stakpak GenAI Hackathon; details under Projects.",
   },
   {
     title: "IBM watsonx.ai training for Vodafone",

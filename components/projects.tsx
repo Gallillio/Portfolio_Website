@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { projects } from "@/lib/projects"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Github, ExternalLink, Check, Filter, ChevronDown, X } from "lucide-react"
+import { Github, ExternalLink, Check, Filter, ChevronDown, X, Smartphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAchievements } from "@/lib/achievements-context"
 import Slideshow from "@/components/ui/Slideshow"
@@ -334,10 +334,16 @@ export default function Projects() {
                     <span>{project.title}</span>
                     {project.inDevelopment && (
                       <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full whitespace-nowrap">
-                        In Development
+                        {project.statusLabel ?? "In Development"}
                       </span>
                     )}
                   </div>
+                  {project.platforms && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs font-normal text-green-300/60">
+                      <Smartphone size={12} aria-hidden="true" />
+                      {project.platforms.join(" · ")}
+                    </p>
+                  )}
                 </CardTitle>
                 <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
               </CardHeader>
@@ -354,8 +360,8 @@ export default function Projects() {
                   ))}
                   {project.inDevelopment && (
                      !(imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png") && (
-                    <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded shadow-md">
-                      IN DEVELOPMENT
+                    <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded shadow-md uppercase">
+                      {project.statusLabel ?? "In Development"}
                     </div>
                   ))}
                 </div>
@@ -400,12 +406,12 @@ export default function Projects() {
                 )}
                 
                 <Tooltip
-                  text={project.code_available
+                  text={project.demoTooltip ?? (project.code_available
                     ? "This project is only available by cloning the GitHub repo and not hosted unfortunately."
-                    : "This project isn't publicly hosted."}
+                    : "This project isn't publicly hosted.")}
                   isMobile={isMobile}
                   isTablet={isTablet}
-                  showTooltip={project.inDevelopment ? false : !project.demo_available}
+                  showTooltip={project.demoTooltip ? true : project.inDevelopment ? false : !project.demo_available}
                 >
                   <Button
                     variant="outline"
@@ -423,7 +429,7 @@ export default function Projects() {
                     ) : (
                       <span className="text-gray-500">
                         <ExternalLink size={16} className="mr-2" />
-                        Demo
+                        {project.demoLabel ?? "Demo"}
                       </span>
                     )}
                   </Button>

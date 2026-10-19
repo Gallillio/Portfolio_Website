@@ -132,8 +132,9 @@ export function buildPortfolioContext(): string {
         "Listed in Ahmed's order, strongest and newest first.",
         ...projects.map((p) =>
           [
-            `### ${p.title}${p.inDevelopment ? " (In Development)" : ""}`,
+            `### ${p.title}${p.inDevelopment ? ` (${p.statusLabel ?? "In Development"})` : ""}`,
             ...(p.period ? [`Period: ${p.period}`] : []),
+            ...(p.platforms ? [`Platforms: ${p.platforms.join(", ")}`] : []),
             normalizeText(p.detailedDescription ?? p.description),
             `Technologies: ${p.technologies.join(", ")}`,
             linkLine("Code", p.github, p.code_available),
