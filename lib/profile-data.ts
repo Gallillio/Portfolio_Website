@@ -244,7 +244,7 @@ export const freelanceProjects: FreelanceProject[] = [
 export const links = {
   portfolio: "https://portfolio.gallillio.com",
   github: "https://github.com/Gallillio",
-  linkedin: "https://www.linkedin.com/in/ahmed-galal-123a4a196",
+  linkedin: "https://www.linkedin.com/in/ahmed-galal-elzeky-123a4a196",
   credly: "https://www.credly.com/users/ahmed-galal.bbb8ea95",
   tiktok: "https://www.tiktok.com/@gallillio11045",
 }
