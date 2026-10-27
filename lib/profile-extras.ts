@@ -9,8 +9,9 @@ export const title = "AI Engineer";
 // Matches the CV header line.
 export const headline = "AI Engineer | LLMs | RAG | Agentic Systems | Arabic NLP";
 
-// First person on purpose: this is the conversational About bio. The first
-// paragraph is the one visible before "Read More".
+// First person on purpose: this is the conversational About bio. Collapsed, it
+// shows as much as fits beside the profile card (three lines on phones) before
+// "Read More", so lead with the strongest sentence.
 export const bio: string[] = [
   "Enterprise generative AI, built end to end. At ISYS, an IBM partner, I'm a founding engineer on SIA: a multi-tenant AI assistant on 22 microservices, live for about 70 staff and sized for a 1,000-seat client rollout.",
   "The results I measure: answer-confidence scoring raised from AUROC 0.35 to 0.994, answers that cite their source page where none of 1,614 did before, and IBM watsonx, Claude and OpenAI behind one interface with automatic failover and a router that runs helper tasks 3.5 to 4 times cheaper. I also trained Vodafone's engineering team on IBM watsonx.ai and pitch SIA to C-suite audiences.",
