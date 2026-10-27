@@ -53,6 +53,20 @@ export const workEligibility = "Egyptian national; military service: exempted";
 export const summary = "I build enterprise LLM systems: RAG, agents and model routing. Founding engineer on SIA at ISYS, an AI assistant live for about 70 staff."
 export const availability = "Cairo, Egypt (UTC+2/+3) · Open to remote and relocation";
 
+// Third person on purpose: it opens the About page and llms.txt, where search
+// engines and AI assistants lift sentences about a person to quote. First-person
+// copy ("I build...") does not say who "I" is once it is quoted alone.
+export const introduction: string[] = [
+  "Ahmed Galal Elzeky is an AI Engineer in Cairo, Egypt, who builds enterprise LLM systems: retrieval-augmented generation (RAG), agents and model routing. At Intelligent Systems (ISYS), an IBM partner, he is a founding engineer on SIA, an AI assistant live for about 70 staff.",
+  "He co-authored research on multi-hop Arabic LLM reasoning, published by Elsevier in Procedia Computer Science, and holds the Microsoft Certified: Azure AI Engineer Associate certification.",
+];
+
+// When the profile and project facts last changed (YYYY-MM-DD). The plain pages
+// show it as "Last updated", and the sitemap and structured data repeat it, so
+// bump it with any content change. A build date would claim changes that never
+// happened, and search engines learn to ignore a date that always moves.
+export const contentUpdated = "2026-10-27";
+
 export interface Highlight {
   title: string;
   period: string;

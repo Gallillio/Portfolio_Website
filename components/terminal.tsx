@@ -38,7 +38,20 @@ function TabLabel({ short, full }: { short: string; full: string }) {
 }
 
 function TerminalContent(): React.ReactNode {
-  const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>([])
+  // The opening banner, seeded as initial state rather than in a mount effect so
+  // it is in the server HTML: crawlers that never run JavaScript see the name,
+  // role and links, and the input no longer jumps down when the page hydrates.
+  // The arrow defers handleCommandClick (declared further down) to click time.
+  const welcomeEntry = () => ({
+    command: "",
+    output: [
+      <AsciiArt key="ascii-art" />,
+      <WelcomeBanner key="welcome" onRun={(command: string) => handleCommandClick(command)} />,
+    ],
+    timestamp: new Date(),
+    isError: false,
+  })
+  const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>(() => [welcomeEntry()])
   const [activeTab, setActiveTab] = useState<string>("terminal")
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [animationClass, setAnimationClass] = useState("")
@@ -214,33 +227,14 @@ function TerminalContent(): React.ReactNode {
     }
   }, [])
 
+  // `clear` resets the transcript to the opening banner.
   const initializeTerminal = () => {
-    // Initial welcome message
-    setHistory([
-      {
-        command: "",
-        output: [
-          <AsciiArt key="ascii-art" />,
-          <WelcomeBanner key="welcome" onRun={handleCommandClick} />,
-        ],
-        timestamp: new Date(),
-        isError: false,
-      },
-    ])
+    setHistory([welcomeEntry()])
   }
 
   useEffect(() => {
     handleCommandRef.current = handleCommand
   })
-
-  // Mount-only on purpose: this seeds the opening banner. Re-running it would
-  // wipe the transcript. initializeTerminal now closes over handleCommandClick
-  // (for the banner's clickable commands), which is why the dep is flagged;
-  // including it would reset the terminal on every render.
-  useEffect(() => {
-    initializeTerminal()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   // Called on every streamed repaint. Uses "auto" rather than "smooth" (a
   // restarting smooth animation per frame looks broken) and stays put if the
@@ -274,8 +268,11 @@ function TerminalContent(): React.ReactNode {
     if (isBotResponding) return
     // Only follow new output if the user hasn't scrolled up to read something.
     if (!isPinnedToBottom()) return
-    // Scroll to bottom when history changes
-    outputEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    // Scroll the transcript to the bottom when history changes. Its own scroll box
+    // only: scrollIntoView also scrolled the page, which on a short screen (a
+    // phone in landscape) pushed the window's title bar and tabs off the top.
+    const scroller = outputEndRef.current?.closest("[data-terminal-scroll]")
+    scroller?.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" })
     
     // Also ensure input is visible when history changes
     // This helps when the keyboard might cover the input
@@ -679,11 +676,12 @@ function TerminalContent(): React.ReactNode {
     }
   }, []);
   
-  const contentHeight = isFullscreen 
+  // Phones are always fullscreen, so their height comes from a media query, not
+  // from isMobile: the server cannot know the screen, and a height decided after
+  // hydration made the whole page jump (CLS 0.45 on a phone).
+  const contentHeight = isFullscreen && !isMobile
     ? "h-[calc(100vh-120px)]"
-    : isMobile 
-      ? "h-[calc(100vh-140px)]"
-      : "h-[70vh]";
+    : "max-md:h-[calc(100vh-120px)] md:h-[70vh]";
 
   // While the on-screen keyboard is up, fit the content to what is still
   // visible. An inline style, not a class: this used to assemble an arbitrary
@@ -841,11 +839,14 @@ function TerminalContent(): React.ReactNode {
         ref={terminalRef}
         className={`bg-black transition-all duration-700 ease-in-out transform-gpu overflow-hidden
           ${isChatMode && activeTab === "terminal" ? 'border border-gray-400 rounded-lg chat-mode' : 'border border-green-500'} 
-          ${isFullscreen 
-            ? 'fixed inset-0 z-50 max-w-none rounded-none border-green-400' 
-            : isMobile 
-              ? 'fixed inset-4 z-50 rounded-md shadow-xl' 
+          ${isMinimized || isClosing
+            ? isMobile
+              ? 'fixed inset-4 z-50 rounded-md shadow-xl'
               : 'w-full max-w-5xl 2xl:max-w-6xl rounded-md relative'
+            : isFullscreen && !isMobile
+              ? 'fixed inset-0 z-50 max-w-none rounded-none border-green-400'
+              // Media queries, as for contentHeight: fullscreen on phones from the first paint.
+              : 'max-md:fixed max-md:inset-0 max-md:z-50 max-md:max-w-none max-md:rounded-none max-md:border-green-400 md:w-full md:max-w-5xl 2xl:max-w-6xl md:rounded-md md:relative'
           } ${animationClass} ${isMinimized || isClosing ? 'h-10 overflow-hidden' : ''}
           ${isChatMode && activeTab === "terminal" 
             ? 'shadow-gray-400/30 hover:shadow-gray-400/50' 
@@ -959,34 +960,33 @@ function TerminalContent(): React.ReactNode {
               <>portfolio@Gallillio:~</>
             )}
             
-            {/* Add chat/terminal toggle button for mobile */}
-            {isMobile && (
-              <button 
-                onClick={() => {
-                  if (activeTab !== "terminal") {
-                    setActiveTab("terminal");
-                  }
-                  if (!isChatMode) {
-                    activateChatMode();
-                  }
-                  setIsChatMode(!isChatMode);
-                }}
-                className={`ml-2 p-1 rounded-md transition-colors duration-300
-                  ${isChatMode 
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                    : 'bg-gray-900 text-green-400 hover:bg-gray-800'}`}
-                title={isChatMode ? "Switch to command mode" : "Switch to chat mode"}
-              >
-                {isChatMode ? (
-                  <TerminalIcon size={14} />
-                ) : (
-                  <MessageSquare size={14} />
-                )}
-              </button>
-            )}
+            {/* Chat/terminal toggle for phones. Shown by a media query, like the
+                desktop buttons below, so the title bar doesn't rearrange on hydration. */}
+            <button
+              onClick={() => {
+                if (activeTab !== "terminal") {
+                  setActiveTab("terminal");
+                }
+                if (!isChatMode) {
+                  activateChatMode();
+                }
+                setIsChatMode(!isChatMode);
+              }}
+              className={`md:hidden ml-2 p-1 rounded-md transition-colors duration-300
+                ${isChatMode 
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                  : 'bg-gray-900 text-green-400 hover:bg-gray-800'}`}
+              title={isChatMode ? "Switch to command mode" : "Switch to chat mode"}
+            >
+              {isChatMode ? (
+                <TerminalIcon size={14} />
+              ) : (
+                <MessageSquare size={14} />
+              )}
+            </button>
           </div>
-          {!isMobile && !isMinimized && (
-            <div className="flex gap-2 items-center">
+          {!isMinimized && (
+            <div className="hidden md:flex gap-2 items-center">
               {/* Change chat/terminal toggle to show on all tabs */}
               <button 
                 onClick={() => {

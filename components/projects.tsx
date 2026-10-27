@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import Link from "next/link"
 import { projects } from "@/lib/projects"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -334,7 +335,14 @@ export default function Projects() {
               <CardHeader>
                 <CardTitle className="text-green-400">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span>{project.title}</span>
+                    {/* The title opens the project's own page, the shareable, indexable version of this card. */}
+                    {project.slug ? (
+                      <Link href={`/projects/${project.slug}`} className="underline-offset-4 hover:underline">
+                        {project.title}
+                      </Link>
+                    ) : (
+                      <span>{project.title}</span>
+                    )}
                     {project.inDevelopment && (
                       <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full whitespace-nowrap">
                         {project.statusLabel ?? "In Development"}

@@ -37,12 +37,13 @@ export default function WelcomeBanner({ onRun }: WelcomeBannerProps) {
 
   return (
     <div className="font-mono text-sm">
-      <div>
+      {/* The page's only h1: the name and role are what search engines should read first. */}
+      <h1>
         <span className="font-semibold text-white">Ahmed Galal Elzeky</span>
-        <span className="text-gray-500"> · {title}</span>
-      </div>
+        <span className="text-gray-400"> · {title}</span>
+      </h1>
       <div className="mt-1 max-w-3xl text-gray-300">{summary}</div>
-      <div className="mt-1 text-gray-500">{availability}</div>
+      <div className="mt-1 text-gray-400">{availability}</div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
         <a
@@ -81,12 +82,12 @@ export default function WelcomeBanner({ onRun }: WelcomeBannerProps) {
             >
               {command}
             </button>
-            <span className="text-gray-500">{description}</span>
+            <span className="text-gray-400">{description}</span>
           </React.Fragment>
         ))}
       </div>
 
-      <div className="mt-3 text-gray-500">or pick a tab above ↑</div>
+      <div className="mt-3 text-gray-400">or pick a tab above ↑</div>
     </div>
   )
 }
