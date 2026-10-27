@@ -249,6 +249,7 @@ export const links = {
   credly: "https://www.credly.com/users/ahmed-galal.bbb8ea95",
   tiktok: "https://www.tiktok.com/@gallillio11045",
   orcid: "https://orcid.org/0009-0006-7927-7513",
+  scholar: "https://scholar.google.com/citations?user=LnQx7kAAAAAJ",
 }
 
 // Personal Achievement interface
