@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
-import Link from "next/link"
-import { projects } from "@/lib/projects"
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
+import { usePathname } from "next/navigation"
+import { projects, projectPages } from "@/lib/projects"
 import { Badge, badgeVariants } from "@/components/ui/badge"
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Github, ExternalLink, Check, Filter, ChevronDown, X, Smartphone, Briefcase, BookOpen, ArrowRight } from "lucide-react"
@@ -10,46 +10,43 @@ import { Button } from "@/components/ui/button"
 import { useAchievements } from "@/lib/achievements-context"
 import Slideshow from "@/components/ui/Slideshow"
 import ImageModal from "@/lib/image-modal"
-import CaseStudyModal from "@/components/case-study-modal"
+import ProjectDetail from "@/components/project-detail"
 import { Tooltip } from "@/components/ui/tooltip"
 import type { ProjectImage } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { opensNewTab, pathForTab, projectPath, projectSlugForPath } from "@/lib/routes"
 
 // Tags a card shows before folding the rest into a "+N" chip; the project page lists them all.
 const VISIBLE_TECH_COUNT = 6
 
 /**
- * A card's description, cut to five lines when the project has a page holding
- * the full text. The link only appears when the text actually overflows.
+ * A card's description, cut to five lines when the project has a write-up of its
+ * own, with a link that opens it.
  */
-function ProjectDescription({ text, title, href }: { text: string; title: string; href?: string }) {
-  const textRef = useRef<HTMLParagraphElement>(null)
-  const [clipped, setClipped] = useState(false)
-
-  useEffect(() => {
-    const element = textRef.current
-    if (!element || !href) return
-    const measure = () => setClipped(element.scrollHeight > element.clientHeight + 1)
-    measure()
-    const observer = new ResizeObserver(measure)
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [href, text])
-
+function ProjectDescription({
+  text,
+  title,
+  href,
+  onOpen,
+}: {
+  text: string
+  title: string
+  href?: string
+  onOpen: (event: React.MouseEvent<HTMLAnchorElement>) => void
+}) {
   return (
     <div className="px-6 pt-4">
-      <p ref={textRef} className={cn("text-sm text-green-300/70 whitespace-pre-line", href && "line-clamp-5")}>
-        {text}
-      </p>
-      {href && clipped && (
-        <Link
+      <p className={cn("text-sm text-green-300/70 whitespace-pre-line", href && "line-clamp-5")}>{text}</p>
+      {href && (
+        <a
           href={href}
-          aria-label={`Read more about ${title}`}
+          onClick={onOpen}
           className="mt-2 inline-flex items-center gap-1 text-sm text-green-400 underline-offset-4 hover:text-green-300 hover:underline"
         >
-          Read more
+          {/* The name is in the link text, not only an aria-label, so search engines read a descriptive link. */}
+          Read more<span className="sr-only"> about {title}</span>
           <ArrowRight size={14} aria-hidden="true" />
-        </Link>
+        </a>
       )}
     </div>
   )
@@ -70,8 +67,13 @@ export default function Projects() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const [searchTerm, setSearchTerm] = useState<string>("")
-  const [caseStudyTitle, setCaseStudyTitle] = useState<string | null>(null)
-  const closeCaseStudy = useCallback(() => setCaseStudyTitle(null), [])
+  // /projects/<slug> opens that project's write-up in place of the cards.
+  const pathname = usePathname()
+  const openSlug = projectSlugForPath(pathname)
+  const openIndex = projectPages.findIndex((project) => project.slug === openSlug)
+  const openProject = openIndex >= 0 ? projectPages[openIndex] : null
+  const rootRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -177,6 +179,67 @@ export default function Projects() {
   const closeLightbox = useCallback(() => setLightbox(null), [])
   const showSlide = useCallback((index: number) => setLightbox((current) => current && { ...current, index }), [])
 
+  // The tab's own scroll box (components/terminal.tsx); the page around it stays put.
+  const scrollBox = () => rootRef.current?.closest<HTMLElement>("[data-tab-scroll]") ?? null
+
+  // Every link to a project is a real link: crawlers follow it, and a cmd, ctrl or
+  // middle click opens the project in a new tab. A plain click opens it here, as a
+  // new history entry, so Back returns to where the visitor was. Each entry counts
+  // its steps back to the cards, so "Projects" can return there after browsing
+  // from one project to the next; 0 means the visit started on a project.
+  const handleOpenProject = (event: React.MouseEvent<HTMLAnchorElement>, slug: string, section?: string) => {
+    if (opensNewTab(event)) return
+    event.preventDefault()
+    const state = window.history.state
+    let projectDepth = state?.projectDepth > 0 ? state.projectDepth + 1 : 0
+    if (!openProject) {
+      // Leaving the cards: note on their entry where they were scrolled to and which
+      // card was used, for when Back brings the visitor here again.
+      window.history.replaceState({ ...state, projectsScroll: scrollBox()?.scrollTop ?? 0, projectsFocus: slug }, "")
+      projectDepth = 1
+    }
+    window.history.pushState({ projectDepth }, "", section ? `${projectPath(slug)}#${section}` : projectPath(slug))
+  }
+
+  const handleBackToProjects = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (opensNewTab(event)) return
+    event.preventDefault()
+    const depth = window.history.state?.projectDepth ?? 0
+    if (depth > 0) window.history.go(-depth)
+    else window.history.pushState(null, "", pathForTab("projects"))
+  }
+
+  // After the view changes, put the scroll and the keyboard focus where a page
+  // load would: the top of a write-up (or the section its link named) with focus
+  // on its title, or the cards as they were left with focus on the one used.
+  const shownSlugRef = useRef(openProject?.slug ?? null)
+  useLayoutEffect(() => {
+    const shownSlug = openProject?.slug ?? null
+    const previousSlug = shownSlugRef.current
+    shownSlugRef.current = shownSlug
+    const box = scrollBox()
+    if (!box) return
+    const isFirstRender = previousSlug === shownSlug
+    if (shownSlug) {
+      // Reading a write-up counts as viewing the project, however the visitor got here.
+      if (openProject) handleProjectView(openProject.title)
+      const target = window.location.hash && document.getElementById(window.location.hash.slice(1))
+      if (isFirstRender && !target) return
+      // The target's scroll-margin leaves room for the pinned bar, as the browser's own jump does.
+      box.scrollTop = target
+        ? target.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - parseFloat(getComputedStyle(target).scrollMarginTop)
+        : 0
+      if (!isFirstRender) headingRef.current?.focus({ preventScroll: true })
+    } else if (!isFirstRender) {
+      const state = window.history.state
+      box.scrollTop = state?.projectsScroll ?? 0
+      const card = state?.projectsFocus && box.querySelector<HTMLElement>(`[data-project-slug="${state.projectsFocus}"]`)
+      if (card) card.focus({ preventScroll: true })
+    }
+    // Runs when the shown project changes, never on other renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openProject?.slug])
+
   // Create filter options including "all"
   const filterOptions = [
     { id: "all", label: "All Projects" },
@@ -193,9 +256,35 @@ export default function Projects() {
     ? 0 
     : selectedFilters.size;
 
+  const lightboxModal = (
+    <ImageModal
+      images={lightbox?.images ?? []}
+      index={lightbox?.index ?? null}
+      onIndexChange={showSlide}
+      onClose={closeLightbox}
+    />
+  )
+
+  if (openProject) {
+    return (
+      <div ref={rootRef} className="bg-black text-green-500 p-6 min-h-[70vh] font-mono custom-scrollbar">
+        <ProjectDetail
+          project={openProject}
+          previous={projectPages[(openIndex - 1 + projectPages.length) % projectPages.length]}
+          next={projectPages[(openIndex + 1) % projectPages.length]}
+          headingRef={headingRef}
+          onBack={handleBackToProjects}
+          onOpenProject={handleOpenProject}
+          onImageClick={openLightbox}
+        />
+        {lightboxModal}
+      </div>
+    )
+  }
+
   return (
-    <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono custom-scrollbar">
-      <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">Projects</h2>
+    <div ref={rootRef} className="bg-black text-green-500 p-6 min-h-[70vh] font-mono custom-scrollbar">
+      <h1 className="text-2xl mb-6 border-b border-green-500 pb-2">Projects</h1>
 
       <div className="mb-8 relative">
         {/* Mobile Filter Button */}
@@ -361,7 +450,9 @@ export default function Projects() {
             }
           }
 
-          const projectHref = project.slug ? `/projects/${project.slug}` : undefined
+          const slug = project.slug
+          const projectHref = slug ? projectPath(slug) : undefined
+          const openThis = (event: React.MouseEvent<HTMLAnchorElement>) => slug && handleOpenProject(event, slug)
           const isPlaceholder = imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png"
           // Technologies picked in the filter go first, so a match is never folded into "+N".
           const orderedTechnologies = selectedFilters.has("all")
@@ -396,11 +487,11 @@ export default function Projects() {
               <CardHeader className="space-y-0 pb-0 pt-5">
                 <CardTitle className="text-green-400">
                   <div className="flex flex-wrap items-center gap-2">
-                    {/* The title opens the project's own page, the shareable, indexable version of this card. */}
+                    {/* The title opens the project's write-up, which has an address of its own to share. */}
                     {projectHref ? (
-                      <Link href={projectHref} className="underline-offset-4 hover:underline">
+                      <a href={projectHref} onClick={openThis} data-project-slug={slug} className="underline-offset-4 hover:underline">
                         {project.title}
-                      </Link>
+                      </a>
                     ) : (
                       <span>{project.title}</span>
                     )}
@@ -425,7 +516,7 @@ export default function Projects() {
                 </CardTitle>
               </CardHeader>
 
-              <ProjectDescription text={project.description} title={project.title} href={projectHref} />
+              <ProjectDescription text={project.description} title={project.title} href={projectHref} onOpen={openThis} />
 
               <div className="px-6 pt-4 flex flex-wrap content-start gap-2">
                 {visibleTechnologies.map((tech) => (
@@ -437,9 +528,9 @@ export default function Projects() {
                   const label = `${hiddenTechnologies.length} more: ${hiddenTechnologies.join(", ")}`
                   const chipClass = cn(badgeVariants({ variant: "outline" }), "border-green-500/50 text-green-400/80")
                   return projectHref ? (
-                    <Link href={projectHref} title={label} aria-label={label} className={cn(chipClass, "hover:border-green-500 hover:text-green-300")}>
+                    <a href={projectHref} onClick={openThis} title={label} aria-label={label} className={cn(chipClass, "hover:border-green-500 hover:text-green-300")}>
                       +{hiddenTechnologies.length}
-                    </Link>
+                    </a>
                   ) : (
                     <span title={label} aria-label={label} className={chipClass}>
                       +{hiddenTechnologies.length}
@@ -479,15 +570,17 @@ export default function Projects() {
                   </Tooltip>
                 )}
 
-                {project.caseStudy && (
+                {project.caseStudy && slug && (
                   <Button
                     variant="outline"
                     size="sm"
                     className="border-green-500 text-green-400 bg-black hover:bg-green-500/20"
-                    onClick={() => setCaseStudyTitle(project.title)}
+                    asChild
                   >
-                    <BookOpen size={16} className="mr-2" />
-                    Case study
+                    <a href={`${projectPath(slug)}#case-study`} onClick={(event) => handleOpenProject(event, slug, "case-study")}>
+                      <BookOpen size={16} className="mr-2" />
+                      Case study
+                    </a>
                   </Button>
                 )}
 
@@ -538,19 +631,7 @@ export default function Projects() {
         </div>
       )}
 
-      <CaseStudyModal
-        project={projects.find(project => project.title === caseStudyTitle) ?? null}
-        onClose={closeCaseStudy}
-        onImageClick={openLightbox}
-        suspended={lightbox !== null}
-      />
-
-      <ImageModal
-        images={lightbox?.images ?? []}
-        index={lightbox?.index ?? null}
-        onIndexChange={showSlide}
-        onClose={closeLightbox}
-      />
+      {lightboxModal}
     </div>
   )
 }

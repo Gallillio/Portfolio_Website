@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { links, education, personalAchievements } from "./profile-data"
 import { title, headline, introduction, contact, contentUpdated } from "./profile-extras"
+import { projectPages } from "./projects"
+import { projectSlugForPath, tabForPath } from "./routes"
 import type { Project } from "./types"
 
 // Search and share metadata, and the schema.org structured data, built from the
@@ -16,6 +18,36 @@ export const SITE_DESCRIPTION =
 
 // New filename on purpose: social networks cache preview images by URL.
 export const OG_IMAGE = { url: "/og-2026.png", width: 1200, height: 630, alt: SITE_TITLE }
+
+// Page titles. Each route's metadata uses them, and so does the terminal when it
+// changes the address in the browser without loading a new page, so the browser
+// tab always shows the title a direct visit to that address would.
+export const HOME_TITLE = `${SITE_TITLE} | portfolio@Gallillio:~`
+export const ABOUT_TITLE = `About ${NAME} · AI Engineer in Cairo`
+export const PROJECTS_TITLE = `Projects · ${NAME}`
+export const ACHIEVEMENTS_TITLE = `Publications, awards and certifications · ${NAME}`
+
+export function projectTitle(project: Pick<Project, "title" | "tagline">): string {
+  const heading = project.tagline ? `${project.title}: ${project.tagline}` : project.title
+  return `${heading} · ${NAME}`
+}
+
+/** The title of the page at an address the terminal can show. */
+export function titleForPath(pathname: string): string {
+  const slug = projectSlugForPath(pathname)
+  const project = slug && projectPages.find((p) => p.slug === slug)
+  if (project) return projectTitle(project)
+  switch (tabForPath(pathname)) {
+    case "projects":
+      return PROJECTS_TITLE
+    case "about":
+      return ABOUT_TITLE
+    case "my-achievements":
+      return ACHIEVEMENTS_TITLE
+    default:
+      return HOME_TITLE
+  }
+}
 
 /** Public URL of a file in public/. Several folders have spaces in their names. */
 export const publicUrl = (src: string) => `${links.portfolio}${encodeURI(src)}`

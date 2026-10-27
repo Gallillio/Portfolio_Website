@@ -7,7 +7,7 @@ import AchievementNotificationProvider from "@/components/achievement-notificati
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { links } from "@/lib/profile-data";
-import { NAME, SITE_TITLE, SITE_DESCRIPTION, OG_IMAGE, siteJsonLd } from "@/lib/seo";
+import { NAME, SITE_TITLE, HOME_TITLE, SITE_DESCRIPTION, OG_IMAGE, siteJsonLd } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 // (lib/seo.ts). The canonical lives in app/page.tsx, not here, so no page can
 // inherit the home page's. The terminal prompt stays as a title suffix.
 export const metadata: Metadata = {
-  title: `${SITE_TITLE} | portfolio@Gallillio:~`,
+  title: HOME_TITLE,
   description: SITE_DESCRIPTION,
   metadataBase: new URL(links.portfolio),
   openGraph: {

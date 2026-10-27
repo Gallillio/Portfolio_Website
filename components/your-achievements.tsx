@@ -73,7 +73,7 @@ export default function YourAchievements() {
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono relative custom-scrollbar">
       <div className="mb-6 border-b border-green-500 pb-2">
-        <h2 className="text-2xl mb-4">Your Achievements</h2>
+        <h1 className="text-2xl mb-4">Your Achievements</h1>
       </div>
 
       <div className="mt-8 p-4 bg-gray-900/50 border border-green-500 rounded-md">
