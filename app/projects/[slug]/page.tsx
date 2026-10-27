@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { projectPages } from "@/lib/projects"
-import { NAME, pageMetadata, summarise, projectJsonLd, breadcrumbJsonLd } from "@/lib/seo"
+import { NAME, pageMetadata, summarize, projectJsonLd, breadcrumbJsonLd } from "@/lib/seo"
 import { imageSize } from "@/lib/image-size"
 import StaticPage, { Section, JsonLd, linkClass, inlineLinkClass } from "@/components/static-page"
 
@@ -21,7 +21,7 @@ export function generateStaticParams() {
 
 const findProject = (slug: string) => projectPages.find((project) => project.slug === slug)
 
-const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const project = findProject((await params).slug)
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cover = project.images[0]
   return pageMetadata({
     title: `${heading} · ${NAME}`,
-    description: summarise(project.description),
+    description: summarize(project.description),
     path: `/projects/${project.slug}`,
     image: cover && { url: encodeURI(cover.src), alt: cover.alt },
   })
@@ -76,7 +76,7 @@ export default async function ProjectPage({ params }: Props) {
       </nav>
 
       <h1 className="mt-3 text-2xl font-semibold text-white md:text-3xl">{project.title}</h1>
-      {project.tagline && <p className="mt-1 text-green-400">{capitalise(project.tagline)}</p>}
+      {project.tagline && <p className="mt-1 text-green-400">{capitalize(project.tagline)}</p>}
       {facts.length > 0 && <p className="mt-2 text-sm text-gray-400">{facts.join(" · ")}</p>}
 
       <p className="mt-6">{project.description}</p>

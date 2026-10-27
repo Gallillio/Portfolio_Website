@@ -10,7 +10,7 @@ import {
   links,
 } from "@/lib/profile-data"
 import { introduction, headline, languages, contact, availability } from "@/lib/profile-extras"
-import { NAME, pageMetadata, summarise, aboutPageJsonLd, breadcrumbJsonLd } from "@/lib/seo"
+import { NAME, pageMetadata, summarize, aboutPageJsonLd, breadcrumbJsonLd } from "@/lib/seo"
 import StaticPage, { Section, JsonLd, linkClass, inlineLinkClass } from "@/components/static-page"
 
 // Everything the terminal's About and Achievements tabs hold, as one plain page,
@@ -18,7 +18,7 @@ import StaticPage, { Section, JsonLd, linkClass, inlineLinkClass } from "@/compo
 
 export const metadata = pageMetadata({
   title: `About ${NAME} · AI Engineer in Cairo`,
-  description: summarise(introduction[0]),
+  description: summarize(introduction[0]),
   path: "/about",
 })
 

@@ -52,11 +52,11 @@ export class UpstreamError extends Error {
  * wait a minute costs one retry.
  */
 export function detectQuotaScope(body: string): QuotaScope {
-  const normalised = body.toLowerCase().replace(/[\s_-]/g, "");
-  if (/perday|requestsperday|dailylimit|perdayperproject/.test(normalised)) return "per-day";
+  const normalized = body.toLowerCase().replace(/[\s_-]/g, "");
+  if (/perday|requestsperday|dailylimit|perdayperproject/.test(normalized)) return "per-day";
 
   // A retryDelay measured in hours can only be the daily cap.
-  const retryDelay = /"retrydelay":"(\d+(?:\.\d+)?)s"/.exec(normalised);
+  const retryDelay = /"retrydelay":"(\d+(?:\.\d+)?)s"/.exec(normalized);
   if (retryDelay && Number(retryDelay[1]) > 300) return "per-day";
 
   return "per-minute";

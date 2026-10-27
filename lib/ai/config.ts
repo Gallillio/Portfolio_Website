@@ -39,7 +39,7 @@ export const GENERATION_CONFIG = {
 };
 
 /**
- * System instruction for the assistant. Behaviour, not data — the factual
+ * System instruction for the assistant. Behavior, not data — the factual
  * context is generated separately in lib/ai/context.ts.
  */
 export const SYSTEM_INSTRUCTION = `The person using this chat is NOT Ahmed Galal Elzeky, he is a different person, interested in knowing more about Ahmed Galal Elzeky, so talk to the user in the first person, not as Ahmed Galal Elzeky, also, if the user asks about my projects, you should answer the question using the data provided.

@@ -54,6 +54,17 @@ const nextConfig: NextConfig = {
             },
         ],
   },
+  // The project's slug moved to American spelling; keep the old URL working
+  // for search engines and links already shared.
+  async redirects() {
+    return [
+      {
+        source: "/projects/data-visualiser-tool",
+        destination: "/projects/data-visualizer-tool",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
