@@ -94,7 +94,7 @@ const person = {
     })),
   // Lets search engines tie the site to these profiles, so "Ahmed Galal Elzeky"
   // resolves to one person rather than to his namesakes.
-  sameAs: [links.linkedin, links.github, links.orcid, links.credly, links.tiktok],
+  sameAs: [links.linkedin, links.github, links.orcid, links.scholar, links.credly, links.tiktok],
 }
 
 const website = {

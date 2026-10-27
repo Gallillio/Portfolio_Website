@@ -50,6 +50,7 @@ const profiles = [
   { href: links.linkedin, label: "LinkedIn" },
   { href: links.github, label: "GitHub" },
   { href: links.orcid, label: "ORCID" },
+  { href: links.scholar, label: "Google Scholar" },
   { href: links.credly, label: "Credly" },
   { href: links.tiktok, label: "TikTok" },
 ]
