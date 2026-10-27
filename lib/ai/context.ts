@@ -23,6 +23,7 @@ import {
   languages,
   contact,
   workEligibility,
+  availability,
   coursesNote,
   siteMap,
 } from "@/lib/profile-extras";
@@ -68,7 +69,7 @@ export function buildPortfolioContext(): string {
     section(
       "Highlights",
       [
-        "Ranked by Ahmed. Use this order for his most impressive work, and the periods for recent work. SIA is his main project even though it is listed under Professional Experience, not Projects.",
+        "Ranked by Ahmed. Use this order for his most impressive work, and the periods for recent work. SIA is his main project; it is first under Projects and also described under the AI Engineer role in Professional Experience.",
         ...highlights.map((h, i) => `${i + 1}. ${h.title} (${h.period}): ${h.pointer}`),
       ].join("\n")
     )
@@ -134,6 +135,7 @@ export function buildPortfolioContext(): string {
           [
             `### ${p.title}${p.inDevelopment ? ` (${p.statusLabel ?? "In Development"})` : ""}`,
             ...(p.period ? [`Period: ${p.period}`] : []),
+            ...(p.role ? [`Role: ${p.role}`] : []),
             ...(p.platforms ? [`Platforms: ${p.platforms.join(", ")}`] : []),
             normalizeText(p.detailedDescription ?? p.description),
             `Technologies: ${p.technologies.join(", ")}`,
@@ -206,6 +208,7 @@ export function buildPortfolioContext(): string {
         `Phone: ${contact.phone}`,
         `Location: ${contact.location}`,
         `Work eligibility: ${workEligibility}`,
+        `Availability: ${availability}`,
         `Portfolio: ${links.portfolio}`,
         `GitHub: ${links.github}`,
         `LinkedIn: ${links.linkedin}`,

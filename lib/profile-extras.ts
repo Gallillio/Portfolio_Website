@@ -12,8 +12,8 @@ export const headline = "AI Engineer | LLMs | RAG | Agentic Systems | Arabic NLP
 // First person on purpose: this is the conversational About bio. The first
 // paragraph is the one visible before "Read More".
 export const bio: string[] = [
-  "Enterprise generative AI, built end to end. At ISYS, an IBM partner, I build SIA: a multi-tenant AI assistant on 22 microservices, live for about 70 staff and sized for a 1,000-seat client rollout.",
-  "The results I measure: answer-confidence scoring raised from AUROC 0.35 to 0.994, answers that cite their source page where none of 1,614 did before, and IBM watsonx, Claude and OpenAI behind one interface with automatic failover. I also trained Vodafone's engineering team on IBM watsonx.ai and pitch SIA to C-suite audiences.",
+  "Enterprise generative AI, built end to end. At ISYS, an IBM partner, I'm a founding engineer on SIA: a multi-tenant AI assistant on 22 microservices, live for about 70 staff and sized for a 1,000-seat client rollout.",
+  "The results I measure: answer-confidence scoring raised from AUROC 0.35 to 0.994, answers that cite their source page where none of 1,614 did before, and IBM watsonx, Claude and OpenAI behind one interface with automatic failover and a router that runs helper tasks 3.5 to 4 times cheaper. I also trained Vodafone's engineering team on IBM watsonx.ai and pitch SIA to C-suite audiences.",
   "Beyond ISYS: freelance builds such as Comic Spot (comicspot.co) and Lango, my language-learning app for iOS and Android, co-authored Arabic LLM reasoning research published by Elsevier, and Arabic tech videos for 37K followers.",
 ];
 
@@ -49,6 +49,10 @@ export const cv = {
 // From the CV header. Only the chatbot context reads it.
 export const workEligibility = "Egyptian national; military service: exempted";
 
+// Shown on the welcome banner, the first thing a recruiter sees, and given to the chatbot.
+export const summary = "I build enterprise LLM systems: RAG, agents and model routing. Founding engineer on SIA at ISYS, an AI assistant live for about 70 staff."
+export const availability = "Cairo, Egypt (UTC+2/+3) · Open to remote and relocation";
+
 export interface Highlight {
   title: string;
   period: string;
@@ -62,7 +66,7 @@ export const highlights: Highlight[] = [
   {
     title: "SIA at Intelligent Systems (ISYS)",
     period: "Feb. 2025 - Present",
-    pointer: "His main work and largest system; details under the AI Engineer role in Professional Experience.",
+    pointer: "His main work and largest system, where he is a founding engineer; details under Projects (SIA, with a case study) and the AI Engineer role in Professional Experience.",
   },
   {
     title: "Comic Spot",

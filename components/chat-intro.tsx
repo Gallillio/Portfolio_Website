@@ -13,11 +13,11 @@ interface ChatIntroProps {
  * do and often leave without asking anything.
  *
  * Chosen for breadth (the current role, a ranking, recency) and grounded in the
- * generated context: the ISYS experience entry, and the Highlights section and
- * project periods in lib/ai/context.ts, so none of them can return "I don't know".
+ * generated context: the SIA project and ISYS experience entries, and the Highlights
+ * section and project periods in lib/ai/context.ts, so none of them can return "I don't know".
  */
 const STARTERS = [
-  "What does he do at ISYS?",
+  "What is SIA and what did he build?",
   "What's his most impressive project?",
   "What has he built recently?",
 ]

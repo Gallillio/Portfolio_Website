@@ -1,68 +1,57 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { personalAchievements } from "@/lib/profile-data"
 
-import { useEffect } from 'react'
+// This page once said the exam was still ahead. It now reads the earned
+// certification from the achievements data, so the two cannot disagree again.
+const certification = personalAchievements.find((a) => a.id === "azure-ai-engineer-associate")
+
+export const metadata: Metadata = {
+  title: "Azure AI Engineer Associate · Ahmed Galal Elzeky",
+  description: certification?.description.split("\n")[0],
+}
 
 export default function AzureCertificationPage() {
-  // Function to close the current tab
-  const handleClose = () => {
-    window.close()
-  }
-
-  // Add title to the page
-  useEffect(() => {
-    document.title = "Azure Certification - Work in Progress"
-  }, [])
+  const [headline, ...details] = certification?.description.split("\n") ?? []
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-green-400 p-4 font-mono">
-      <div className="max-w-2xl mx-auto text-center space-y-8">
-        <h1 className="text-3xl font-bold mb-6">
-          Azure AI Engineer Associate Certification
-        </h1>
-        
-        <div className="border-2 border-green-500 rounded-lg p-6 bg-black">
-          <div className="mb-4 text-yellow-400 text-xl">
-            <span className="animate-pulse">⚠️</span> CERTIFICATION STATUS: IN PROGRESS <span className="animate-pulse">⚠️</span>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-900 p-4 font-mono text-green-400">
+      <div className="mx-auto max-w-2xl space-y-8 text-center">
+        <h1 className="mb-6 text-3xl font-bold">{certification?.title ?? "Azure AI Engineer Associate"}</h1>
+
+        <div className="rounded-lg border-2 border-green-500 bg-black p-6">
+          <div className="mb-4 text-xl text-green-300">CERTIFICATION STATUS: EARNED</div>
+
+          {headline && <p className="mb-4 text-lg">{headline}</p>}
+
+          <div className="mb-6 space-y-2 text-left">
+            {details.map((line) => (
+              <p key={line} className="border-l-2 border-green-500 py-1 pl-4">
+                <span className="text-green-400">$</span> {line.replace(/^- /, "")}
+              </p>
+            ))}
           </div>
-          
-          <p className="text-lg mb-4">
-            I&apos;m currently studying for this certification and plan to take the exam in April 2025!
-          </p>
-          
-          <div className="space-y-4 text-left mb-6">
-            <p className="border-l-2 border-green-500 pl-4 py-1">
-              <span className="text-green-400">$</span> Running training_program.sh...
-            </p>
-            <p className="border-l-2 border-green-500 pl-4 py-1">
-              <span className="text-green-400">$</span> Loading Azure modules... [████████░░] 80%
-            </p>
-            <p className="border-l-2 border-green-500 pl-4 py-1">
-              <span className="text-green-400">$</span> Brain capacity: [███████░░░] 70% full
-            </p>
-            <p className="border-l-2 border-green-500 pl-4 py-1">
-              <span className="text-green-400">$</span> Caffeine levels: [██████████] 100%
-            </p>
-            <p className="border-l-2 border-green-500 pl-4 py-1">
-              <span className="text-green-400">$</span> Certification completion: ETA April 2025
-            </p>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            {certification?.link && (
+              <a
+                href={certification.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md bg-green-500 px-6 py-3 font-bold text-black transition-colors duration-300 hover:bg-green-600"
+              >
+                {certification.linkText ?? "View Certification"}
+              </a>
+            )}
+            <Link
+              href="/"
+              className="rounded-md border border-green-500 px-6 py-3 font-bold text-green-400 transition-colors duration-300 hover:bg-green-500/20"
+            >
+              Back to the portfolio
+            </Link>
           </div>
-          
-          <p className="text-green-300 italic mb-6">
-            &ldquo;Why did the developer go broke? Because he used up all his cache on Azure services!&rdquo;
-          </p>
-          
-          <button
-            onClick={handleClose}
-            className="bg-green-500 hover:bg-green-600 text-black font-bold py-3 px-6 rounded-md transition-colors duration-300 mx-auto block"
-          >
-            Click here to exit
-          </button>
         </div>
-        
-        <p className="text-sm text-green-500/60 mt-8">
-          This page will self-destruct in 5... just kidding. But feel free to close it!
-        </p>
       </div>
     </div>
   )
-} 
+}

@@ -6,6 +6,8 @@ import { AchievementsProvider } from "@/lib/achievements-context";
 import AchievementNotificationProvider from "@/components/achievement-notification-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
+import { title, contact } from "@/lib/profile-extras";
+import { links } from "@/lib/profile-data";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,16 +25,33 @@ export const viewport: Viewport = {
   viewportFit: 'cover',  // Enable safe area on modern mobile devices
 };
 
+// The name leads the title: it is what a recruiter searches for and what shows
+// in a browser tab or a shared link. The terminal prompt stays as a suffix.
+const SITE_TITLE = "Ahmed Galal Elzeky · AI Engineer";
+const SITE_DESCRIPTION =
+  "AI Engineer in Cairo building enterprise LLM systems: RAG, agents and model routing. Founding engineer on SIA at ISYS, an IBM partner.";
+
 export const metadata: Metadata = {
-  title: "portfolio@Gallillio:~",
-  description: "Ahmed Galal Elzeky, AI Engineer: LLMs, RAG, agentic systems and Arabic NLP",
-  metadataBase: new URL("https://portfolio.gallillio.com"),
+  title: `${SITE_TITLE} | portfolio@Gallillio:~`,
+  description: SITE_DESCRIPTION,
+  metadataBase: new URL(links.portfolio),
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "portfolio@Gallillio:~",
-    description: "Ahmed Galal Elzeky, AI Engineer: LLMs, RAG, agentic systems and Arabic NLP",
-    images: ["/og-image.png"],
-    url: "https://portfolio.gallillio.com",
+    type: "profile",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    // New filename on purpose: social networks cache preview images by URL.
+    images: [{ url: "/og-2026.png", width: 1200, height: 630, alt: SITE_TITLE }],
+    url: links.portfolio,
+    siteName: "Ahmed Galal Elzeky",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og-2026.png"],
+  },
+  manifest: "/site.webmanifest",
   icons: {
     // For standard favicons in different sizes
     icon: [
@@ -67,6 +86,20 @@ export const metadata: Metadata = {
   },
 };
 
+// schema.org Person, so search engines can tie the site to the LinkedIn and GitHub profiles.
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Ahmed Galal Elzeky",
+  alternateName: "Gallillio",
+  jobTitle: title,
+  url: links.portfolio,
+  email: `mailto:${contact.email}`,
+  worksFor: { "@type": "Organization", name: "Intelligent Systems (ISYS)" },
+  address: { "@type": "PostalAddress", addressLocality: "Cairo", addressCountry: "EG" },
+  sameAs: [links.linkedin, links.github, links.credly],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -77,6 +110,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
         <AchievementsProvider>
           <AchievementNotificationProvider>
             {children}
