@@ -1,14 +1,15 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { projects } from "@/lib/projects"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Github, ExternalLink, Check, Filter, ChevronDown, X, Smartphone } from "lucide-react"
+import { Github, ExternalLink, Check, Filter, ChevronDown, X, Smartphone, Briefcase, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAchievements } from "@/lib/achievements-context"
 import Slideshow from "@/components/ui/Slideshow"
 import ImageModal from "@/lib/image-modal"
+import CaseStudyModal from "@/components/case-study-modal"
 import { Tooltip } from "@/components/ui/tooltip"
 
 export default function Projects() {
@@ -26,6 +27,8 @@ export default function Projects() {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const [searchTerm, setSearchTerm] = useState<string>("")
+  const [caseStudyTitle, setCaseStudyTitle] = useState<string | null>(null)
+  const closeCaseStudy = useCallback(() => setCaseStudyTitle(null), [])
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -338,6 +341,12 @@ export default function Projects() {
                       </span>
                     )}
                   </div>
+                  {project.role && (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-xs font-normal text-green-300/60">
+                      <Briefcase size={12} aria-hidden="true" className="shrink-0" />
+                      {project.role}
+                    </p>
+                  )}
                   {project.platforms && (
                     <p className="mt-1.5 flex items-center gap-1.5 text-xs font-normal text-green-300/60">
                       <Smartphone size={12} aria-hidden="true" />
@@ -374,7 +383,7 @@ export default function Projects() {
                 </div>
               </CardContent>
               
-              <CardFooter className="flex justify-between mt-auto">
+              <CardFooter className="flex flex-wrap justify-between gap-2 mt-auto">
                 {project.github && (
                   <Tooltip 
                     text="Sorry, the code is confidential and not public."
@@ -404,36 +413,51 @@ export default function Projects() {
                     </Button>
                   </Tooltip>
                 )}
-                
-                <Tooltip
-                  text={project.demoTooltip ?? (project.code_available
-                    ? "This project is only available by cloning the GitHub repo and not hosted unfortunately."
-                    : "This project isn't publicly hosted.")}
-                  isMobile={isMobile}
-                  isTablet={isTablet}
-                  showTooltip={project.demoTooltip ? true : project.inDevelopment ? false : !project.demo_available}
-                >
+
+                {project.caseStudy && (
                   <Button
                     variant="outline"
                     size="sm"
-                    className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.demo_available ? '' : 'opacity-50 cursor-not-allowed'}`}
-                    asChild
-                    disabled={!project.demo_available || project.inDevelopment}
-                    onClick={project.demo_available && !project.inDevelopment ? handleDemoClick : undefined}
+                    className="border-green-500 text-green-400 bg-black hover:bg-green-500/20"
+                    onClick={() => setCaseStudyTitle(project.title)}
                   >
-                    {project.demo && project.demo_available ? (
-                      <a href={project.demo} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink size={16} className="mr-2" />
-                        Demo
-                      </a>
-                    ) : (
-                      <span className="text-gray-500">
-                        <ExternalLink size={16} className="mr-2" />
-                        {project.demoLabel ?? "Demo"}
-                      </span>
-                    )}
+                    <BookOpen size={16} className="mr-2" />
+                    Case study
                   </Button>
-                </Tooltip>
+                )}
+
+                {/* A private project with a case study shows that instead of a dead Demo button. */}
+                {!(project.caseStudy && !project.demo_available) && (
+                  <Tooltip
+                    text={project.demoTooltip ?? (project.code_available
+                      ? "This project is only available by cloning the GitHub repo and not hosted unfortunately."
+                      : "This project isn't publicly hosted.")}
+                    isMobile={isMobile}
+                    isTablet={isTablet}
+                    showTooltip={project.demoTooltip ? true : project.inDevelopment ? false : !project.demo_available}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={`border-green-500 text-green-400 bg-black hover:bg-green-500/20 ${project.demo_available ? '' : 'opacity-50 cursor-not-allowed'}`}
+                      asChild
+                      disabled={!project.demo_available || project.inDevelopment}
+                      onClick={project.demo_available && !project.inDevelopment ? handleDemoClick : undefined}
+                    >
+                      {project.demo && project.demo_available ? (
+                        <a href={project.demo} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink size={16} className="mr-2" />
+                          Demo
+                        </a>
+                      ) : (
+                        <span className="text-gray-500">
+                          <ExternalLink size={16} className="mr-2" />
+                          {project.demoLabel ?? "Demo"}
+                        </span>
+                      )}
+                    </Button>
+                  </Tooltip>
+                )}
               </CardFooter>
             </Card>
           )
@@ -448,6 +472,13 @@ export default function Projects() {
           </Button>
         </div>
       )}
+
+      <CaseStudyModal
+        project={projects.find(project => project.title === caseStudyTitle) ?? null}
+        onClose={closeCaseStudy}
+        onImageClick={handleImageClick}
+        suspended={isModalOpen}
+      />
 
       <ImageModal 
         isOpen={isModalOpen} 

@@ -45,6 +45,23 @@ export interface Project {
   /** Replace the disabled Demo button's label and tooltip, e.g. for an app not yet in a store. */
   demoLabel?: string
   demoTooltip?: string
+  /** Ahmed's role and where the work was done, e.g. for employer projects; shown under the title. */
+  role?: string
+  /** Long-form write-up behind the card's "Case study" button. */
+  caseStudy?: CaseStudy
+}
+
+export interface CaseStudy {
+  /** What Ahmed owned on the project. */
+  role: string
+  problem: string
+  decisions: { title: string; detail: string }[]
+  results: string[]
+  /** Known gap and what comes next. */
+  limitations?: string
+  diagrams?: { src: string; alt: string }[]
+  /** Confidentiality or data note shown at the bottom. */
+  note?: string
 }
 
 
