@@ -195,12 +195,15 @@ export interface FreelanceProject {
   demo?: string;
   demo_available?: boolean;
   code_available?: boolean;
+  /** Slug of the same work in lib/projects.ts, so the About page can link to its page. */
+  projectSlug?: string;
 }
 
 // Add freelance projects data
 export const freelanceProjects: FreelanceProject[] = [
   {
     title: "Comic Spot: bilingual comics storefront",
+    projectSlug: "comic-spot",
     description: [
       "Comic Spot, a live bilingual English/Arabic storefront at comicspot.co.",
       "Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
@@ -213,6 +216,7 @@ export const freelanceProjects: FreelanceProject[] = [
   },
   {
     title: "Lango: language-learning app for iOS and Android",
+    projectSlug: "lango",
     description: [
       "Lango, a language-learning app for iOS, Android and iPad, in pre-launch.",
       "Learners read stories where about 90% of the words are ones they know and save the rest; a lesson path builds its exercises from their word bank. Offline-first on SQLite with a sync layer to Supabase, seven languages to learn and an Arabic right-to-left UI.",
@@ -224,6 +228,7 @@ export const freelanceProjects: FreelanceProject[] = [
   },
   {
     title: "Swipelabs: AI CFO reporting and Slack assistant",
+    projectSlug: "swipelabs-ai-cfo",
     description: [
       "Weekly CFO reports automated over the QuickBooks API.",
       "Revenue, burn rate, overdue invoices and natural-language forecasting, plus a GPT-powered Slack assistant wired to Trello, ClickUp and Google Calendar.",
@@ -240,7 +245,8 @@ export const links = {
   portfolio: "https://portfolio.gallillio.com",
   github: "https://github.com/Gallillio",
   linkedin: "https://www.linkedin.com/in/ahmed-galal-123a4a196",
-  credly: "https://www.credly.com/users/ahmed-galal.bbb8ea95"
+  credly: "https://www.credly.com/users/ahmed-galal.bbb8ea95",
+  tiktok: "https://www.tiktok.com/@gallillio11045",
 }
 
 // Personal Achievement interface
@@ -347,7 +353,7 @@ export const personalAchievements: PersonalAchievement[] = [
     icon: "star",
     year: "Sep. 2026",
     category: "Content Creation",
-    link: "https://www.tiktok.com/@gallillio11045",
+    link: links.tiktok,
     linkText: "View TikTok"
   },
   {

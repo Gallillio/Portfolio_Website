@@ -5,6 +5,8 @@ import type { Project } from "./types"
 export const projects: Project[] = [
   {
     title: "SIA",
+    slug: "sia",
+    tagline: "enterprise AI assistant at ISYS",
     role: "Founding engineer · Intelligent Systems (ISYS), IBM partner",
     period: "Feb. 2025 - Present",
     description: "Smart Intelligent Assistant, an enterprise AI assistant live for about 70 staff at ISYS. Chat is grounded in company documents and cites the page; 47 agent tools wait for a person to approve anything outbound; IBM watsonx, Claude and OpenAI sit behind one interface with failover and a task-aware router. 22 FastAPI microservices and a Next.js front end, in English and Arabic. Answer-confidence scoring rebuilt from AUROC 0.35 to 0.994.",
@@ -55,6 +57,8 @@ export const projects: Project[] = [
   },
   {
     title: "Comic Spot",
+    slug: "comic-spot",
+    tagline: "bilingual comics storefront",
     period: "Jul. 2026 - Present",
     description: "Comic Spot, a live bilingual English/Arabic comics storefront at comicspot.co. Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Built on Next.js and Cloudflare Workers with headless Shopify, D1 and R2: cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
     technologies: ["NextJS", "TypeScript", "Cloudflare Workers", "Cloudflare D1", "Cloudflare R2", "Shopify", "Drizzle ORM", "Playwright", "TailwindCSS"],
@@ -71,6 +75,8 @@ export const projects: Project[] = [
   },
   {
     title: "Lango",
+    slug: "lango",
+    tagline: "language-learning app for iOS and Android",
     period: "Aug. 2025 - Present",
     description: "Language-learning app for iOS, Android and iPad, built on comprehensible input: you read stories where about 90% of the words are ones you know, tap the rest to save them, and a lesson path builds its exercises from your word bank. Offline-first on SQLite with a sync layer to Supabase that cut a cold sync from about 156 requests to 29. Seven languages to learn, a six-language UI including Arabic right to left, and a Python NLP service on Fly.io for Japanese, Chinese and Korean. Began as the prototype that won the Stakpak GenAI Hackathon.",
     detailedDescription: "Lango is Ahmed's own language-learning app for iOS, Android and iPad (React Native 0.86, Expo SDK 57, strict TypeScript). It is in pre-launch: not on the App Store or Google Play yet. It teaches through comprehensible input. Learners read stories where about 90% of the words are already in their word bank, tap unknown words to save them with a confidence level from 1 to 5, and follow a lesson path of 21 exercise types (match pairs, sentence building, listening, story cloze, character tracing and more) generated from their own saved words. Seven languages can be learned (English, German, Italian, Spanish, Japanese, Chinese, Korean), the UI is translated into six including Arabic right to left, and each learning language re-themes the app. The app is offline-first: SQLite with a pending-operations queue, incremental pulls with conflict detection, and realtime hints plus silent push for cross-device sync, which cut a cold sync from about 156 requests to about 29. The backend is Supabase (Postgres, Auth, Storage, Realtime, pg_cron) with 25 Deno Edge Functions. Gemini 2.5 Flash runs only behind Edge Functions, with structured JSON output, per-user quotas, usage metering and a circuit breaker; a golden-set eval harness measured how closely candidate models keep to the learner's vocabulary in all seven languages, and Gemini 2.5 Flash beat the cheaper models. A Python FastAPI service on Fly.io splits Japanese (SudachiPy), Chinese (jieba, pypinyin) and Korean (kiwipiepy) text into words and adds readings such as furigana and pinyin. Also: iPad layouts with a sidebar and a two-page reader, an animated Skia splash, Google and Apple sign-in, GDPR account deletion, 328 Jest spec files, Deno and pytest suites, 31 Maestro end-to-end flows and GitHub Actions CI. It grew from the prototype that won the Stakpak GenAI Hackathon in May 2025.",
@@ -94,6 +100,7 @@ export const projects: Project[] = [
   },
   {
     title: "Swipelabs AI CFO and Slack Assistant",
+    slug: "swipelabs-ai-cfo",
     period: "Jun. 2025 - Sep. 2025",
     description: "Weekly CFO reporting automated over the QuickBooks API: revenue, burn rate, overdue invoices and natural-language forecasting, delivered by email and Slack. Includes a Financial Health Score weighted by business type, a KPI dashboard with a 'what changed this week' summary, and forecast and budget simulations with overspend alerts. A companion GPT-powered Slack assistant, wired to Trello, ClickUp and Google Calendar, tracks client packages, flags unanswered messages and sends CRM-style follow-up reminders.",
     detailedDescription: "An AI virtual CFO and a Slack assistant built for Swipelabs. The CFO tool syncs invoices, accounts receivable, expenses and cash flow from the QuickBooks API and sends automated weekly digests by email and Slack covering revenue trends, burn rate, overdue invoices and AI insights. A Financial Health Score uses business-type-adjusted weights (burn multiple, margin, runway). Founders can ask finance questions by email and get GPT-powered replies within minutes. A read-only web dashboard shows financial KPIs, trends and a diff-style 'What changed this week?' summary, with forecast simulation, text-based scenario analysis, budget tracking and overspend alerts. The companion GPT-powered Slack app works across direct messages, internal channels and Slack Connect, with real-time pings, sentiment cues and AI-suggested replies. It tracks client packages and onboarding with automatic reminders, integrates with Trello, ClickUp and Google Calendar to compare deliverables against obligations and ping owners of overdue tasks, monitors Slack Connect for unanswered messages, deadlines and client tone, sends CRM-style follow-up nudges to account managers, and produces weekly or on-demand performance reports from time tracking.",
@@ -115,6 +122,8 @@ export const projects: Project[] = [
   },
   {
     title: "GPTube",
+    slug: "gptube",
+    tagline: "YouTube videos into quizzes, summaries and slides",
     period: "2024",
     description:
       "Graduation project and top-3 finalist at GESAwards Africa 2024: turns YouTube videos into quizzes, summaries and slides. A GPT-powered chatbot answers questions about the video by voice (TTS/STT), generates mock tests, marks answers and builds PowerPoint decks.",
@@ -132,6 +141,7 @@ export const projects: Project[] = [
   },
   {
     title: "ESLSCA University Chatbot",
+    slug: "eslsca-university-chatbot",
     period: "Feb. 2024 - Apr. 2024",
     description:
       "Admissions chatbot for ESLSCA University, part of the AI system that won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024. Guides prospective students, sends real-time updates and automates document processing and verification.",
@@ -149,6 +159,7 @@ export const projects: Project[] = [
   },
   {
     title: "Real-Time Facial Emotion Classification",
+    slug: "facial-emotion-classification",
     description:
     "Developed a real-time facial emotion classification system using transfer learning (MobileNetV2, VGG) and a custom CNN, achieving 83% accuracy on FER-2013 dataset using fine-tuned MobileNetV2 model.",
     technologies: ["OpenCV", "CNN", "MobileNetV2", "VGG", "Flask"],
@@ -166,6 +177,7 @@ export const projects: Project[] = [
   },
   {
     title: "IIG-HEC Company Profile Website",
+    slug: "iig-hec-website",
     period: "Jun. 2023 - Dec. 2023",
     description:
     "Company website for IIG-HEC, built during a software development internship: services, projects and a real-time blog. Live at iig.land.",
@@ -183,6 +195,7 @@ export const projects: Project[] = [
   },
   {
     title: "Data Visualiser and Analysis Tool",
+    slug: "data-visualiser-tool",
     description:
     "Desktop tool for exploratory data analysis and preprocessing ahead of supervised machine learning: load a CSV, visualise distributions, handle missing values, encode columns and train models from a Tkinter interface.",
     technologies: ["Scikit-learn", "Numpy", "Pandas", "Matplotlib", "Seaborn", "Tkinter"],
@@ -212,3 +225,8 @@ export const projects: Project[] = [
     code_available: true,
   },
 ];
+
+// The projects that have their own page under /projects/<slug>.
+export const projectPages = projects.filter(
+  (project): project is Project & { slug: string } => Boolean(project.slug)
+)

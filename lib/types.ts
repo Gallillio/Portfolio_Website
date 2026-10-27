@@ -15,6 +15,13 @@ export interface CommandResponse {
 
 export interface Project {
   title: string
+  /**
+   * The project's own page, /projects/<slug>. Never change one once published:
+   * search results and shared links point at it. Projects without one get no page.
+   */
+  slug?: string
+  /** Short label after the title on its page and in its search title, e.g. "enterprise AI assistant". */
+  tagline?: string
   description: string
   /**
    * Fuller write-up used only for the AI assistant's context (lib/ai/context.ts).
