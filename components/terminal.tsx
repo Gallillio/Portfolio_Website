@@ -37,6 +37,26 @@ function TabLabel({ short, full }: { short: string; full: string }) {
   )
 }
 
+const opensNewTab = (event: React.MouseEvent) => event.metaKey || event.ctrlKey || event.shiftKey
+
+// A tab that is also a link to the section's own page (/about, /projects). The tab
+// bar is in the server HTML, so these links are how crawlers reach those pages. A
+// plain click only switches the tab; cmd/ctrl/shift or middle click opens the page.
+function PageTab({ href, children, ...props }: React.ComponentPropsWithoutRef<typeof TabsTrigger> & { href: string }) {
+  return (
+    <TabsTrigger
+      {...props}
+      asChild
+      // Radix switches tabs on mousedown and skips it when the event is prevented.
+      onMouseDown={(event) => { if (opensNewTab(event)) event.preventDefault() }}
+      onClick={(event) => { if (!opensNewTab(event)) event.preventDefault() }}
+    >
+      {/* type: drop the type="button" Radix gives triggers, which is invalid on a link */}
+      <a href={href} type={undefined}>{children}</a>
+    </TabsTrigger>
+  )
+}
+
 function TerminalContent(): React.ReactNode {
   // The opening banner, seeded as initial state rather than in a mount effect so
   // it is in the server HTML: crawlers that never run JavaScript see the name,
@@ -1061,24 +1081,26 @@ function TerminalContent(): React.ReactNode {
                       "Terminal"
                     )}
                 </TabsTrigger>
-                <TabsTrigger
+                <PageTab
                   value="projects"
+                  href="/projects"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
                   Projects
-                </TabsTrigger>
-                <TabsTrigger
+                </PageTab>
+                <PageTab
                   value="about"
+                  href="/about"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
                     <TabLabel short="About" full="About / Experience" />
-                </TabsTrigger>
+                </PageTab>
                 <TabsTrigger
                   value="contact"
                     className={`custom-tab touch-optimized rounded-none border-r
