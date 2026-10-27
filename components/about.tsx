@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useLayoutEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { experiences, education, freelanceProjects, personalAchievements, getSkillsAsCategories, courses } from "@/lib/profile-data"
@@ -56,8 +56,12 @@ export default function About() {
   })
   // const [activeTab, setActiveTab] = useState<string>("skills")
   const [isBioExpanded, setIsBioExpanded] = useState(false)
+  // Measured, not assumed: whether the collapsed bio cuts off any text.
+  const [isBioClipped, setIsBioClipped] = useState(true)
   const [expandedExperiences, setExpandedExperiences] = useState<Set<number>>(new Set())
   const bioRef = useRef<HTMLDivElement>(null)
+  const bioTextRef = useRef<HTMLDivElement>(null)
+  const bioHeightBeforeToggle = useRef<number | null>(null)
 
   // Add new state for mobile detection
   const [isMobile, setIsMobile] = useState(window.innerWidth < 767);
@@ -258,7 +262,36 @@ export default function About() {
     }
   }
 
+  // The collapsed bio takes whatever height its row has (from md up the profile card
+  // sets it), so whether text is cut off, and "Read More" is needed, depends on the
+  // viewport. Watch the text as well as its box: a late web font changes the text's
+  // height without resizing the box.
+  useEffect(() => {
+    const box = bioTextRef.current
+    if (!box || isBioExpanded) return
+    const observer = new ResizeObserver(() => {
+      setIsBioClipped(box.scrollHeight > box.clientHeight + 1)
+    })
+    observer.observe(box)
+    if (box.firstElementChild) observer.observe(box.firstElementChild)
+    return () => observer.disconnect()
+  }, [isBioExpanded])
+
+  // Neither height is known ahead of time (the collapsed one comes from the layout),
+  // so measure both sides of the toggle and animate between them.
+  useLayoutEffect(() => {
+    const box = bioTextRef.current
+    const from = bioHeightBeforeToggle.current
+    bioHeightBeforeToggle.current = null
+    if (!box || from === null || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    box.animate(
+      [{ height: `${from}px` }, { height: `${box.offsetHeight}px` }],
+      { duration: 500, easing: 'ease-in-out' }
+    )
+  }, [isBioExpanded])
+
   const handleBioToggle = () => {
+    bioHeightBeforeToggle.current = bioTextRef.current?.offsetHeight ?? null
     if (isBioExpanded) {
       setIsBioExpanded(false)
       // Add a small delay to ensure the state is updated before scrolling
@@ -331,53 +364,52 @@ export default function About() {
         {/* Thirds from md up: quarters left the profile ~150px wide on tablets,
             wrapping the name onto three lines. */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card ref={bioRef} className="bg-gray-900 border-green-500 md:col-span-2 order-2 lg:order-1">
+        <Card ref={bioRef} className="bg-gray-900 border-green-500 md:col-span-2 order-2 lg:order-1 flex flex-col">
           <CardHeader>
             <CardTitle className="text-green-400">Bio</CardTitle>
           </CardHeader>
-          <CardContent className="text-green-300">
-            <div className={`relative ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
-              <div className={`space-y-4 ${!isBioExpanded ? 'md:space-y-4' : ''}`}>
-                <p className={`${!isBioExpanded ? 'line-clamp-2 md:line-clamp-none' : ''}`}>
-                  {bio[0]}
-                </p>
-                {/* grid-rows collapse instead of a fixed max-height: the text is taller than
-                    any fixed cap on narrow phones, and overflow-hidden would clip it silently. */}
-                <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${
-                  !isBioExpanded ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
-                }`}>
-                  <div className="overflow-hidden space-y-4">
-                    {bio.slice(1).map((paragraph, i) => (
-                      <p key={i}>{paragraph}</p>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              {/* Gradient overlay for collapsed state */}
-              <div className={`absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none transition-opacity duration-300 ${
-                !isBioExpanded ? 'opacity-100' : 'opacity-0'
-              }`}></div>
-            </div>
-            <button
-              onClick={handleBioToggle}
-              className="mt-4 text-green-400 hover:text-green-300 transition-colors duration-200 flex items-center gap-1 relative z-10"
+          <CardContent className="text-green-300 flex flex-col grow">
+            {/* Collapsed, the text fills the height left in the card instead of a fixed
+                cap: h-0 keeps it from stretching the row, grow takes the height the
+                profile card sets from md up, and min-h keeps a three-line preview where
+                nothing sets one (phones, where the cards stack). */}
+            <div
+              ref={bioTextRef}
+              id="bio-text"
+              className={`overflow-hidden ${!isBioExpanded ? 'h-0 grow min-h-[4.5rem]' : ''} ${
+                !isBioExpanded && isBioClipped ? '[mask-image:linear-gradient(to_bottom,black_calc(100%_-_3rem),transparent)]' : ''
+              }`}
             >
-              {isBioExpanded ? (
-                <>
-                  Read Less
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
-                  </svg>
-                </>
-              ) : (
-                <>
-                  Read More
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </>
-              )}
-            </button>
+              <div className="space-y-4">
+                {bio.map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            </div>
+            {(isBioClipped || isBioExpanded) && (
+              <button
+                onClick={handleBioToggle}
+                aria-expanded={isBioExpanded}
+                aria-controls="bio-text"
+                className="mt-4 self-start text-green-400 hover:text-green-300 transition-colors duration-200 flex items-center gap-1"
+              >
+                {isBioExpanded ? (
+                  <>
+                    Read Less
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    Read More
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            )}
           </CardContent>
         </Card>
 
