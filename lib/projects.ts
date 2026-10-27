@@ -142,9 +142,10 @@ export const projects: Project[] = [
   {
     title: "ESLSCA University Chatbot",
     slug: "eslsca-university-chatbot",
+    tagline: "Times Higher Education Awards Arab World 2024 winner",
     period: "Feb. 2024 - Apr. 2024",
     description:
-      "Admissions chatbot for ESLSCA University, part of the AI system that won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024. Guides prospective students, sends real-time updates and automates document processing and verification.",
+      "Award-winning admissions chatbot for ESLSCA University, built solo as a student intern. It won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024, presented to the university. Guides prospective students, sends real-time updates and automates document processing and verification.",
     technologies: ["Microsoft Azure", "Langchain", "Django", "OpenAI Function Calling", "Vector Database", "RAG"],
     images: [
       { src: "/ESLSCA Chatbot/intro-majors.png", alt: "ESLSCA Chatbot Majors Provided Question/Answer" },
