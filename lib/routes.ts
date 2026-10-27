@@ -43,3 +43,16 @@ export function followInPlace(event: MouseEvent<HTMLAnchorElement>): void {
   event.preventDefault()
   window.history.pushState(null, "", event.currentTarget.href)
 }
+
+/**
+ * Back to the project cards from a project's write-up. When the visitor came
+ * from the cards, step back through history to them, which also restores their
+ * scroll position; when the visit started on a project, open the cards as a new
+ * entry. Used by the write-up's "Projects" link and by re-clicking the open
+ * Projects tab.
+ */
+export function returnToProjectList(): void {
+  const depth = window.history.state?.projectDepth ?? 0
+  if (depth > 0) window.history.go(-depth)
+  else window.history.pushState(null, "", pathForTab("projects"))
+}

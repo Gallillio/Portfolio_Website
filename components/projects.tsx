@@ -14,7 +14,7 @@ import ProjectDetail from "@/components/project-detail"
 import { Tooltip } from "@/components/ui/tooltip"
 import type { ProjectImage } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { opensNewTab, pathForTab, projectPath, projectSlugForPath } from "@/lib/routes"
+import { opensNewTab, projectPath, projectSlugForPath, returnToProjectList } from "@/lib/routes"
 
 // Tags a card shows before folding the rest into a "+N" chip; the project page lists them all.
 const VISIBLE_TECH_COUNT = 6
@@ -204,9 +204,7 @@ export default function Projects() {
   const handleBackToProjects = (event: React.MouseEvent<HTMLAnchorElement>) => {
     if (opensNewTab(event)) return
     event.preventDefault()
-    const depth = window.history.state?.projectDepth ?? 0
-    if (depth > 0) window.history.go(-depth)
-    else window.history.pushState(null, "", pathForTab("projects"))
+    returnToProjectList()
   }
 
   // After the view changes, put the scroll and the keyboard focus where a page
@@ -219,19 +217,25 @@ export default function Projects() {
     shownSlugRef.current = shownSlug
     const box = scrollBox()
     if (!box) return
-    const isFirstRender = previousSlug === shownSlug
+    // Reading a write-up counts as viewing the project, however the visitor got here.
+    if (openProject) handleProjectView(openProject.title)
+    const state = window.history.state
+    const hashTarget = window.location.hash && document.getElementById(window.location.hash.slice(1))
+    // The target's scroll-margin leaves room for the pinned bar, as the browser's own jump does.
+    const scrollTopFor = (target: HTMLElement) =>
+      target.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - parseFloat(getComputedStyle(target).scrollMarginTop)
+    if (previousSlug === shownSlug) {
+      // The tab has just opened. Back from another tab, pick up where the visitor
+      // left off (components/terminal.tsx keeps the position); on a page load,
+      // follow a #section in the address. Focus stays on the tab that was used.
+      if (typeof state?.projectsScroll === "number") box.scrollTop = state.projectsScroll
+      else if (hashTarget) box.scrollTop = scrollTopFor(hashTarget)
+      return
+    }
     if (shownSlug) {
-      // Reading a write-up counts as viewing the project, however the visitor got here.
-      if (openProject) handleProjectView(openProject.title)
-      const target = window.location.hash && document.getElementById(window.location.hash.slice(1))
-      if (isFirstRender && !target) return
-      // The target's scroll-margin leaves room for the pinned bar, as the browser's own jump does.
-      box.scrollTop = target
-        ? target.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - parseFloat(getComputedStyle(target).scrollMarginTop)
-        : 0
-      if (!isFirstRender) headingRef.current?.focus({ preventScroll: true })
-    } else if (!isFirstRender) {
-      const state = window.history.state
+      box.scrollTop = hashTarget ? scrollTopFor(hashTarget) : 0
+      headingRef.current?.focus({ preventScroll: true })
+    } else {
       box.scrollTop = state?.projectsScroll ?? 0
       const card = state?.projectsFocus && box.querySelector<HTMLElement>(`[data-project-slug="${state.projectsFocus}"]`)
       if (card) card.focus({ preventScroll: true })
