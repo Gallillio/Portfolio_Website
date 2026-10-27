@@ -12,6 +12,7 @@ import Slideshow from "@/components/ui/Slideshow"
 import ImageModal from "@/lib/image-modal"
 import CaseStudyModal from "@/components/case-study-modal"
 import { Tooltip } from "@/components/ui/tooltip"
+import type { ProjectImage } from "@/lib/types"
 
 export default function Projects() {
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(["all"]))
@@ -21,8 +22,8 @@ export default function Projects() {
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
   const [isMobile, setIsMobile] = useState<boolean>(false)
   const [isTablet, setIsTablet] = useState<boolean>(false)
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [selectedImage, setSelectedImage] = useState<string>("")
+  // The open lightbox: the slides it steps through and the one on show.
+  const [lightbox, setLightbox] = useState<{ images: ProjectImage[]; index: number } | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -131,16 +132,9 @@ export default function Projects() {
     clickProjectDemo()
   }
 
-  const handleImageClick = (imageSrc: string) => {
-    // Always set the selected image and open the modal
-    setSelectedImage(imageSrc);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedImage("");
-  };
+  const openLightbox = useCallback((images: ProjectImage[], index: number) => setLightbox({ images, index }), [])
+  const closeLightbox = useCallback(() => setLightbox(null), [])
+  const showSlide = useCallback((index: number) => setLightbox((current) => current && { ...current, index }), [])
 
   // Create filter options including "all"
   const filterOptions = [
@@ -367,7 +361,7 @@ export default function Projects() {
               <CardContent className="flex-grow">
                 {/* Image Slideshow or In Development Placeholder */}
                 <div className="mb-4 rounded-lg overflow-hidden shadow-lg relative h-40 flex items-center justify-center">
-                  <Slideshow images={imagesToShow} onImageClick={handleImageClick} />
+                  <Slideshow images={imagesToShow} onImageClick={openLightbox} />
                   {project.inDevelopment && (
                      imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png" && (
                      <div className="absolute inset-0 bg-yellow-500/10 flex flex-col items-center justify-center border border-yellow-500/30 rounded-md">
@@ -484,16 +478,15 @@ export default function Projects() {
       <CaseStudyModal
         project={projects.find(project => project.title === caseStudyTitle) ?? null}
         onClose={closeCaseStudy}
-        onImageClick={handleImageClick}
-        suspended={isModalOpen}
+        onImageClick={openLightbox}
+        suspended={lightbox !== null}
       />
 
-      <ImageModal 
-        isOpen={isModalOpen} 
-        imageSrc={selectedImage} 
-        onClose={closeModal} 
-        images={filteredProjects.find(project => project.images.some(img => img.src === selectedImage))?.images || []}
-        setImageSrc={setSelectedImage}
+      <ImageModal
+        images={lightbox?.images ?? []}
+        index={lightbox?.index ?? null}
+        onIndexChange={showSlide}
+        onClose={closeLightbox}
       />
     </div>
   )

@@ -4,13 +4,15 @@ import React, { useEffect } from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
 import { X } from "lucide-react"
-import type { Project } from "@/lib/types"
+import { getImageMeta } from "@/lib/image-meta"
+import { lightboxIntentHandlers } from "@/lib/image-modal"
+import type { Project, ProjectImage } from "@/lib/types"
 
 interface CaseStudyModalProps {
   project: Project | null
   onClose: () => void
-  /** Opens a diagram in the shared image lightbox. */
-  onImageClick: (src: string) => void
+  /** Opens a diagram in the shared image lightbox, with the other diagrams as its slides. */
+  onImageClick: (images: ProjectImage[], index: number) => void
   /** True while that lightbox is open on top, so Escape closes it and not this. */
   suspended?: boolean
 }
@@ -29,17 +31,24 @@ export default function CaseStudyModal({ project, onClose, onImageClick, suspend
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && !suspended) onClose()
     }
-    // Stop the page behind the modal from scrolling along with it.
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
     window.addEventListener("keydown", onKey)
-    return () => {
-      window.removeEventListener("keydown", onKey)
-      document.body.style.overflow = previousOverflow
-    }
+    return () => window.removeEventListener("keydown", onKey)
   }, [study, onClose, suspended])
 
+  // Stop the page behind the modal from scrolling along with it. Kept apart from
+  // the key handler: re-running when `suspended` flips would save the lightbox's
+  // own lock as the value to restore, and the page would stay frozen after both close.
+  useEffect(() => {
+    if (!study) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [study])
+
   if (!project || !study) return null
+  const diagrams = study.diagrams ?? []
 
   // Portal to <body>: the terminal window is `transform-gpu`, which turns it into
   // the containing block for fixed elements and would clip the modal to its frame.
@@ -114,27 +123,33 @@ export default function CaseStudyModal({ project, onClose, onImageClick, suspend
             </Section>
           )}
 
-          {study.diagrams && study.diagrams.length > 0 && (
+          {diagrams.length > 0 && (
             <Section title="Architecture">
               <div className="space-y-3">
-                {study.diagrams.map((diagram) => (
-                  <button
-                    key={diagram.src}
-                    type="button"
-                    onClick={() => onImageClick(diagram.src)}
-                    className="block w-full overflow-hidden rounded-md border border-green-500/20 transition-colors hover:border-green-500/60"
-                    aria-label={`Enlarge: ${diagram.alt}`}
-                  >
-                    <Image
-                      src={diagram.src}
-                      alt={diagram.alt}
-                      width={1800}
-                      height={900}
-                      sizes="(max-width: 768px) 100vw, 720px"
-                      className="h-auto w-full"
-                    />
-                  </button>
-                ))}
+                {diagrams.map((diagram, index) => {
+                  const meta = getImageMeta(diagram)
+                  return (
+                    <button
+                      key={diagram.src}
+                      type="button"
+                      onClick={() => onImageClick(diagrams, index)}
+                      {...lightboxIntentHandlers(diagram.src)}
+                      className="block w-full overflow-hidden rounded-md border border-green-500/20 transition-colors hover:border-green-500/60"
+                      aria-label={`Enlarge: ${diagram.alt}`}
+                    >
+                      <Image
+                        src={diagram.src}
+                        alt={diagram.alt}
+                        width={meta?.width ?? 1800}
+                        height={meta?.height ?? 900}
+                        placeholder={meta?.blurDataURL ? "blur" : "empty"}
+                        blurDataURL={meta?.blurDataURL}
+                        sizes="(max-width: 768px) 100vw, 720px"
+                        className="h-auto w-full"
+                      />
+                    </button>
+                  )
+                })}
               </div>
             </Section>
           )}

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { projectPages } from "@/lib/projects"
 import { NAME, pageMetadata, summarise, projectJsonLd, breadcrumbJsonLd } from "@/lib/seo"
-import { imageSize } from "@/lib/image-size"
+import { getImageMeta } from "@/lib/image-meta"
 import StaticPage, { Section, JsonLd, linkClass, inlineLinkClass } from "@/components/static-page"
 
 // One page per project, built at deploy time from lib/projects.ts. The terminal's
@@ -133,18 +133,27 @@ export default async function ProjectPage({ params }: Props) {
       {images.length > 0 && (
         <Section title="Screenshots">
           <div className="space-y-8">
-            {images.map((image) => (
-              <figure key={image.src}>
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  {...imageSize(image.src)}
-                  sizes="(min-width: 896px) 830px, 100vw"
-                  className="h-auto w-full rounded border border-green-500/30"
-                />
-                <figcaption className="mt-2 text-xs text-gray-400">{image.alt}</figcaption>
-              </figure>
-            ))}
+            {images.map((image) => {
+              // The real size reserves the right box before the screenshot loads,
+              // so the text below never jumps; the blur fills that box meanwhile.
+              const meta = getImageMeta(image)
+              if (!meta) throw new Error(`No size for ${image.src}: is it in a public/ subfolder?`)
+              return (
+                <figure key={image.src}>
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={meta.width}
+                    height={meta.height}
+                    placeholder={meta.blurDataURL ? "blur" : "empty"}
+                    blurDataURL={meta.blurDataURL}
+                    sizes="(min-width: 896px) 830px, 100vw"
+                    className="h-auto w-full rounded border border-green-500/30"
+                  />
+                  <figcaption className="mt-2 text-xs text-gray-400">{image.alt}</figcaption>
+                </figure>
+              )
+            })}
           </div>
         </Section>
       )}
