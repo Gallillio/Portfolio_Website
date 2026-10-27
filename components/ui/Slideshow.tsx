@@ -105,8 +105,17 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, onImageClick }) => {
               aria-label={`Enlarge: ${image.alt}`}
               onClick={() => onImageClick(images, index)}
               {...lightboxIntentHandlers(image.src)}
-              className="absolute inset-0 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-400"
+              className="absolute inset-0 cursor-pointer overflow-hidden rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-400"
             >
+              {/* A screenshot narrower than the frame is fitted, not cropped; its own
+                  blurred preview fills the bars beside it instead of empty space. */}
+              {meta?.blurDataURL && (
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-0 scale-110 bg-cover bg-center opacity-40 blur-xl"
+                  style={{ backgroundImage: `url(${meta.blurDataURL})` }}
+                />
+              )}
               <Image
                 src={image.src}
                 alt={image.alt}

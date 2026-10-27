@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { projects } from "@/lib/projects"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Github, ExternalLink, Check, Filter, ChevronDown, X, Smartphone, Briefcase, BookOpen } from "lucide-react"
+import { Badge, badgeVariants } from "@/components/ui/badge"
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Github, ExternalLink, Check, Filter, ChevronDown, X, Smartphone, Briefcase, BookOpen, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAchievements } from "@/lib/achievements-context"
 import Slideshow from "@/components/ui/Slideshow"
@@ -13,6 +13,47 @@ import ImageModal from "@/lib/image-modal"
 import CaseStudyModal from "@/components/case-study-modal"
 import { Tooltip } from "@/components/ui/tooltip"
 import type { ProjectImage } from "@/lib/types"
+import { cn } from "@/lib/utils"
+
+// Tags a card shows before folding the rest into a "+N" chip; the project page lists them all.
+const VISIBLE_TECH_COUNT = 6
+
+/**
+ * A card's description, cut to five lines when the project has a page holding
+ * the full text. The link only appears when the text actually overflows.
+ */
+function ProjectDescription({ text, title, href }: { text: string; title: string; href?: string }) {
+  const textRef = useRef<HTMLParagraphElement>(null)
+  const [clipped, setClipped] = useState(false)
+
+  useEffect(() => {
+    const element = textRef.current
+    if (!element || !href) return
+    const measure = () => setClipped(element.scrollHeight > element.clientHeight + 1)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [href, text])
+
+  return (
+    <div className="px-6 pt-4">
+      <p ref={textRef} className={cn("text-sm text-green-300/70 whitespace-pre-line", href && "line-clamp-5")}>
+        {text}
+      </p>
+      {href && clipped && (
+        <Link
+          href={href}
+          aria-label={`Read more about ${title}`}
+          className="mt-2 inline-flex items-center gap-1 text-sm text-green-400 underline-offset-4 hover:text-green-300 hover:underline"
+        >
+          Read more
+          <ArrowRight size={14} aria-hidden="true" />
+        </Link>
+      )}
+    </div>
+  )
+}
 
 export default function Projects() {
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(["all"]))
@@ -320,18 +361,44 @@ export default function Projects() {
             }
           }
 
+          const projectHref = project.slug ? `/projects/${project.slug}` : undefined
+          const isPlaceholder = imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png"
+          // Technologies picked in the filter go first, so a match is never folded into "+N".
+          const orderedTechnologies = selectedFilters.has("all")
+            ? project.technologies
+            : [
+                ...project.technologies.filter((tech) => selectedFilters.has(tech)),
+                ...project.technologies.filter((tech) => !selectedFilters.has(tech)),
+              ]
+          const visibleTechnologies = orderedTechnologies.slice(0, VISIBLE_TECH_COUNT)
+          const hiddenTechnologies = orderedTechnologies.slice(VISIBLE_TECH_COUNT)
+
           return (
-            <Card 
+            // Each card spans five rows of the grid and shares them with the cards
+            // beside it (subgrid), so images, titles, text, tags and buttons line up.
+            <Card
               key={project.title}
-              className={`bg-gray-900 border-green-500 hover:shadow-lg hover:shadow-green-500/20 transition-all hover:scale-[1.02] hover:-translate-y-1 ${project.inDevelopment ? 'border-2 border-yellow-500/50' : ''} flex flex-col`}
+              className={`row-span-5 grid grid-rows-subgrid gap-0 bg-gray-900 transition-shadow hover:shadow-lg hover:shadow-green-500/20 ${project.inDevelopment ? 'border-yellow-500/50' : 'border-green-500'}`}
               onMouseEnter={() => handleProjectView(project.title)}
             >
-              <CardHeader>
+              <div className="px-6 pt-6">
+                <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-black/40 shadow-lg">
+                  <Slideshow images={imagesToShow} onImageClick={openLightbox} />
+                  {isPlaceholder && (
+                    <div className="absolute inset-0 bg-yellow-500/10 flex flex-col items-center justify-center border border-yellow-500/30 rounded-md pointer-events-none">
+                      <span className="text-yellow-500 text-lg font-bold">Under Development</span>
+                      <p className="text-yellow-500/70 text-sm mt-2">Coming Soon!</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <CardHeader className="space-y-0 pb-0 pt-5">
                 <CardTitle className="text-green-400">
                   <div className="flex flex-wrap items-center gap-2">
                     {/* The title opens the project's own page, the shareable, indexable version of this card. */}
-                    {project.slug ? (
-                      <Link href={`/projects/${project.slug}`} className="underline-offset-4 hover:underline">
+                    {projectHref ? (
+                      <Link href={projectHref} className="underline-offset-4 hover:underline">
                         {project.title}
                       </Link>
                     ) : (
@@ -356,36 +423,32 @@ export default function Projects() {
                     </p>
                   )}
                 </CardTitle>
-                <CardDescription className="text-green-300/70 whitespace-pre-line">{project.description}</CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow">
-                {/* Image Slideshow or In Development Placeholder */}
-                <div className="mb-4 rounded-lg overflow-hidden shadow-lg relative h-40 flex items-center justify-center">
-                  <Slideshow images={imagesToShow} onImageClick={openLightbox} />
-                  {project.inDevelopment && (
-                     imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png" && (
-                     <div className="absolute inset-0 bg-yellow-500/10 flex flex-col items-center justify-center border border-yellow-500/30 rounded-md">
-                        <span className="text-yellow-500 text-lg font-bold">Under Development</span>
-                        <p className="text-yellow-500/70 text-sm mt-2">Coming Soon!</p>
-                      </div>
-                  ))}
-                  {project.inDevelopment && (
-                     !(imagesToShow.length === 1 && imagesToShow[0].src === "/in-development.png") && (
-                    <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded shadow-md uppercase">
-                      {project.statusLabel ?? "In Development"}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {project.technologies.map((tech, techIndex) => (
-                    <Badge key={techIndex} variant="outline" className="border-green-500 text-green-400">
-                      {tech}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-              
-              <CardFooter className="flex flex-wrap justify-between gap-2 mt-auto">
+
+              <ProjectDescription text={project.description} title={project.title} href={projectHref} />
+
+              <div className="px-6 pt-4 flex flex-wrap content-start gap-2">
+                {visibleTechnologies.map((tech) => (
+                  <Badge key={tech} variant="outline" className="border-green-500 text-green-400">
+                    {tech}
+                  </Badge>
+                ))}
+                {hiddenTechnologies.length > 0 && (() => {
+                  const label = `${hiddenTechnologies.length} more: ${hiddenTechnologies.join(", ")}`
+                  const chipClass = cn(badgeVariants({ variant: "outline" }), "border-green-500/50 text-green-400/80")
+                  return projectHref ? (
+                    <Link href={projectHref} title={label} aria-label={label} className={cn(chipClass, "hover:border-green-500 hover:text-green-300")}>
+                      +{hiddenTechnologies.length}
+                    </Link>
+                  ) : (
+                    <span title={label} aria-label={label} className={chipClass}>
+                      +{hiddenTechnologies.length}
+                    </span>
+                  )
+                })()}
+              </div>
+
+              <CardFooter className="flex flex-wrap items-start justify-between gap-2 pt-6">
                 {project.github && (
                   <Tooltip 
                     text="Sorry, the code is confidential and not public."
