@@ -58,9 +58,9 @@ export const projects: Project[] = [
   {
     title: "Comic Spot",
     slug: "comic-spot",
-    tagline: "bilingual comics storefront",
+    tagline: "localised comics storefront",
     period: "Jul. 2026 - Present",
-    description: "Comic Spot, a live bilingual English/Arabic comics storefront at comicspot.co. Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Built on Next.js and Cloudflare Workers with headless Shopify, D1 and R2: cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
+    description: "Comic Spot, a localised comics storefront at comicspot.co, live in English and Arabic. Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Built on Next.js and Cloudflare Workers with headless Shopify, D1 and R2: cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
     technologies: ["NextJS", "TypeScript", "Cloudflare Workers", "Cloudflare D1", "Cloudflare R2", "Shopify", "Drizzle ORM", "Playwright", "TailwindCSS"],
     images: [
       { src: "/Comic Spot/home.png", alt: "Comic Spot home page in English" },

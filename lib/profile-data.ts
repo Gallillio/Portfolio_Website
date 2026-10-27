@@ -202,10 +202,10 @@ export interface FreelanceProject {
 // Add freelance projects data
 export const freelanceProjects: FreelanceProject[] = [
   {
-    title: "Comic Spot: bilingual comics storefront",
+    title: "Comic Spot: localised comics storefront",
     projectSlug: "comic-spot",
     description: [
-      "Comic Spot, a live bilingual English/Arabic storefront at comicspot.co.",
+      "Comic Spot, a localised comics storefront at comicspot.co, live in English and Arabic.",
       "Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
     ].join("\n"),
     technologies: ["NextJS", "TypeScript", "Cloudflare Workers", "Cloudflare D1", "Cloudflare R2", "Shopify", "Drizzle ORM", "Playwright", "TailwindCSS"],
