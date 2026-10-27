@@ -18,8 +18,10 @@ import type { ProjectImage } from "@/lib/types"
  */
 
 // The lightbox and the preloader must build the same URL, or a preload is wasted.
+// Below 768px the sizes match the card slideshow's, so a phone opens the copy
+// the card has already downloaded instead of fetching a second one.
 function lightboxImageProps(src: string) {
-  return { src, fill: true, sizes: "92vw", unoptimized: isGif(src) } as const
+  return { src, fill: true, sizes: "(max-width: 768px) 100vw, 92vw", unoptimized: isGif(src) } as const
 }
 
 // "loaded" means the browser holds the file, so a slide can skip the blur.
