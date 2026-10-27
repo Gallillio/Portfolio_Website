@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Download, Github, Linkedin, Mail } from "lucide-react"
-import { title, summary, availability, cv, contact } from "@/lib/profile-extras"
+import { title, cv, contact } from "@/lib/profile-extras"
 import { links } from "@/lib/profile-data"
 import { useAchievements } from "@/lib/achievements-context"
 
@@ -24,8 +24,8 @@ const LINK_CLASS =
  * list: the two actions that matter first, the explanation dim and secondary.
  *
  * Above the commands sits what a recruiter looks for in the first few seconds:
- * the role, one line of proof, location and work mode, and the CV and profile
- * links, so none of it is hidden behind a tab or a command.
+ * the role and the CV and profile links, so none of it is hidden behind a tab
+ * or a command.
  *
  * Rendered as JSX rather than strings because TerminalOutput.renderLine applies
  * mutually exclusive, early-returning rules — a <status> tag used to dim the
@@ -42,8 +42,6 @@ export default function WelcomeBanner({ onRun }: WelcomeBannerProps) {
         <span className="font-semibold text-white">Ahmed Galal Elzeky</span>
         <span className="text-gray-400"> · {title}</span>
       </h1>
-      <div className="mt-1 max-w-3xl text-gray-300">{summary}</div>
-      <div className="mt-1 text-gray-400">{availability}</div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
         <a
