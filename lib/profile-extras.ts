@@ -50,8 +50,7 @@ export const cv = {
 // From the CV header. Only the chatbot context reads it.
 export const workEligibility = "Egyptian national; military service: exempted";
 
-// Shown on the welcome banner, the first thing a recruiter sees, and given to the chatbot.
-export const summary = "I build enterprise LLM systems: RAG, agents and model routing. Founding engineer on SIA at ISYS, an AI assistant live for about 70 staff."
+// Shown on the About page and in llms.txt, and given to the chatbot.
 export const availability = "Cairo, Egypt (UTC+2/+3) · Open to remote and relocation";
 
 // Third person on purpose: it opens the About page and llms.txt, where search
