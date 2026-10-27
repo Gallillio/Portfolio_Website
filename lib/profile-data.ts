@@ -146,9 +146,10 @@ export const experiences = [
     period: "Feb. 2024 - Apr. 2024",
     technologies: ["Microsoft Azure", "Langchain", "OpenAI Function Calling", "Vector Database", "RAG"],
     description: [
-      "GPT-based admissions assistant automating applicant responses and document checks, part of the university AI system that won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024.",
+      "Sole developer of ESLSCA University's GPT-based admissions system, which won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024.",
       "• Built on Azure OpenAI with LangChain and OpenAI function calling, grounded in a Chroma vector database through RAG.",
-      "• Guides prospective students and sends real-time updates, freeing admissions staff for personalised support.",
+      "• Answers applicants, checks their documents and sends real-time updates, freeing admissions staff for personalised support.",
+      "• The award was presented to the university because the system was built during a student internship.",
     ].join("\n"),
   },
   {
@@ -281,10 +282,10 @@ export const personalAchievements: PersonalAchievement[] = [
   },
   {
     id: "times-higher-education-eslsca",
-    title: "Times Higher Education Awards Arab World 2024",
+    title: "Winner, Times Higher Education Awards Arab World 2024",
     description: [
-      "Technological/Digital Innovation of the Year, awarded to ESLSCA University in Dubai.",
-      "Contributed to the winning university AI system, including its admissions chatbot.",
+      "Technological/Digital Innovation of the Year, won by the AI admissions system built solo for ESLSCA University.",
+      "Presented to the university in Dubai, as the system was built during a student internship. See ESLSCA University Chatbot in the Projects tab.",
     ].join("\n"),
     icon: "trophy",
     year: "Dec. 2024",
