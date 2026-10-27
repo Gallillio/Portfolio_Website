@@ -10,8 +10,8 @@ const NAV = [
 ]
 
 export const linkClass = "text-green-400 underline-offset-4 hover:text-green-300 hover:underline"
-// For a link inside a sentence or next to plain text: colour alone does not set
-// it apart from the grey text around it, so it is underlined too.
+// For a link inside a sentence or next to plain text: color alone does not set
+// it apart from the gray text around it, so it is underlined too.
 export const inlineLinkClass = "text-green-400 underline decoration-green-500/60 underline-offset-4 hover:text-green-300"
 
 /**

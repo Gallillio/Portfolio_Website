@@ -25,7 +25,7 @@ export const publicUrl = (src: string) => `${links.portfolio}${encodeURI(src)}`
  * descriptions and link lists. A first sentence that is already too long is cut
  * at a word boundary.
  */
-export function summarise(text: string, max = 160): string {
+export function summarize(text: string, max = 160): string {
   // Split only where punctuation is followed by a space, so the dot in a domain
   // such as "comicspot.co" does not end a sentence.
   let result = ""

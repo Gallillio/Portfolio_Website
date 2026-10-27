@@ -126,7 +126,7 @@ export const experiences = [
       "• Bilingual English/Arabic with full RTL across 6,300+ UI strings, and Arabic-dialect speech in and out (Egyptian and Saudi) through a speech provider behind a swappable port.",
       "• Vodafone's engineering team trained on IBM watsonx.ai over a 9-hour course: prompt engineering, tuning, LoRA/QLoRA, synthetic data, evaluation and RAG.",
       "• C-suite audiences at ISYS conferences: SIA pitched alongside IBM watsonx.ai and watsonx Orchestrate. Workshop showcase: https://www.linkedin.com/feed/update/urn:li:activity:7342125077758390273/",
-      "• Every service containerised from one Dockerfile template with hashed lockfiles, and shipped to AWS through the team's Jenkins CI/CD pipeline.",
+      "• Every service containerized from one Dockerfile template with hashed lockfiles, and shipped to AWS through the team's Jenkins CI/CD pipeline.",
     ].join("\n"),
   },
   {
@@ -148,7 +148,7 @@ export const experiences = [
     description: [
       "Sole developer of ESLSCA University's GPT-based admissions system, which won Technological/Digital Innovation of the Year at the Times Higher Education Awards Arab World 2024.",
       "• Built on Azure OpenAI with LangChain and OpenAI function calling, grounded in a Chroma vector database through RAG.",
-      "• Answers applicants, checks their documents and sends real-time updates, freeing admissions staff for personalised support.",
+      "• Answers applicants, checks their documents and sends real-time updates, freeing admissions staff for personalized support.",
       "• The award was presented to the university because the system was built during a student internship.",
     ].join("\n"),
   },
@@ -203,11 +203,11 @@ export interface FreelanceProject {
 // Add freelance projects data
 export const freelanceProjects: FreelanceProject[] = [
   {
-    title: "Comic Spot: bilingual comics storefront",
+    title: "Comic Spot: localized comics storefront",
     projectSlug: "comic-spot",
     description: [
-      "Comic Spot, a live bilingual English/Arabic storefront at comicspot.co.",
-      "Checkout revalidates every variant with Shopify, so stale catalogue data cannot authorise a purchase. Cached catalogue snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
+      "Comic Spot, a localized comics storefront at comicspot.co, live in English and Arabic.",
+      "Checkout revalidates every variant with Shopify, so stale catalog data cannot authorize a purchase. Cached catalog snapshot with webhook invalidation, a staff inventory pipeline, PKCE customer sessions, and Playwright accessibility and SEO suites across three browsers.",
     ].join("\n"),
     technologies: ["NextJS", "TypeScript", "Cloudflare Workers", "Cloudflare D1", "Cloudflare R2", "Shopify", "Drizzle ORM", "Playwright", "TailwindCSS"],
     period: "Jul. 2026 - Present",
@@ -272,7 +272,7 @@ export const personalAchievements: PersonalAchievement[] = [
     title: "Published in Procedia Computer Science (Elsevier)",
     description: [
       "\"Multi-Hop Arabic LLM Reasoning in Complex QA\", Procedia Computer Science 244 (2024) 66–75. Third of five authors: Abdelazim, Begemy, Galal, Sedki, Mohamed.",
-      "Presented at ACLing 2024, the 6th International Conference on AI in Computational Linguistics, in Dubai, UAE. Recognised with an ESLSCA research award.",
+      "Presented at ACLing 2024, the 6th International Conference on AI in Computational Linguistics, in Dubai, UAE. Recognized with an ESLSCA research award.",
     ].join("\n"),
     icon: "book",
     year: "Sep. 2024",
@@ -361,7 +361,7 @@ export const personalAchievements: PersonalAchievement[] = [
   {
     id: "japanese-proficiency",
     title: "Japanese Language Proficiency",
-    description: "JLPT N4 in Japanese, reached during the Human Academy Japanese Language and Business Manner programme.",
+    description: "JLPT N4 in Japanese, reached during the Human Academy Japanese Language and Business Manner program.",
     icon: "languages",
     year: "Jan. 2025",
     category: "Language",

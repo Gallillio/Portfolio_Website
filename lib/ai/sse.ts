@@ -62,7 +62,7 @@ function extractData(block: string): string | null {
   return data;
 }
 
-/** Serialise one frame for the wire. */
+/** Serialize one frame for the wire. */
 export function encodeSSE(payload: unknown): string {
   return `data: ${JSON.stringify(payload)}\n\n`;
 }
