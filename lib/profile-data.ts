@@ -247,6 +247,7 @@ export const links = {
   linkedin: "https://www.linkedin.com/in/ahmed-galal-elzeky-123a4a196",
   credly: "https://www.credly.com/users/ahmed-galal.bbb8ea95",
   tiktok: "https://www.tiktok.com/@gallillio11045",
+  orcid: "https://orcid.org/0009-0006-7927-7513",
 }
 
 // Personal Achievement interface

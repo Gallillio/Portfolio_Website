@@ -29,6 +29,7 @@ export function GET() {
     "",
     `- [LinkedIn](${links.linkedin})`,
     `- [GitHub](${links.github})`,
+    `- [ORCID](${links.orcid})`,
     `- [Credly](${links.credly})`,
     `- [TikTok](${links.tiktok})`,
     "",
