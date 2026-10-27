@@ -15,11 +15,10 @@ export const linkClass = "text-green-400 underline-offset-4 hover:text-green-300
 export const inlineLinkClass = "text-green-400 underline decoration-green-500/60 underline-offset-4 hover:text-green-300"
 
 /**
- * Frame for the plain pages: About, Projects, each project and the Azure
- * certificate. They exist because search engines and AI assistants read HTML and
- * never click the terminal's tabs, and because a shared link should open on the
- * content. Server-rendered, no client JavaScript of their own, and drawn as the
- * same terminal window so they read as part of one site.
+ * Frame for the Azure certificate page, the one page that is not a view of the
+ * terminal (see components/terminal-page.tsx). Server-rendered, no client
+ * JavaScript of its own, and drawn as the same terminal window so it reads as
+ * part of one site.
  */
 export default function StaticPage({ path, children }: { path: string; children: ReactNode }) {
   return (

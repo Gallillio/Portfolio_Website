@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Mail, Phone, MapPin, Github, Linkedin } from "lucide-react"
+import { Mail, Phone, MapPin, Github, Linkedin, GraduationCap } from "lucide-react"
 import { useAchievements } from "@/lib/achievements-context"
 import { links } from "@/lib/profile-data"
 import { contact, cv } from "@/lib/profile-extras"
@@ -65,7 +65,7 @@ export default function Contact() {
   return (
     <>
       <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
-        <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">Contact Me</h2>
+        <h1 className="text-2xl mb-6 border-b border-green-500 pb-2">Contact Me</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
@@ -262,6 +262,29 @@ export default function Contact() {
                         height={20} 
                         className="green-logo"
                       />
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    title="Google Scholar"
+                    className="border-green-500 text-green-400 bg-black hover:bg-green-500/20"
+                    asChild
+                  >
+                    <a href={links.scholar} target="_blank" rel="noopener noreferrer" aria-label="Google Scholar">
+                      <GraduationCap size={20} />
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    title="ORCID"
+                    className="border-green-500 text-green-400 bg-black hover:bg-green-500/20"
+                    asChild
+                  >
+                    {/* ORCID's mark is the letters "iD". */}
+                    <a href={links.orcid} target="_blank" rel="noopener noreferrer" aria-label="ORCID" className="text-sm font-bold">
+                      iD
                     </a>
                   </Button>
                 </div>

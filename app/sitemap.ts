@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     "",
     "/about",
+    "/achievements",
     "/projects",
     ...projectPages.map((project) => `/projects/${project.slug}`),
     "/azure-certification",

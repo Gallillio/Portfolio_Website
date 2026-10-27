@@ -8,11 +8,12 @@ import { bio, title, languages } from "@/lib/profile-extras"
 import { useAchievements } from "@/lib/achievements-context"
 import Image from 'next/image'
 import { Badge } from "@/components/ui/badge"
-import { Github, ExternalLink, BookOpen, Trophy, ShieldCheck, Star, Languages, ChevronDown, ChevronUp, Check, Filter } from "lucide-react"
+import { Github, ExternalLink, BookOpen, Trophy, ShieldCheck, Star, Languages, ChevronDown, ChevronUp, Check, Filter, ArrowRight } from "lucide-react"
 import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
 import { skillLogos } from "@/lib/skill-logos"
 import { Tooltip } from "@/components/ui/tooltip"
+import { followInPlace, projectPath } from "@/lib/routes"
 
 // Map of icon strings to Lucide components
 const iconMap = {
@@ -44,17 +45,9 @@ const providerStyles: { [key: string]: { width: number; height: number; unoptimi
 export default function About() {
   const { visitTab } = useAchievements()
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    // Try to get the saved tab from localStorage on initial render
-    if (typeof window !== 'undefined') {
-      const savedTab = localStorage.getItem('aboutActiveTab');
-      // Validate that the saved tab is a valid option
-      const validTabs = ['skills', 'timeline', 'experience', 'education', 'freelance', 'languages', 'courses'];
-      return savedTab && validTabs.includes(savedTab) ? savedTab : "skills";
-    }
-    return "skills";
-  })
-  // const [activeTab, setActiveTab] = useState<string>("skills")
+  // Skills on the server and in the first render, so the page hydrates cleanly;
+  // the effect below then reopens the section the visitor last used.
+  const [activeTab, setActiveTab] = useState<string>("skills")
   const [isBioExpanded, setIsBioExpanded] = useState(false)
   // Measured, not assumed: whether the collapsed bio cuts off any text.
   const [isBioClipped, setIsBioClipped] = useState(true)
@@ -63,8 +56,9 @@ export default function About() {
   const bioTextRef = useRef<HTMLDivElement>(null)
   const bioHeightBeforeToggle = useRef<number | null>(null)
 
-  // Add new state for mobile detection
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 767);
+  // Set after mount, since the server cannot know the screen. Only the timeline and
+  // the tooltips read it; the section navigation switches with CSS instead.
+  const [isMobile, setIsMobile] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -117,8 +111,9 @@ export default function About() {
   // Effect to handle window resize
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 700);
+      setIsMobile(window.innerWidth < 768);
     };
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -359,7 +354,7 @@ export default function About() {
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
-      <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">About Me</h2>
+      <h1 className="text-2xl mb-6 border-b border-green-500 pb-2">About Me</h1>
 
         {/* Thirds from md up: quarters left the profile ~150px wide on tablets,
             wrapping the name onto three lines. */}
@@ -430,7 +425,7 @@ export default function About() {
               />
             </div>
             <div className="text-center text-green-300">
-              <h3 className="text-lg md:text-xl font-bold">Ahmed Galal Elzeky</h3>
+              <h2 className="text-lg md:text-xl font-bold">Ahmed Galal Elzeky</h2>
               <p className="text-sm md:text-base text-green-400">{title}</p>
             </div>
           </CardContent>
@@ -438,10 +433,10 @@ export default function About() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        {/* Tabs list with horizontal scroll - only show on desktop */}
-        {!isMobile && (
-          <div className="mt-8 overflow-x-auto pb-2">
-            <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto">
+        {/* Tabs list with horizontal scroll, from md up. Both navigations are in the
+            HTML and CSS picks one: choosing after hydration made the page jump on phones. */}
+          <div className="mt-8 overflow-x-auto pb-2 max-md:hidden">
+            <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto text-gray-400">
               <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
                 Skills
               </TabsTrigger>
@@ -465,11 +460,9 @@ export default function About() {
               </TabsTrigger>
             </TabsList>
           </div>
-        )}
-        
+
         {/* Mobile-friendly section selector */}
-        {isMobile && (
-          <div className="mb-6 mt-6 bg-gray-900 pt-3 pb-3 border border-green-500 rounded-md shadow-md">
+          <div className="mb-6 mt-6 bg-gray-900 pt-3 pb-3 border border-green-500 rounded-md shadow-md md:hidden">
             
             <div className="about-section-nav px-4">
               <div className="flex flex-wrap gap-2">
@@ -497,9 +490,8 @@ export default function About() {
               </div>
             </div>
           </div>
-        )}
         
-        <TabsContent value="skills" className="pt-4">
+        <TabsContent value="skills" forceMount className="pt-4 data-[state=inactive]:hidden">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Skills</h3>
@@ -541,7 +533,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="timeline" className="pt-4">
+        <TabsContent value="timeline" forceMount className="pt-4 data-[state=inactive]:hidden">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Timeline</h3>
@@ -974,7 +966,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="experience" className="pt-4">
+        <TabsContent value="experience" forceMount className="pt-4 data-[state=inactive]:hidden">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Professional Experience</h3>
@@ -1062,7 +1054,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="education" className="pt-4">
+        <TabsContent value="education" forceMount className="pt-4 data-[state=inactive]:hidden">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Education</h3>
@@ -1096,7 +1088,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="languages" className="pt-4">
+        <TabsContent value="languages" forceMount className="pt-4 data-[state=inactive]:hidden">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Languages</h3>
@@ -1124,7 +1116,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="freelance" className="pt-4">
+        <TabsContent value="freelance" forceMount className="pt-4 data-[state=inactive]:hidden">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Freelance Projects</h3>
@@ -1139,6 +1131,17 @@ export default function About() {
                     </span>
 
                     <p className="text-green-300/90 mb-4 group-hover:text-green-300/80 transition-colors duration-200">{project.description}</p>
+                    {/* Opens the project's write-up in the Projects tab. */}
+                    {project.projectSlug && (
+                      <a
+                        href={projectPath(project.projectSlug)}
+                        onClick={followInPlace}
+                        className="-mt-2 mb-4 inline-flex items-center gap-1 text-sm text-green-400 underline-offset-4 hover:text-green-300 hover:underline"
+                      >
+                        Read more<span className="sr-only"> about {project.title}</span>
+                        <ArrowRight size={14} aria-hidden="true" />
+                      </a>
+                    )}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {project.technologies.map((tech, techIndex) => (
                         <Badge key={techIndex} variant="outline" className="border-green-500 text-green-400 group-hover:border-green-400 group-hover:text-green-300 transition-colors duration-200">
@@ -1154,16 +1157,23 @@ export default function About() {
                         isMobile={isMobile}
                         showTooltip={!project.code_available}
                       >
-                        <a
-                          href={project.code_available ? project.github : undefined}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md ${project.code_available ? '' : 'cursor-not-allowed opacity-50'}`}
-                          // style={{ pointerEvents: project.code_available ? 'auto' : 'none' }}
-                        >
-                          <Github size={16} className="mr-1" />
-                          Code
-                        </a>
+                        {/* Without a public repo this is text, not a link that goes nowhere. */}
+                        {project.code_available ? (
+                          <a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md"
+                          >
+                            <Github size={16} className="mr-1" />
+                            Code
+                          </a>
+                        ) : (
+                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50">
+                            <Github size={16} className="mr-1" />
+                            Code
+                          </span>
+                        )}
                       </Tooltip>
                       
                       {/* Demo Button */}
@@ -1175,16 +1185,22 @@ export default function About() {
                         isTablet={isTablet}
                         showTooltip={!project.demo_available}
                       >
-                        <a
-                          href={project.demo_available ? project.demo : undefined}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md ${project.demo_available ? '' : 'cursor-not-allowed opacity-50'}`}
-                          // style={{ pointerEvents: project.demo_available ? 'auto' : 'none' }}
-                        >
-                          <ExternalLink size={16} className="mr-1" />
-                          Check it out!
-                        </a>
+                        {project.demo_available ? (
+                          <a
+                            href={project.demo}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md"
+                          >
+                            <ExternalLink size={16} className="mr-1" />
+                            Check it out!
+                          </a>
+                        ) : (
+                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50">
+                            <ExternalLink size={16} className="mr-1" />
+                            Check it out!
+                          </span>
+                        )}
                       </Tooltip>
                     </div>
                   </div>
@@ -1194,7 +1210,7 @@ export default function About() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="courses" className="pt-4">
+        <TabsContent value="courses" forceMount className="pt-4 data-[state=inactive]:hidden">
           <Card className="bg-gray-900 border-green-500">
             <CardContent className="pt-6">
               <h3 className="text-2xl font-bold text-green-400 mb-4 border-b border-green-500 pb-2">Courses</h3>

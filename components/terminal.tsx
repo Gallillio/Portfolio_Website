@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import { usePathname } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import TerminalInput, { TerminalInputRef } from "./terminal-input"
 import TerminalOutput from "./terminal-output"
@@ -16,6 +17,8 @@ import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
 import { contact, cv } from "@/lib/profile-extras"
 import { hasTextSelection } from "@/lib/utils"
+import { tabForPath, pathForTab, opensNewTab } from "@/lib/routes"
+import { titleForPath } from "@/lib/seo"
 import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command, ChatMessage } from '@/lib/types'
@@ -37,11 +40,10 @@ function TabLabel({ short, full }: { short: string; full: string }) {
   )
 }
 
-const opensNewTab = (event: React.MouseEvent) => event.metaKey || event.ctrlKey || event.shiftKey
-
-// A tab that is also a link to the section's own page (/about, /projects). The tab
-// bar is in the server HTML, so these links are how crawlers reach those pages. A
-// plain click only switches the tab; cmd/ctrl/shift or middle click opens the page.
+// A tab that is also a link to the section's own page (/projects, /about,
+// /achievements). The tab bar is in the server HTML, so these links are how
+// crawlers reach those pages. A plain click only switches the tab; cmd/ctrl/shift
+// or middle click opens the page.
 function PageTab({ href, children, ...props }: React.ComponentPropsWithoutRef<typeof TabsTrigger> & { href: string }) {
   return (
     <TabsTrigger
@@ -72,7 +74,22 @@ function TerminalContent(): React.ReactNode {
     isError: false,
   })
   const [history, setHistory] = useState<Array<{ command: string; output: React.ReactNode[]; timestamp: Date; isError: boolean }>>(() => [welcomeEntry()])
-  const [activeTab, setActiveTab] = useState<string>("terminal")
+  const pathname = usePathname()
+  // The address picks the opening tab: /projects, /about and /achievements open
+  // their tab, and anything else opens the terminal. usePathname works during
+  // server rendering too, so that tab's content is in the server HTML.
+  const [activeTab, setActiveTabState] = useState<string>(() => tabForPath(pathname) ?? "terminal")
+  // Every tab change goes through here so the address always names what is on
+  // screen. replaceState, not pushState: switching tabs should not fill the Back
+  // button's history. An open project keeps its /projects/<slug> address while
+  // the Projects tab stays selected.
+  const setActiveTab = useCallback((tab: string) => {
+    setActiveTabState(tab)
+    const current = window.location.pathname
+    if (tab === "projects" && tabForPath(current) === "projects") return
+    const target = pathForTab(tab)
+    if (current !== target) window.history.replaceState(null, "", target)
+  }, [])
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [animationClass, setAnimationClass] = useState("")
   const [isMobile, setIsMobile] = useState(false)
@@ -122,14 +139,16 @@ function TerminalContent(): React.ReactNode {
       setIsFullscreen(true)
       setAnimationClass("animate-expand")
     }
-
-    // Load saved tab from localStorage after initial render
-    const savedTab = localStorage.getItem('terminalActiveTab');
-    const validTabs = ['terminal', 'projects', 'about', 'contact', 'my-achievements', 'your-achievements'];
-    if (savedTab && validTabs.includes(savedTab)) {
-      setActiveTab(savedTab);
-    }
   }, [])
+
+  // Back and Forward change the address without a click: follow it to the tab it
+  // names, and keep the browser tab's title the one that page's metadata gives.
+  // Tabs without an address of their own stay open while the address is /.
+  useEffect(() => {
+    const routeTab = tabForPath(pathname)
+    setActiveTabState((current) => routeTab ?? (pathForTab(current) === "/" ? current : "terminal"))
+    document.title = titleForPath(pathname)
+  }, [pathname])
 
   // Add listener for custom tab switching events from other components
   useEffect(() => {
@@ -169,7 +188,7 @@ function TerminalContent(): React.ReactNode {
       window.removeEventListener('contact-email-clicked', handleContactEmailClicked);
       window.removeEventListener('message', handleMessage);
     };
-  }, [executeSecretCommand]);
+  }, [executeSecretCommand, setActiveTab]);
 
   // Check if we're on a mobile device and handle responsive behavior
   useEffect(() => {
@@ -656,10 +675,6 @@ function TerminalContent(): React.ReactNode {
         focusInput();
       }, 0);
     }
-    
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('terminalActiveTab', activeTab);
-    }
   }, [activeTab, focusInput])
 
   const handleNavigateToAchievements = () => {
@@ -1032,6 +1047,8 @@ function TerminalContent(): React.ReactNode {
               </button>
             <button 
               onClick={toggleFullscreen} 
+              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
                 className={`transition-colors duration-300
                   ${isChatMode && activeTab === "terminal" ? 'text-gray-400 hover:text-gray-300' : 'text-green-500 hover:text-green-400'}`}
             >
@@ -1045,10 +1062,20 @@ function TerminalContent(): React.ReactNode {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className={`w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed
               ${isChatMode && activeTab === "terminal" ? 'bg-gray-800 border-b border-gray-400' : 'bg-gray-900 border-b border-green-500'}`}>
-              <div 
-                className="md:hidden flex-grow cursor-pointer" 
+              <div
+                className="md:hidden flex-grow cursor-pointer"
                 onClick={toggleMobileMenu}
                 ref={hamburgerButtonRef}
+                role="button"
+                tabIndex={0}
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileMenuOpen}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    toggleMobileMenu()
+                  }
+                }}
               >
                 <div className="flex items-center p-2">
                   <div className={`flex items-center focus:outline-none ml-1
@@ -1063,7 +1090,7 @@ function TerminalContent(): React.ReactNode {
               </div>
 
               <div className="hidden md:block">
-                <TabsList className={`bg-transparent border-none rounded-none h-auto 
+                <TabsList className={`bg-transparent border-none rounded-none h-auto text-gray-400
                   ${isChatMode && activeTab === "terminal" ? 'chat-tabs' : ''}`}>
                 <TabsTrigger
                   value="terminal"
@@ -1110,19 +1137,20 @@ function TerminalContent(): React.ReactNode {
                 >
                     <TabLabel short="Contact" full="Contact / CV" />
                 </TabsTrigger>
-                <TabsTrigger
+                <PageTab
                   value="my-achievements"
+                  href="/achievements"
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
                         : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                 >
                     <TabLabel short="Achievements" full="My Achievements / Publications / Certifications" />
-                </TabsTrigger>
+                </PageTab>
               </TabsList>
               </div>
 
-              <TabsList className={`bg-transparent border-none rounded-none h-auto ml-auto flex-grow hidden md:flex
+              <TabsList className={`bg-transparent border-none rounded-none h-auto ml-auto flex-grow hidden md:flex text-gray-400
                 ${isChatMode && activeTab === "terminal" ? 'chat-tabs' : ''}`}>
                 <TabsTrigger
                   value="your-achievements"
@@ -1241,6 +1269,7 @@ function TerminalContent(): React.ReactNode {
             >
               <div 
                 style={contentStyle}
+                data-tab-scroll
                 className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
               >
                 <Projects />

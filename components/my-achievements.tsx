@@ -30,7 +30,7 @@ export default function MyAchievements() {
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
-      <h2 className="text-2xl mb-6 border-b border-green-500 pb-2">My Achievements</h2>
+      <h1 className="text-2xl mb-6 border-b border-green-500 pb-2">My Achievements</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {personalAchievements.map((achievement) => (
