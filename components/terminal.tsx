@@ -17,7 +17,7 @@ import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
 import { contact, cv } from "@/lib/profile-extras"
 import { hasTextSelection } from "@/lib/utils"
-import { tabForPath, pathForTab, opensNewTab } from "@/lib/routes"
+import { tabForPath, pathForTab, opensNewTab, projectSlugForPath, returnToProjectList } from "@/lib/routes"
 import { titleForPath } from "@/lib/seo"
 import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
@@ -44,13 +44,28 @@ function TabLabel({ short, full }: { short: string; full: string }) {
 // /achievements). The tab bar is in the server HTML, so these links are how
 // crawlers reach those pages. A plain click only switches the tab; cmd/ctrl/shift
 // or middle click opens the page.
-function PageTab({ href, children, ...props }: React.ComponentPropsWithoutRef<typeof TabsTrigger> & { href: string }) {
+//
+// Pressing the tab that is already open calls onReselect: Radix runs these
+// handlers before its own, so data-state still says whether the tab was open.
+function PageTab({
+  href,
+  onReselect,
+  children,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof TabsTrigger> & { href: string; onReselect?: () => void }) {
+  const reselect = (event: React.SyntheticEvent<HTMLElement>) => {
+    if (event.currentTarget.dataset.state === "active") onReselect?.()
+  }
   return (
     <TabsTrigger
       {...props}
       asChild
       // Radix switches tabs on mousedown and skips it when the event is prevented.
-      onMouseDown={(event) => { if (opensNewTab(event)) event.preventDefault() }}
+      onMouseDown={(event) => {
+        if (opensNewTab(event)) event.preventDefault()
+        else if (event.button === 0) reselect(event)
+      }}
+      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") reselect(event) }}
       onClick={(event) => { if (!opensNewTab(event)) event.preventDefault() }}
     >
       {/* type: drop the type="button" Radix gives triggers, which is invalid on a link */}
@@ -79,16 +94,51 @@ function TerminalContent(): React.ReactNode {
   // their tab, and anything else opens the terminal. usePathname works during
   // server rendering too, so that tab's content is in the server HTML.
   const [activeTab, setActiveTabState] = useState<string>(() => tabForPath(pathname) ?? "terminal")
+  // The Projects tab keeps its place, as tabs in apps do: leaving it notes the
+  // page it was on, how far down that was scrolled and how many steps back the
+  // cards are, and choosing the tab again reopens that page there. Held in memory
+  // only, so a reload or a new visit opens what the address says.
+  const projectsPlaceRef = useRef<{ path: string; depth: number; scroll: number } | null>(null)
   // Every tab change goes through here so the address always names what is on
   // screen. replaceState, not pushState: switching tabs should not fill the Back
-  // button's history. An open project keeps its /projects/<slug> address while
-  // the Projects tab stays selected.
+  // button's history.
   const setActiveTab = useCallback((tab: string) => {
-    setActiveTabState(tab)
     const current = window.location.pathname
-    if (tab === "projects" && tabForPath(current) === "projects") return
+    const state = window.history.state
+    const onProjects = tabForPath(current) === "projects"
+    if (tab === "projects" && onProjects) {
+      // An open project keeps its /projects/<slug> address while the tab stays selected.
+      setActiveTabState(tab)
+      return
+    }
+    const place = projectsPlaceRef.current
+    if (tab === "projects" && place) {
+      // The steps back to the cards only hold on the history entry the tab was left from.
+      const projectDepth = state?.leftProjectsHere ? place.depth : 0
+      window.history.replaceState({ projectDepth, projectsScroll: place.scroll }, "", place.path)
+      // The pathname effect below opens the tab once the router has this address.
+      // Opening it here would mount Projects on the old one and show the cards for
+      // a moment before the project: Next applies the address in a transition.
+      return
+    }
+    if (onProjects) {
+      projectsPlaceRef.current = {
+        path: current,
+        depth: state?.projectDepth ?? 0,
+        scroll: document.querySelector("[data-tab-scroll]")?.scrollTop ?? 0,
+      }
+    }
+    setActiveTabState(tab)
     const target = pathForTab(tab)
-    if (current !== target) window.history.replaceState(null, "", target)
+    // Mark the entry the Projects tab was left from; moving between the other tabs keeps the mark.
+    const leftProjectsHere = tab !== "projects" && (onProjects || Boolean(state?.leftProjectsHere))
+    if (current !== target) window.history.replaceState(leftProjectsHere ? { leftProjectsHere } : null, "", target)
+  }, [])
+
+  // Choosing the tab that is already open: from a project, the Projects tab goes
+  // back to the cards, as tapping the current tab returns to its top in apps.
+  const reselectTab = useCallback((tab: string) => {
+    if (tab === "projects" && projectSlugForPath(window.location.pathname)) returnToProjectList()
   }, [])
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [animationClass, setAnimationClass] = useState("")
@@ -736,7 +786,8 @@ function TerminalContent(): React.ReactNode {
   }
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
+    if (value === activeTab) reselectTab(value)
+    else setActiveTab(value)
     setMobileMenuOpen(false);
   }
 
@@ -1111,6 +1162,7 @@ function TerminalContent(): React.ReactNode {
                 <PageTab
                   value="projects"
                   href="/projects"
+                  onReselect={() => reselectTab("projects")}
                     className={`custom-tab touch-optimized rounded-none border-r
                       ${isChatMode && activeTab === "terminal" 
                         ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
