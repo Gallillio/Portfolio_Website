@@ -36,7 +36,7 @@ export interface Project {
    */
   period?: string
   technologies: string[]
-  images: { src: string; alt: string }[]
+  images: ProjectImage[]
   github?: string
   demo?: string
   demo_available?: boolean
@@ -58,6 +58,18 @@ export interface Project {
   caseStudy?: CaseStudy
 }
 
+export interface ProjectImage {
+  /** A path in public/, or a full URL for an image hosted elsewhere. */
+  src: string
+  alt: string
+  /**
+   * Pixel size, needed only for images hosted elsewhere. Images in public/ get
+   * theirs, with a blur preview, from lib/image-meta.json at build time.
+   */
+  width?: number
+  height?: number
+}
+
 export interface CaseStudy {
   /** What Ahmed owned on the project. */
   role: string
@@ -66,7 +78,7 @@ export interface CaseStudy {
   results: string[]
   /** Known gap and what comes next. */
   limitations?: string
-  diagrams?: { src: string; alt: string }[]
+  diagrams?: ProjectImage[]
   /** Confidentiality or data note shown at the bottom. */
   note?: string
 }

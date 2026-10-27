@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "node scripts/generate-image-meta.mjs && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "images:meta": "node scripts/generate-image-meta.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -35,6 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
     "postcss": "^8",
+    "sharp": "^0.33.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }

@@ -1,0 +1,247 @@
+{
+  "/Comic Spot/home-arabic.png": {
+    "width": 1440,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAADQAQCdASoKAAYAAoBCJQBOgBuKUFjvIAD+a1v9WNLPgjlSQ4hsozFxwQenDTkNAcw7fC9vfrKBt9Ysb89295XKbsgE1nsHvvltqi/KFGscAA=="
+  },
+  "/Comic Spot/home.png": {
+    "width": 1440,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRmIAAABXRUJQVlA4IFYAAADwAQCdASoKAAYAAoBCJZACdAD5hQv1rYAA/vCrSZMBwH7lazv6TpaL2grd3w7anNFnCUfgrNVRKOv3+m6wFxooZMFwOW23wxixgx5cM982zEORT3YAAA=="
+  },
+  "/Comic Spot/product.png": {
+    "width": 1440,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRlgAAABXRUJQVlA4IEwAAADwAQCdASoKAAYAAoBCJYgCdAD0ul+t9kAA/uKU/op5R5O7o7qUqBqFsdpgbpBmW4Ij2I64/CN7d67fH0IcBBckJHNubcJJ4lL2D8AA"
+  },
+  "/Comic Spot/storylines.png": {
+    "width": 1440,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAAAwAgCdASoKAAYAAoBCJYgCdEf/gehxfILbIAD33qDdX89fIKro/BEJNt98I2EgNCq/Jar2W2qaYBRt3qkOpt5/T3xXhWrccROc4uknWnfwkqo5Iw85oPZzQ2wAAA=="
+  },
+  "/Data Visualizer Tool/Detailed EDA.png": {
+    "width": 1371,
+    "height": 850,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAAAwAQCdASoKAAYAAoBCJaQAA3AA/vedfusrhFKvlnomN0CDNAAAAA=="
+  },
+  "/Data Visualizer Tool/Encode Column.png": {
+    "width": 1372,
+    "height": 856,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAADQAQCdASoKAAYAAoBCJaQAAxZr+z/OAAD++sa7eIxZd2LdIAAAAA=="
+  },
+  "/Data Visualizer Tool/Handle NA.png": {
+    "width": 1456,
+    "height": 852,
+    "blurDataURL": "data:image/webp;base64,UklGRj4AAABXRUJQVlA4IDIAAACwAQCdASoKAAYAAoBCJaQAAudnxawAAP75qTBRLpQWEw8YCpsd812LI1PHNlC8AAAAAA=="
+  },
+  "/Data Visualizer Tool/Histogram EDA.png": {
+    "width": 1373,
+    "height": 881,
+    "blurDataURL": "data:image/webp;base64,UklGRkwAAABXRUJQVlA4IEAAAADQAQCdASoKAAYAAoBCJYwCdAELXVC3AAD++znB4snL5xjDtjsKFr1zo1IVhoWQu6t9pxDmE222AvCFFZ+rAAAA"
+  },
+  "/Data Visualizer Tool/Main.png": {
+    "width": 1366,
+    "height": 855,
+    "blurDataURL": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAACQAQCdASoKAAYAAoBCJaQAAudVMbgA/vs0SBasRkOC85poAAA="
+  },
+  "/ESLSCA Chatbot/courses provided.png": {
+    "width": 1920,
+    "height": 918,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAABQAQCdASoKAAUAAoBCJZwABDOAAP74eFPUAE7/rDy5raKhVtgAAA=="
+  },
+  "/ESLSCA Chatbot/intro-majors.png": {
+    "width": 1920,
+    "height": 916,
+    "blurDataURL": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAABQAQCdASoKAAUAAoBCJZwABDOAAP74Ww/iAFxT/mP5l00PgAA="
+  },
+  "/ESLSCA Chatbot/newsletter-thanks.png": {
+    "width": 1920,
+    "height": 918,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAABQAQCdASoKAAUAAoBCJZwABDOAAP74eFQCAFxT/mQJIMFjSzAAAA=="
+  },
+  "/GPTube/main.png": {
+    "width": 1921,
+    "height": 916,
+    "blurDataURL": "data:image/webp;base64,UklGRjQAAABXRUJQVlA4ICgAAACwAQCdASoKAAUAAoBCJZwAAvd3BKzAAP7w7Kx7kpFR3N9lI3zCkAAA"
+  },
+  "/GPTube/powerpoint.png": {
+    "width": 1926,
+    "height": 909,
+    "blurDataURL": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAACwAQCdASoKAAUAAoBCJZQAAp0/ixwAAP6cMI4WemZYSs99jd7VpKuVD+cxVMj205ukVVI4xTHV7GYQAAA="
+  },
+  "/GPTube/question.png": {
+    "width": 1921,
+    "height": 916,
+    "blurDataURL": "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAACQAQCdASoKAAUAAoBCJZQAApkIcEAA/gvcq6Obe1rkM/8Be1a40iDdmxCOhW3CLh49sneIAAA="
+  },
+  "/GPTube/quiz.png": {
+    "width": 1921,
+    "height": 918,
+    "blurDataURL": "data:image/webp;base64,UklGRkAAAABXRUJQVlA4IDQAAACQAQCdASoKAAUAAoBCJZwAApplJwAA/pwxPXtI8xwbbnop6pl1p7hyP8cTqqWojgYhfoAA"
+  },
+  "/IIG-HEC Website/Blog.png": {
+    "width": 1904,
+    "height": 918,
+    "blurDataURL": "data:image/webp;base64,UklGRjwAAABXRUJQVlA4IDAAAACwAQCdASoKAAUAAoBCJaQAAtzWyzIAAP75d6FGoSDQ/oHDf4w/vQjwJkr/84DBHAA="
+  },
+  "/IIG-HEC Website/Contact us.png": {
+    "width": 1901,
+    "height": 917,
+    "blurDataURL": "data:image/webp;base64,UklGRjQAAABXRUJQVlA4ICgAAACQAQCdASoKAAUAAoBCJaQAAltMeAAA/vobedHyfyrRmf2H9f0TEHAA"
+  },
+  "/IIG-HEC Website/Main.png": {
+    "width": 1902,
+    "height": 916,
+    "blurDataURL": "data:image/webp;base64,UklGRkYAAABXRUJQVlA4IDoAAACQAQCdASoKAAUAAoBCJZwAAp1GwkAA/u0rWmdlbc7lfFb2szOO1qofJL7y56Uc5h13x1viDh1ooAAA"
+  },
+  "/IIG-HEC Website/Projects.png": {
+    "width": 1904,
+    "height": 917,
+    "blurDataURL": "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACQAQCdASoKAAUAAoBCJaQAAmazagAA/vl06ZS5mxytYpyNJoyj9vOxfB2aAoAA"
+  },
+  "/Lango/ipad.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAADQAQCdASoKAAUAAoBCJZAC7AELG3ipsAD+75iiLtJmzmgjTpcvVdLUPnVWa26vCQtG46oAAAA="
+  },
+  "/Lango/languages-rtl.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRkgAAABXRUJQVlA4IDwAAAAQAgCdASoKAAUAAoBCJZgCdAEQ+qH8Q06AAP7tFaDAU7bzKFXCXwNkqh+S2rvLCjIeg5v9smEW/KcAAAA="
+  },
+  "/Lango/path.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAACwAQCdASoKAAUAAoBCJZgCdADc5pkgAP7tFaBONw7uxnmTq3u2urDu/ktrg6A/oNxlPySAAAA="
+  },
+  "/Lango/reader.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRkYAAABXRUJQVlA4IDoAAACwAQCdASoKAAUAAoBCJaACdADZja8IAP7qC1WZpxc65UopnauO669Z0pEp8ltcHQRfyfKNdP0pWRAA"
+  },
+  "/Lango/stories.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRkIAAABXRUJQVlA4IDYAAACwAQCdASoKAAUAAoBCJaACsADze7mIAP7mqGaMNOWUS8rmrWZsd94zQdounzW5Y7q4+lAAAAA="
+  },
+  "/Mini CFO/AI Assistant in Dashboard.png": {
+    "width": 1266,
+    "height": 927,
+    "blurDataURL": "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAAAwAQCdASoKAAcAAoBCJZQAA3AA/vjlVwGKvjC0MdWdqvDXM7+xb+pxoFeIuAAA"
+  },
+  "/Mini CFO/Balance Sheet.png": {
+    "width": 1902,
+    "height": 929,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAADQAQCdASoKAAUAAoBCJaQAAxf/ExQOAAD++7bRYDz9NWjpAAAAAA=="
+  },
+  "/Mini CFO/Forecasting.png": {
+    "width": 1900,
+    "height": 931,
+    "blurDataURL": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAAAwAQCdASoKAAUAAoBCJaQAA3AA/vdxvh7qSOb2wke4HacAAAA="
+  },
+  "/Mini CFO/dashboard 1.png": {
+    "width": 1903,
+    "height": 933,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACwAQCdASoKAAUAAoBCJaQAAud/lWqAAP77V1fRGwgfBY9uQAAAAA=="
+  },
+  "/Mini CFO/dashboard 2.png": {
+    "width": 1228,
+    "height": 928,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAAAwAQCdASoKAAgAAoBCJaQAA3AA/vivOeZudZxf2gXBn+ACEDAAAA=="
+  },
+  "/Mini CFO/dashboard 3.png": {
+    "width": 1227,
+    "height": 918,
+    "blurDataURL": "data:image/webp;base64,UklGRigAAABXRUJQVlA4IBwAAAAwAQCdASoKAAcAAoBCJaQAA3AA/vkAF6eNhAAA"
+  },
+  "/Mini CFO/invoices.png": {
+    "width": 1920,
+    "height": 927,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACwAQCdASoKAAUAAoBCJaQAAp2pyNgAAP77ttFgPp2WyzN0O4AAAA=="
+  },
+  "/Mini CFO/transactions.png": {
+    "width": 1905,
+    "height": 928,
+    "blurDataURL": "data:image/webp;base64,UklGRjAAAABXRUJQVlA4ICQAAACwAQCdASoKAAUAAoBCJaQAAp2nN4gAAP77ttFg8p78yzgwAAA="
+  },
+  "/RealTime Facial Emotion Classification Results Slideshow/fearful.png": {
+    "width": 791,
+    "height": 601,
+    "blurDataURL": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAADQAQCdASoKAAgAAoBCJZwAArJpxdtpcAD++PDqofL8cgTH/Lo0e/0U6Evk1eeOsjROq/fgB772wlR7b21jAUfaTnwp+cexbgX0hftEC7Nf5AFcQAA="
+  },
+  "/RealTime Facial Emotion Classification Results Slideshow/happy.png": {
+    "width": 799,
+    "height": 617,
+    "blurDataURL": "data:image/webp;base64,UklGRmAAAABXRUJQVlA4IFQAAADwAQCdASoKAAgAAoBCJZwAArJpx/e8nCAA/vf+sVc/G6X+oxgHdkkt4uH2v9MQXkkEGldb4+yPNnv1w7JGOljPuvJ50Yg9/eI4rHfWJUi1TZmAAAA="
+  },
+  "/RealTime Facial Emotion Classification Results Slideshow/neutral.png": {
+    "width": 794,
+    "height": 617,
+    "blurDataURL": "data:image/webp;base64,UklGRmIAAABXRUJQVlA4IFYAAADwAQCdASoKAAgAAoBCJZwAArJpqdnbDqAA/vCzXM593qeSyNPt/O/8/etKIqjOld/0xBeSQQaV1+R2XOxToVnjTd08ADe+Hb+i7P+KNNMum4C/ApgAAA=="
+  },
+  "/RealTime Facial Emotion Classification Results Slideshow/sad.png": {
+    "width": 799,
+    "height": 605,
+    "blurDataURL": "data:image/webp;base64,UklGRmIAAABXRUJQVlA4IFYAAADwAQCdASoKAAgAAoBCJZwAArJp02t7BAAA/vgva9eig37qhSnaF5t95Sk/jd/w4GC6ftbxT/xg/eah0FzWCVsHIQZESP+x6+6etNqI6OYJmn9QOIKAAA=="
+  },
+  "/RealTime Facial Emotion Classification Results Slideshow/surprised.png": {
+    "width": 793,
+    "height": 617,
+    "blurDataURL": "data:image/webp;base64,UklGRmgAAABXRUJQVlA4IFwAAABQAgCdASoKAAgAAoBCJZQC7AYsZzA5Mq2gnIAA/vKRoVa9lTS0Vwb6T2A9ImxGwV/piC8SypS19/RbftPnnOQlrsgqRKYAh9ETXeU4KxY7R/ZAeWol4qIQczAAAA=="
+  },
+  "/SIA/approve-actions.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAADQAQCdASoKAAUAAoBCJYwCdAELQnjeAAD++d3CegGAFiD0ZzzTFBjmgRhnwAAA"
+  },
+  "/SIA/arabic-mobile.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRkoAAABXRUJQVlA4ID4AAADwAQCdASoKAAUAAoBCJYwCdAEWO8v1jWAA/vnt6wxpoonVwcTyz83gqcD1i7m1Zj5V3DDx6ZPc++DrGzAAAA=="
+  },
+  "/SIA/architecture.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjgAAABXRUJQVlA4ICwAAACwAQCdASoKAAUAAoBCJQBOgCHgFNM8AP77FkLznthj7ijQadVUqzQGQAAAAA=="
+  },
+  "/SIA/chat-sources.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjgAAABXRUJQVlA4ICwAAACwAQCdASoKAAUAAoBCJYwCdADyf/xoAP757ZF/oU+2m5FF4dvofz9XDY0AAA=="
+  },
+  "/SIA/cited-page.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAADQAQCdASoKAAUAAoBCJYwCdAEf/Fa5YAD++d3CegGANkNgDFPD3+NVfCRUEjAA"
+  },
+  "/SIA/contract-compare.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjQAAABXRUJQVlA4ICgAAABwAQCdASoKAAUAAoBCJYwCdAFAAAD+96yfJMBFcNEnFNHhUcCX4UgA"
+  },
+  "/SIA/documents.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAABwAQCdASoKAAUAAoBCJYwCdAFAAAD+9++KXF+XxrFD3UjqRDgCnMDThIoLYAAA"
+  },
+  "/SIA/model-measurement.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjgAAABXRUJQVlA4ICwAAABwAQCdASoKAAUAAoBCJYwCdAFAAAD+9++KXnbsv1xCGHvBnP3Bm/Vw2NAAAA=="
+  },
+  "/SIA/model-routing.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAADwAQCdASoKAAUAAoBCJYwCdAEPhMmBHAAA/vnt2F+uUWjSn2/NvWvhzO/u1AAA"
+  },
+  "/SIA/rag-pipeline.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAABwAQCdASoKAAUAAoBCJYwCdAFAAAD+9qOHXdbDjeGRBAZ9kpAAAA=="
+  },
+  "/SIA/recruitment-ranking.png": {
+    "width": 1800,
+    "height": 900,
+    "blurDataURL": "data:image/webp;base64,UklGRjgAAABXRUJQVlA4ICwAAADQAQCdASoKAAUAAoBCJYwCdAEOfAr1EAD++e2MUUv8wbN7FCF5/T9XDY0AAA=="
+  }
+}

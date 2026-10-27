@@ -218,7 +218,7 @@ export const projects: Project[] = [
     "The website you are currently on! My personal portfolio website showcasing projects, skills, and achievements. Designed as a unique terminal-style website that showcases my skills and projects.",
     technologies: ["Google Cloud", "TypeScript", "NextJS", "ReactJS", "TailwindCSS", "Vercel"],
     images: [
-      { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!" },
+      { src: "https://i.pinimg.com/originals/12/f6/ac/12f6accc21f3cad0047fc68fc282569c.gif", alt: "Explore the website Right Here!", width: 498, height: 466 },
     ],
     github: "https://github.com/Gallillio/Portfolio_Website",
     demo: "https://portfolio.gallillio.com",

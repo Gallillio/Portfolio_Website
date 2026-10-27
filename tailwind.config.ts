@@ -8,6 +8,9 @@ const config = {
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
+    // lib/ holds rendered UI too (the image lightbox, chat markdown); without
+    // this glob their classes were never generated in production.
+    "./lib/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
