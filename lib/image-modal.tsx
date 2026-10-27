@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
@@ -11,9 +12,22 @@ interface ImageModalProps {
 }
 
 const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageSrc, onClose, images, setImageSrc }) => {
-  if (!isOpen) return null;
-
   const currentIndex = images.findIndex(image => image.src === imageSrc);
+
+  // Escape closes, arrows step through the slides, like the buttons.
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (images.length < 2) return;
+      if (e.key === 'ArrowLeft') setImageSrc(images[(currentIndex - 1 + images.length) % images.length].src);
+      if (e.key === 'ArrowRight') setImageSrc(images[(currentIndex + 1) % images.length].src);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, images, currentIndex, onClose, setImageSrc]);
+
+  if (!isOpen) return null;
 
   const handlePrev = () => {
     const prevIndex = (currentIndex - 1 + images.length) % images.length;
@@ -29,15 +43,15 @@ const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageSrc, onClose, imag
     setImageSrc(images[index].src); // Change the image based on the dot clicked
   };
 
-  return (
+  // Portal to <body>, so the lightbox covers the viewport instead of the transformed terminal window.
+  return createPortal(
     <div 
-      className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm z-50 p-4"
+      className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm z-[110] p-4"
       onClick={onClose}
     >
       <div 
-        className="relative bg-gray-900/95 rounded-md max-w-[90%] max-h-[90vh] md:max-w-[85%] md:max-h-[85vh]"
+        className="relative bg-gray-900/95 rounded-md max-w-[96vw] max-h-[92vh] md:max-w-[92vw]"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '100%' }}
       >
         {/* Header Bar */}
         <div className="flex items-center justify-between bg-black/50 px-4 py-2 border-b border-green-500/50 rounded-t-md">
@@ -63,13 +77,14 @@ const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageSrc, onClose, imag
         {/* Image Container */}
         <div className="relative p-4 border border-green-500/20 rounded-b-md">
           <div className="relative flex items-center justify-center">
+            {/* Sized for the 2:1 showcase slides (1800x900); smaller screenshots scale the same way. */}
             <Image
-              style={{ maxWidth: '80%' }}
               src={imageSrc}
-              alt="Expanded view"
-              width={800}
-              height={600}
-              className="max-w-full max-h-[70vh] object-contain rounded-sm"
+              alt={images[currentIndex]?.alt ?? "Expanded view"}
+              width={1800}
+              height={900}
+              sizes="92vw"
+              className="w-auto h-auto max-w-full max-h-[78vh] object-contain rounded-sm"
             />
           </div>
           {/* Navigation Buttons */}
@@ -98,7 +113,8 @@ const ImageModal: React.FC<ImageModalProps> = ({ isOpen, imageSrc, onClose, imag
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
