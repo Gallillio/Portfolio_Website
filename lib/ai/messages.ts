@@ -41,8 +41,10 @@ const DISPLAY: Record<ChatErrorCode, DisplayMessage> = {
     text: "My brain is a little overloaded at the moment. Give it a moment and ask me again — or have a look around 'projects' while I catch up.",
     tone: "assistant",
   },
+  // Most often Google's free endpoint sending nothing at all for 15 seconds
+  // (the route's first-byte timeout), so don't word it as a half-finished answer.
   TIMEOUT: {
-    text: "I got lost halfway through that thought. Try asking me again.",
+    text: "Sorry, the free Gemini API this chat runs on didn't answer in time. That happens now and then; ask again and it usually goes through.",
     tone: "assistant",
   },
   CONFIG: {
