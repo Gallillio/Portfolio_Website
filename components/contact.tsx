@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,10 +23,11 @@ export default function Contact() {
     message: "",
   })
 
-  const [state, handleSubmit] = useForm("mrbpbjaa")
+  const [state, handleSubmit, resetSubmission] = useForm("mrbpbjaa")
   const { sendContact, visitTab, downloadCV } = useAchievements()
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
   const [showThankYou, setShowThankYou] = useState(false)
+  const closeThankYou = useCallback(() => setShowThankYou(false), [])
 
   // Mark this tab as visited for the site explorer achievement - only once
   useEffect(() => {
@@ -43,24 +44,29 @@ export default function Contact() {
     })
   }
 
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    await handleSubmit(e)
-    
-    // Unlock the contact achievement
-    sendContact()
-    
-    // Reset form
-    setFormState({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    })
-
-    // Show thank you popup
-    setShowThankYou(true)
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    handleSubmit(e)
   }
+
+  // Clear the form and thank the visitor only once Formspree has the message.
+  // handleSubmit resolves the same way when sending fails, and this used to
+  // run after it regardless: a failed send wiped what had been typed and still
+  // said "Message Sent!". On failure the text now stays put, with an error
+  // under the button (formError below).
+  useEffect(() => {
+    if (!state.succeeded) return
+    sendContact()
+    setFormState({ name: "", email: "", subject: "", message: "" })
+    setShowThankYou(true)
+    // Ready for another message.
+    resetSubmission()
+  }, [state.succeeded, sendContact, resetSubmission])
+
+  // A failure that isn't about one field: the network, or Formspree itself.
+  const formError =
+    state.errors && state.errors.getAllFieldErrors().length === 0
+      ? state.errors.getFormErrors()[0]?.message || "Something went wrong."
+      : null
 
   return (
     <>
@@ -86,6 +92,8 @@ export default function Contact() {
                       <Input
                         id="name"
                         name="name"
+                        autoComplete="name"
+                        enterKeyHint="next"
                         value={formState.name}
                         onChange={handleChange}
                         required
@@ -106,6 +114,11 @@ export default function Contact() {
                         id="email"
                         name="email"
                         type="email"
+                        autoComplete="email"
+                        autoCapitalize="off"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        enterKeyHint="next"
                         value={formState.email}
                         onChange={handleChange}
                         required
@@ -126,6 +139,7 @@ export default function Contact() {
                     <Input
                       id="subject"
                       name="subject"
+                      enterKeyHint="next"
                       value={formState.subject}
                       onChange={handleChange}
                       required
@@ -165,6 +179,15 @@ export default function Contact() {
                   >
                     {state.submitting ? "Sending..." : "Send Message"}
                   </Button>
+                  {formError && (
+                    <p role="alert" className="mt-3 text-sm text-red-400">
+                      Your message wasn&apos;t sent ({formError}). It&apos;s still here, so you can try again, or email{" "}
+                      <a href={`mailto:${contact.email}`} className="break-all underline">
+                        {contact.email}
+                      </a>
+                      .
+                    </p>
+                  )}
                 </form>
               </CardContent>
             </Card>
@@ -295,7 +318,7 @@ export default function Contact() {
       </div>
 
       {showThankYou && (
-        <ThankYouPopup onClose={() => setShowThankYou(false)} />
+        <ThankYouPopup onClose={closeThankYou} />
       )}
     </>
   )

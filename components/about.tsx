@@ -13,6 +13,7 @@ import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
 import { skillLogos } from "@/lib/skill-logos"
 import { Tooltip } from "@/components/ui/tooltip"
+import FilterSheet from "@/components/filter-sheet"
 import { followInPlace, projectPath } from "@/lib/routes"
 
 // Map of icon strings to Lucide components
@@ -60,7 +61,6 @@ export default function About() {
   // the tooltips read it; the section navigation switches with CSS instead.
   const [isMobile, setIsMobile] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
 
   // Add new state for timeline filters
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(['achievement', 'experience', 'education', 'freelance']))
@@ -310,25 +310,6 @@ export default function About() {
     })
   }
 
-  // Function to close the mobile section modal when clicking outside
-  const handleCloseModal = (event: MouseEvent) => {
-    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-      setModalOpen(false);
-    }
-  };
-
-  // Handle clicks outside the modal
-  useEffect(() => {
-    if (modalOpen) {
-      document.addEventListener('mousedown', handleCloseModal);
-    } else {
-      document.removeEventListener('mousedown', handleCloseModal);
-    }
-    
-    return () => {
-      document.removeEventListener('mousedown', handleCloseModal);
-    };
-  }, [modalOpen]);
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
@@ -564,52 +545,33 @@ export default function About() {
                 </div>
               )}
 
-              {/* Modal for Mobile Filters */}
-              {modalOpen && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center">
-                  <div ref={modalRef} className="bg-gray-800 p-6 rounded-lg w-11/12 max-w-md relative">
-                    <h3 className="text-green-400 mb-4 font-bold flex items-center justify-between">
-                      <span>Filter Timeline</span>
-                      <button 
-                        onClick={() => setModalOpen(false)} 
-                        className="text-green-400 hover:text-green-300" 
-                        aria-label="Close modal"
-                      >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </h3>
-                    <div className="flex flex-col gap-4">
-                      {filterOptions.map((option) => (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            toggleFilter(option.id);
-                            // setModalOpen(false); // Close modal after selection
-                          }}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-md border transition-all duration-200 ${
-                            selectedFilters.has(option.id)
-                              ? 'border-green-500 bg-green-500/10 text-green-400'
-                              : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
-                          }`}
-                        >
-                          <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
-                            selectedFilters.has(option.id)
-                              ? 'border-green-500 bg-green-500'
-                              : 'border-green-500/50'
-                          }`}>
-                            {selectedFilters.has(option.id) && (
-                              <Check className="h-3 w-3 text-black" />
-                            )}
-                          </div>
-                          <span>{option.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              {/* Mobile filter sheet */}
+              <FilterSheet open={modalOpen} onClose={() => setModalOpen(false)} title="Filter Timeline">
+                <div className="flex flex-col gap-4">
+                  {filterOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => toggleFilter(option.id)}
+                      className={`flex min-h-[44px] items-center gap-2 px-4 py-2 rounded-md border transition-all duration-200 ${
+                        selectedFilters.has(option.id)
+                          ? 'border-green-500 bg-green-500/10 text-green-400'
+                          : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
+                        selectedFilters.has(option.id)
+                          ? 'border-green-500 bg-green-500'
+                          : 'border-green-500/50'
+                      }`}>
+                        {selectedFilters.has(option.id) && (
+                          <Check className="h-3 w-3 text-black" />
+                        )}
+                      </div>
+                      <span>{option.label}</span>
+                    </button>
+                  ))}
                 </div>
-              )}
+              </FilterSheet>
 
               {/* Timeline Items */}
               <div className="relative max-w-5xl mx-auto">

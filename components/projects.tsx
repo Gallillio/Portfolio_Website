@@ -11,6 +11,7 @@ import { useAchievements } from "@/lib/achievements-context"
 import Slideshow from "@/components/ui/Slideshow"
 import ImageModal from "@/lib/image-modal"
 import ProjectDetail from "@/components/project-detail"
+import FilterSheet from "@/components/filter-sheet"
 import { Tooltip } from "@/components/ui/tooltip"
 import type { ProjectImage } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -67,7 +68,6 @@ export default function Projects() {
   const [modalOpen, setModalOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const modalRef = useRef<HTMLDivElement>(null)
   const [searchTerm, setSearchTerm] = useState<string>("")
   // /projects/<slug> opens that project's write-up in place of the cards.
   const pathname = usePathname()
@@ -108,14 +108,12 @@ export default function Projects() {
     };
   }, []);
 
-  // Handle click outside dropdown and modal to close them
+  // Close the desktop dropdown on a click outside it. The phone sheet
+  // (components/filter-sheet.tsx) closes itself.
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
-      }
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setModalOpen(false);
       }
     };
 
@@ -340,9 +338,14 @@ export default function Projects() {
                   <input
                     type="text"
                     placeholder="Search technologies..."
+                    aria-label="Search technologies"
                     className="w-full p-2 border border-green-500 rounded-md bg-gray-800 text-green-400"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    enterKeyHint="search"
                   />
                 </div>
                 <div className="p-3 max-h-[40vh] overflow-y-auto custom-scrollbar">
@@ -376,70 +379,51 @@ export default function Projects() {
           </div>
         )}
 
-        {/* Mobile Filter Modal */}
-        {modalOpen && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center">
-            <div ref={modalRef} className="bg-gray-800 p-4 rounded-lg w-11/12 max-w-md max-h-[80vh] flex flex-col">
-              <div className="flex justify-between items-center border-b border-green-500/30 pb-3 mb-3">
-                <h3 className="text-green-400 font-bold">Filter by Technology</h3>
-                <button 
-                  onClick={() => setModalOpen(false)} 
-                  className="text-green-400 hover:text-green-300 p-1 rounded-full hover:bg-green-500/10" 
-                  aria-label="Close modal"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              
-              {/* Search Input for Mobile */}
-              <div className="p-3">
-                <input
-                  type="text"
-                  placeholder="Search technologies..."
-                  className="w-full p-2 border border-green-500 rounded-md bg-gray-800 text-green-400"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              <div className="overflow-y-auto flex-grow custom-scrollbar p-1">
-                <div className="grid grid-cols-2 gap-2">
-                  {filteredOptions.map((option) => (
-                    <button
-                      key={option.id}
-                      onClick={() => toggleFilter(option.id)}
-                      className={`flex min-h-[44px] items-center gap-2 px-2 py-2 rounded-md border transition-all duration-200 ${
-                        selectedFilters.has(option.id)
-                          ? 'border-green-500 bg-green-500/10 text-green-400'
-                          : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
-                      }`}
-                    >
-                      <div className={`w-4 h-4 shrink-0 border rounded flex items-center justify-center transition-colors ${
-                        selectedFilters.has(option.id)
-                          ? 'border-green-500 bg-green-500'
-                          : 'border-green-500/50'
-                      }`}>
-                        {selectedFilters.has(option.id) && (
-                          <Check className="h-3 w-3 text-black" />
-                        )}
-                      </div>
-                      <span className="min-w-0 text-left text-sm leading-tight [overflow-wrap:anywhere]">{option.label}</span>
-                    </button>
-                  ))}
+        {/* Mobile filter sheet */}
+        <FilterSheet
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          title="Filter by Technology"
+          toolbar={
+            <input
+              type="search"
+              placeholder="Search technologies..."
+              aria-label="Search technologies"
+              className="mt-2 w-full rounded-md border border-green-500/40 bg-transparent p-2 text-base text-green-300 placeholder:text-gray-500 focus:border-green-400 focus:outline-none"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="search"
+            />
+          }
+        >
+          <div className="grid grid-cols-2 gap-2">
+            {filteredOptions.map((option) => (
+              <button
+                key={option.id}
+                onClick={() => toggleFilter(option.id)}
+                className={`flex min-h-[44px] items-center gap-2 px-2 py-2 rounded-md border transition-all duration-200 ${
+                  selectedFilters.has(option.id)
+                    ? 'border-green-500 bg-green-500/10 text-green-400'
+                    : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
+                }`}
+              >
+                <div className={`w-4 h-4 shrink-0 border rounded flex items-center justify-center transition-colors ${
+                  selectedFilters.has(option.id)
+                    ? 'border-green-500 bg-green-500'
+                    : 'border-green-500/50'
+                }`}>
+                  {selectedFilters.has(option.id) && (
+                    <Check className="h-3 w-3 text-black" />
+                  )}
                 </div>
-              </div>
-              
-              <div className="pt-3 border-t border-green-500/30 mt-3 flex justify-end">
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="bg-green-500/20 hover:bg-green-500/30 text-green-400 px-4 py-2 rounded-md transition-colors duration-200"
-                >
-                  Apply Filters
-                </button>
-              </div>
-            </div>
+                <span className="min-w-0 text-left text-sm leading-tight [overflow-wrap:anywhere]">{option.label}</span>
+              </button>
+            ))}
           </div>
-        )}
+        </FilterSheet>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
