@@ -90,6 +90,22 @@
     animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
+  /* A phone's achievement toast rises from above the prompt and dock. */
+  @keyframes riseIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-rise-in {
+    animation: riseIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
   /* Add slide-up animation for achievement notification */
   @keyframes slideUp {
     0% {
@@ -354,7 +370,7 @@ html::-webkit-scrollbar-thumb:hover {
 }
 @media (max-width: 767px) {
   .scroll-to-top {
-    bottom: calc(var(--terminal-dock-h, 0px) + var(--terminal-prompt-h, 0px) + var(--kb, 0px) + 0.75rem);
+    bottom: calc(var(--terminal-dock-h, 0px) + var(--terminal-prompt-h, 0px) + var(--kb, 0px) + var(--toast-h, 0px) + 0.75rem);
     right: calc(1rem + env(safe-area-inset-right, 0px));
   }
 }
@@ -397,6 +413,7 @@ html::-webkit-scrollbar-thumb:hover {
   .animate-contract,
   .animate-fade-in,
   .animate-slide-down,
+  .animate-rise-in,
   .animate-slide-up,
   .chat-mode,
   .chat-cursor,
