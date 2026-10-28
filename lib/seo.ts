@@ -100,6 +100,11 @@ export function pageMetadata({
 const PERSON_ID = `${links.portfolio}/#person`
 const WEBSITE_ID = `${links.portfolio}/#website`
 
+// contentUpdated as a full date and time: Google reads dateModified as a DateTime
+// and reports a bare date as "Invalid datetime value". Midday UTC keeps the same
+// calendar date in Cairo and wherever else the page is read.
+const DATE_MODIFIED = `${contentUpdated}T12:00:00Z`
+
 // Enough for a page that only points at the person to name them on its own.
 const personRef = { "@type": "Person", "@id": PERSON_ID, name: NAME, url: links.portfolio }
 
@@ -147,7 +152,7 @@ export const profilePageJsonLd = {
   "@type": "ProfilePage",
   url: links.portfolio,
   name: SITE_TITLE,
-  dateModified: contentUpdated,
+  dateModified: DATE_MODIFIED,
   isPartOf: { "@id": WEBSITE_ID },
   mainEntity: personRef,
 }
@@ -157,7 +162,7 @@ export const aboutPageJsonLd = {
   "@type": "AboutPage",
   url: `${links.portfolio}/about`,
   name: `About ${NAME}`,
-  dateModified: contentUpdated,
+  dateModified: DATE_MODIFIED,
   isPartOf: { "@id": WEBSITE_ID },
   mainEntity: personRef,
 }
@@ -193,7 +198,7 @@ export function projectJsonLd(project: Project & { slug: string }) {
     image: project.images.map((image) => publicUrl(image.src)),
     keywords: project.technologies.join(", "),
     author: personRef,
-    dateModified: contentUpdated,
+    dateModified: DATE_MODIFIED,
     isPartOf: { "@id": WEBSITE_ID },
   }
 }
