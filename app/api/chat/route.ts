@@ -12,6 +12,7 @@ import type { ChatErrorBody, ChatErrorCode, ChatStreamFrame, ChatUsage } from "@
 import { encodeSSE, parseSSE } from "@/lib/ai/sse";
 import { checkRateLimit, clientKey } from "@/lib/ai/rate-limit";
 import { buildPayload, fetchGeminiStream, UpstreamError } from "@/lib/ai/gemini";
+import { admit, noteUpstream429, release, settle, type QuotaScope } from "@/lib/ai/quota";
 import { MAX_MESSAGE_CHARS, MAX_TOTAL_HISTORY_CHARS } from "@/lib/ai/config";
 
 export const runtime = "nodejs";
@@ -20,6 +21,12 @@ export const maxDuration = 60;
 
 /** Whole-request budget. */
 const REQUEST_TIMEOUT_MS = 45_000;
+/**
+ * No response headers from Google within this long means the free endpoint is
+ * stuck. Production saw calls sit the full 45s and then fail; a visitor should
+ * hear about that in seconds, not watch a thinking indicator for most of a minute.
+ */
+const FIRST_BYTE_TIMEOUT_MS = 15_000;
 /** Idle-between-deltas budget. Catches a hung upstream that the overall timeout would sit on. */
 const STALL_TIMEOUT_MS = 20_000;
 
@@ -29,26 +36,37 @@ function errorResponse(
   status: number,
   code: ChatErrorCode,
   message: string,
-  opts: { retryable?: boolean; detail?: string; retryAfterSec?: number } = {}
+  opts: { retryable?: boolean; detail?: string; retryAfterMs?: number } = {}
 ): Response {
   const body: ChatErrorBody = {
     code,
     message,
     retryable: opts.retryable ?? false,
+    ...(opts.retryAfterMs ? { retryAfterMs: Math.ceil(opts.retryAfterMs) } : {}),
     ...(opts.detail && !isProd ? { detail: opts.detail } : {}),
   };
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (opts.retryAfterSec) headers["Retry-After"] = String(opts.retryAfterSec);
+  if (opts.retryAfterMs) headers["Retry-After"] = String(Math.ceil(opts.retryAfterMs / 1000));
   return new Response(JSON.stringify(body), { status, headers });
 }
 
-/** Seconds until the Gemini free-tier daily quota resets (midnight US/Pacific). */
-function secondsUntilPacificMidnight(): number {
-  const now = new Date();
-  const pacificNow = new Date(now.toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-  const nextMidnight = new Date(pacificNow);
-  nextMidnight.setHours(24, 0, 0, 0);
-  return Math.max(60, Math.round((nextMidnight.getTime() - pacificNow.getTime()) / 1000));
+/** The free-tier cap is reached, whether Google said so or our own ledger did. */
+function quotaResponse(scope: QuotaScope, retryAfterMs: number, detail?: string): Response {
+  if (scope === "per-day") {
+    return errorResponse(
+      429,
+      "UPSTREAM_QUOTA_EXHAUSTED",
+      "The daily AI quota has been used up. It resets at midnight Pacific.",
+      // Not retryable in any useful sense: the cap will not clear for hours.
+      { retryable: false, detail, retryAfterMs }
+    );
+  }
+  return errorResponse(
+    429,
+    "UPSTREAM_RATE_LIMITED",
+    "The AI service hit its per-minute limit.",
+    { retryable: true, detail, retryAfterMs }
+  );
 }
 
 interface ValidBody {
@@ -119,7 +137,8 @@ interface GeminiChunk {
 /** Transform Google's SSE stream into our own frame protocol. */
 function toClientStream(
   upstream: ReadableStream<Uint8Array>,
-  requestId: string
+  requestId: string,
+  onUsage: (usage: ChatUsage) => void
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
 
@@ -203,6 +222,7 @@ function toClientStream(
           send({ type: "done", finishReason, usage });
         }
 
+        if (usage) onUsage(usage);
         console.log("[chat] completed", { requestId, finishReason, usage, sawText });
       } catch (error) {
         console.error("[chat] stream failed", { requestId, error });
@@ -243,7 +263,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!limit.ok) {
     return errorResponse(429, "RATE_LIMITED", "Too many messages. Give it a moment.", {
       retryable: true,
-      retryAfterSec: limit.retryAfterSec,
+      retryAfterMs: limit.retryAfterSec * 1000,
     });
   }
 
@@ -257,33 +277,39 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  const payload = buildPayload(validated.message, validated.conversationHistory);
+  const payloadChars = JSON.stringify(payload).length;
+
+  // Refuse here, instantly and with an exact wait, when the request cannot fit
+  // in this minute's free-tier budget. Calling Google anyway would only buy the
+  // visitor a slower 429.
+  const admission = admit(payloadChars);
+  if (!admission.ok) {
+    console.log("[chat] held back by quota ledger", { requestId, ...admission });
+    return quotaResponse(admission.scope, admission.retryAfterMs);
+  }
+  const { reservation } = admission;
+
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
-  const signal = AbortSignal.any([request.signal, timeout]);
+  // Cleared as soon as headers arrive, so it can never cut a stream that started.
+  const firstByte = new AbortController();
+  const firstByteTimer = setTimeout(() => firstByte.abort(), FIRST_BYTE_TIMEOUT_MS);
+  const signal = AbortSignal.any([request.signal, timeout, firstByte.signal]);
 
   let upstream: Response;
   try {
-    upstream = await fetchGeminiStream(
-      buildPayload(validated.message, validated.conversationHistory),
-      { signal, apiKey, requestId }
-    );
+    upstream = await fetchGeminiStream(payload, { signal, apiKey, requestId });
   } catch (error) {
     if (error instanceof UpstreamError) {
+      // Google answered with an error, so it generated nothing. A timeout or a
+      // visitor leaving keeps the reservation: Google may already be counting it.
+      release(reservation);
+
       if (error.status === 429) {
-        if (error.quotaScope === "per-day") {
-          return errorResponse(
-            429,
-            "UPSTREAM_QUOTA_EXHAUSTED",
-            "The daily AI quota has been used up. It resets at midnight Pacific.",
-            // Not retryable in any useful sense: the cap will not clear for hours.
-            { retryable: false, detail: error.detail, retryAfterSec: secondsUntilPacificMidnight() }
-          );
-        }
-        return errorResponse(
-          429,
-          "UPSTREAM_RATE_LIMITED",
-          "The AI service hit its per-minute limit. Try again in a minute.",
-          { retryable: true, detail: error.detail, retryAfterSec: 60 }
+        const { retryAfterMs, scope } = noteUpstream429(
+          error.quota ?? { scope: "per-minute", metric: "unknown" }
         );
+        return quotaResponse(scope, retryAfterMs, error.detail);
       }
       if (error.status === 503 || error.status === 500 || error.status === 504) {
         return errorResponse(
@@ -301,7 +327,8 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    if (timeout.aborted) {
+    if (timeout.aborted || firstByte.signal.aborted) {
+      console.error("[chat] upstream timed out", { requestId, firstByte: firstByte.signal.aborted });
       return errorResponse(504, "TIMEOUT", "The assistant took too long to respond.", {
         retryable: true,
       });
@@ -314,9 +341,15 @@ export async function POST(request: Request): Promise<Response> {
     return errorResponse(500, "UNKNOWN", "Something went wrong reaching the assistant.", {
       retryable: true,
     });
+  } finally {
+    clearTimeout(firstByteTimer);
   }
 
-  return new Response(toClientStream(upstream.body as ReadableStream<Uint8Array>, requestId), {
+  const stream = toClientStream(upstream.body as ReadableStream<Uint8Array>, requestId, (usage) =>
+    settle(reservation, usage.input, payloadChars)
+  );
+
+  return new Response(stream, {
     status: 200,
     headers: {
       "Content-Type": "text/event-stream; charset=utf-8",

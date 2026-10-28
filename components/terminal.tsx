@@ -21,6 +21,7 @@ import { isCoarsePointer, PHONE_WIDTH, prefersReducedMotion } from "@/lib/media"
 import { tabScroller, transcriptBlocks } from "@/lib/scroll"
 import { usePublishHeight } from "@/lib/use-publish-height"
 import ChatFollowUps from "./chat-follow-ups"
+import ChatQuotaNotice, { quotaKindFor, type QuotaKind } from "./chat-quota-notice"
 import TerminalDock from "./terminal-dock"
 import CommandSheet from "./command-sheet"
 import PageMenu from "./page-menu"
@@ -161,6 +162,9 @@ function TerminalContent(): React.ReactNode {
   const requestGenRef = useRef(0)
   // Date.now() collides when two entries commit in the same millisecond.
   const messageKeyRef = useRef(0)
+  // Set when a free-tier limit is hit. Until it passes, a new question gets the
+  // countdown again straight away instead of a round trip that can only fail.
+  const chatPausedRef = useRef<{ until: number; kind: QuotaKind } | null>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
@@ -451,6 +455,19 @@ function TerminalContent(): React.ReactNode {
     ]);
   };
 
+  const commitQuotaNotice = (kind: QuotaKind, retryAt: number, question: string) => {
+    const key = `chat-${messageKeyRef.current++}`;
+    setHistory(prev => [
+      ...prev,
+      {
+        command: "",
+        output: [<ChatQuotaNotice key={key} kind={kind} retryAt={retryAt} question={question} onAsk={runCommand} />],
+        timestamp: new Date(),
+        isError: false
+      }
+    ]);
+  };
+
   // Stops the answer being written and keeps what has arrived, staying in
   // chat. Ctrl+C and the Stop button both land here; the button is the touch
   // screen's way out of a long answer.
@@ -507,6 +524,16 @@ function TerminalContent(): React.ReactNode {
         return;
       }
 
+      const paused = chatPausedRef.current;
+      if (paused && paused.until > Date.now()) {
+        setHistory(prev => [
+          ...prev,
+          { command: trimmedInput, output: [], timestamp: new Date(), isError: false }
+        ]);
+        commitQuotaNotice(paused.kind, paused.until, trimmedInput);
+        return;
+      }
+
       // Add user's message to history immediately
       const newUserMessage: ChatMessage = { role: 'user', content: trimmedInput };
       setChatHistory(prevChat => [...prevChat, newUserMessage]);
@@ -553,6 +580,19 @@ function TerminalContent(): React.ReactNode {
             if (error.partial) {
               setChatHistory(prevChat => [...prevChat, { role: 'model', content: error.partial }]);
               commitAssistant(error.partial, "normal");
+            } else {
+              // Unanswered, so it must not stay in the history: asking again
+              // would otherwise send the same question twice in a row.
+              setChatHistory(prevChat => prevChat.filter(m => m !== newUserMessage));
+            }
+            const quotaKind = quotaKindFor(error.code);
+            if (quotaKind && error.retryAfterMs && !error.partial) {
+              const until = Date.now() + error.retryAfterMs;
+              chatPausedRef.current = { until, kind: quotaKind };
+              console.info("[chat]", error.code, error.message, { retryAfterMs: error.retryAfterMs });
+              commitQuotaNotice(quotaKind, until, trimmedInput);
+              streamingRef.current?.reset();
+              return;
             }
             // Quota, overload and misconfiguration are Ahmed's problem, not the
             // visitor's — those read as the assistant talking, not as a red error.
