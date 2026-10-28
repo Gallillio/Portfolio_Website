@@ -125,7 +125,7 @@ export default function AchievementNotification({
   // slide-down animation and the swipe both set `transform`.
   const positionClass = isMobile
     ? "inset-x-0 mx-auto w-[calc(100%-1.5rem)] max-w-sm"
-    : "top-4 right-4 w-80";
+    : "top-4 right-[calc(1rem+env(safe-area-inset-right,0px))] w-80";
   const positionStyle = isMobile
     ? { top: "calc(var(--terminal-header-h, env(safe-area-inset-top, 0px)) + 0.5rem)" }
     : undefined;

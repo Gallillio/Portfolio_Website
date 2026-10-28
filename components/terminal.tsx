@@ -825,7 +825,7 @@ function TerminalContent(): React.ReactNode {
               // here may clip or transform, or the header, prompt and dock could
               // no longer pin to the screen. A touch iPad: the window fills the
               // screen, as fullscreen does on a desktop.
-              : 'max-md:flex max-md:min-h-[100svh] max-md:w-full max-md:flex-col max-md:overflow-visible max-md:rounded-none max-md:border-0 max-md:transform-none md:w-full md:max-w-5xl 2xl:max-w-6xl md:rounded-md md:relative md:coarse:fixed md:coarse:inset-0 md:coarse:z-50 md:coarse:flex md:coarse:h-[100dvh] md:coarse:max-w-none md:coarse:flex-col md:coarse:rounded-none md:coarse:border-0'
+              : 'max-md:flex max-md:min-h-[100svh] max-md:w-full max-md:flex-col max-md:overflow-visible max-md:rounded-none max-md:border-0 max-md:transform-none md:w-full md:max-w-5xl 2xl:max-w-6xl md:rounded-md md:relative md:coarse:fixed md:coarse:inset-0 md:coarse:z-50 md:coarse:flex md:coarse:h-[100dvh] md:coarse:max-w-none md:coarse:flex-col md:coarse:rounded-none md:coarse:border-0 md:coarse:pl-[env(safe-area-inset-left,0px)] md:coarse:pr-[env(safe-area-inset-right,0px)]'
           } ${animationClass} ${isMinimized || isClosing ? 'h-10 overflow-hidden' : ''}
           ${chatLook
             ? 'shadow-gray-400/30 hover:shadow-gray-400/50'
@@ -862,7 +862,7 @@ function TerminalContent(): React.ReactNode {
                   <div className="w-3 h-3 rounded-full bg-red-500 group-hover:bg-red-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(239,68,68,0.7)]"></div>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                    className="absolute opacity-0 group-hover:opacity-100 coarse:opacity-100 group-disabled:hidden transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
                     width="10"
                     height="10"
                     viewBox="0 0 24 24"
@@ -885,7 +885,7 @@ function TerminalContent(): React.ReactNode {
                   <div className="w-3 h-3 rounded-full bg-yellow-500 group-hover:bg-yellow-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(234,179,8,0.7)]"></div>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                    className="absolute opacity-0 group-hover:opacity-100 coarse:opacity-100 group-disabled:hidden transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
                     width="10"
                     height="10"
                     viewBox="0 0 24 24"
@@ -902,12 +902,13 @@ function TerminalContent(): React.ReactNode {
                 <button
                   className="touch-hit group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
                   onClick={isMinimized ? handleRestore : (!isMobile ? toggleFullscreen : undefined)}
+                  disabled={isMobile && !isMinimized}
                   aria-label={isFullscreen ? "Exit fullscreen" : (isMinimized ? "Restore" : "Enter fullscreen")}
                 >
                   <div className={`w-3 h-3 rounded-full transition-all duration-200 bg-green-500 group-hover:bg-green-600 group-hover:shadow-[0_0_3px_rgba(34,197,94,0.7)]'}`}></div>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                    className="absolute opacity-0 group-hover:opacity-100 coarse:opacity-100 group-disabled:hidden transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
                     width="10"
                     height="10"
                     viewBox="0 0 24 24"
@@ -1149,14 +1150,14 @@ function TerminalContent(): React.ReactNode {
                   {/* More arrived below while the visitor read further up. Pinned
                       just above the prompt (and the dock, on a phone). */}
                   {hasUnseenOutput && (
-                    <div className="sticky bottom-3 z-30 flex h-0 justify-center max-md:bottom-[calc(var(--terminal-dock-h,0px)+var(--terminal-prompt-h,0px)+0.75rem)]">
+                    <div className="sticky bottom-3 z-30 flex h-0 justify-center max-md:bottom-[calc(var(--terminal-dock-h,0px)+var(--terminal-prompt-h,0px)+var(--kb,0px)+0.75rem)]">
                       <button
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation()
                           scrollTranscriptToEnd()
                         }}
-                        className="flex min-h-[40px] -translate-y-full items-center gap-1.5 rounded-full border border-blue-400/60 bg-gray-800 px-4 font-mono text-sm text-blue-200 shadow-lg shadow-black/60 active:bg-gray-700"
+                        className="flex min-h-[44px] -translate-y-full items-center gap-1.5 rounded-full border border-blue-400/60 bg-gray-800 px-4 font-mono text-sm text-blue-200 shadow-lg shadow-black/60 active:bg-gray-700"
                       >
                         New reply <span aria-hidden="true">↓</span>
                       </button>
@@ -1258,7 +1259,7 @@ function TerminalContent(): React.ReactNode {
       </div>
 
       {(isMinimized || isClosing) && (
-        <div className={`fixed inset-4 z-40 bg-black p-6 flex flex-col justify-center items-center text-center shadow-lg font-mono rounded-md border
+        <div className={`fixed inset-4 z-40 bg-black p-6 flex flex-col overflow-y-auto [justify-content:safe_center] items-center text-center shadow-lg font-mono rounded-md border
           ${isChatMode && activeTab === "terminal" 
             ? 'border-gray-400 shadow-gray-400/30' 
             : 'border-green-500 shadow-green-500/30'}`}>

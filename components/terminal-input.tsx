@@ -313,7 +313,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
         e.stopPropagation()
         setInput((prev) => prev + suggestion)
       }}
-      className="hidden coarse:inline-flex shrink-0 items-center gap-1 self-center rounded border border-green-500/50 px-2.5 min-h-[36px] ml-2 font-mono text-sm text-green-300 active:bg-green-500/20"
+      className="hidden coarse:inline-flex shrink-0 items-center gap-1 self-center rounded border border-green-500/50 px-2.5 min-h-[44px] ml-2 font-mono text-sm text-green-300 active:bg-green-500/20"
       aria-label={`Complete to ${input}${suggestion}`}
     >
       {input}{suggestion}
@@ -394,7 +394,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
               e.stopPropagation()
               onStop()
             }}
-            className="ml-2 inline-flex shrink-0 items-center gap-1.5 self-center rounded border border-gray-500 px-2.5 py-1 coarse:min-h-[40px] font-mono text-sm text-gray-200 hover:bg-gray-700 active:bg-gray-700"
+            className="ml-2 inline-flex shrink-0 items-center gap-1.5 self-center rounded border border-gray-500 px-2.5 py-1 coarse:min-h-[44px] font-mono text-sm text-gray-200 hover:bg-gray-700 active:bg-gray-700"
           >
             <span aria-hidden="true" className="inline-block h-2.5 w-2.5 bg-current" />
             Stop

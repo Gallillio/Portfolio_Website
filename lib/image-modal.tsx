@@ -6,6 +6,7 @@ import Image, { getImageProps } from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { getImageMeta, isGif } from "@/lib/image-meta"
 import { useCloseOnBack } from "@/lib/use-close-on-back"
+import { useLockPageScroll } from "@/lib/use-lock-page-scroll"
 import type { ProjectImage } from "@/lib/types"
 
 /*
@@ -141,17 +142,18 @@ const ImageModal: React.FC<ImageModalProps> = ({ images, index, onIndexChange, o
     },
   }
 
-  // Hold the page still and take focus while open; hand focus back on close.
-  // Only opening and closing re-run this, so stepping slides leaves it alone.
+  // Hold the page still: overflow: hidden on the body, used before, doesn't
+  // stop iOS scrolling the page behind.
+  useLockPageScroll(isOpen)
+
+  // Take focus while open; hand it back on close. Only opening and closing
+  // re-run this, so stepping slides leaves it alone.
   useEffect(() => {
     if (!isOpen) return
-    const previousOverflow = document.body.style.overflow
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    document.body.style.overflow = "hidden"
     dialogRef.current?.focus()
     return () => {
-      document.body.style.overflow = previousOverflow
-      previousFocus?.focus()
+      previousFocus?.focus({ preventScroll: true })
     }
   }, [isOpen])
 
@@ -183,7 +185,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ images, index, onIndexChange, o
     // The frame limits leave room for the paddings (4rem across, the borders 2px)
     // and for the header (7rem down in all), so phones in landscape fit too.
     <div
-      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm [--lb-max-h:calc(100svh-7rem)] [--lb-max-w:calc(100vw-4rem-2px)] md:[--lb-max-w:calc(92vw-2rem-2px)]"
+      className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm [--lb-max-h:calc(100svh-7rem)] [--lb-max-w:calc(100vw-4rem-2px-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px))] md:[--lb-max-w:calc(92vw-2rem-2px-env(safe-area-inset-left,0px)-env(safe-area-inset-right,0px))]"
       onClick={onClose}
     >
       <div

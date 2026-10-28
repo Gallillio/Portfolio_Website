@@ -65,7 +65,7 @@ export default function ProjectDetail({
           <a
             href={pathForTab("projects")}
             onClick={onBack}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded border border-green-500/60 px-2.5 py-1 text-sm text-green-400 transition-colors hover:bg-green-500/10 hover:text-green-300"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded border border-green-500/60 px-2.5 py-1 text-sm text-green-400 transition-colors hover:bg-green-500/10 hover:text-green-300 active:bg-green-500/10 coarse:min-h-[44px]"
           >
             <ArrowLeft size={14} aria-hidden="true" />
             Projects
@@ -82,7 +82,7 @@ export default function ProjectDetail({
           {project.title}
         </h1>
         {project.tagline && <p className="mt-1 text-green-300">{capitalize(project.tagline)}</p>}
-        {facts.length > 0 && <p className="mt-2 text-xs text-green-300/60 md:text-sm">{facts.join(" · ")}</p>}
+        {facts.length > 0 && <p className="mt-2 text-sm text-green-300/60">{facts.join(" · ")}</p>}
 
         <p className="mt-6 whitespace-pre-line">{project.description}</p>
 
@@ -174,7 +174,7 @@ export default function ProjectDetail({
                         className="h-auto w-full"
                       />
                     </button>
-                    <figcaption className="mt-2 text-xs text-green-300/60">{image.alt}</figcaption>
+                    <figcaption className="mt-2 text-sm text-green-300/60">{image.alt}</figcaption>
                   </figure>
                 )
               })}
@@ -192,7 +192,7 @@ export default function ProjectDetail({
           </ul>
         </Section>
 
-        {study?.note && <p className="mt-8 border-t border-green-500/20 pt-4 text-xs text-green-300/60">{study.note}</p>}
+        {study?.note && <p className="mt-8 border-t border-green-500/20 pt-4 text-sm text-green-300/60">{study.note}</p>}
 
         <nav aria-label="More projects" className="mt-12 grid gap-3 border-t border-green-500/30 pt-6 sm:grid-cols-2">
           <SiblingLink project={previous} direction="previous" onOpenProject={onOpenProject} />
@@ -204,13 +204,13 @@ export default function ProjectDetail({
 }
 
 const buttonClass =
-  "inline-flex items-center gap-2 rounded-md border border-green-500 bg-black px-3 py-1.5 text-sm text-green-400 transition-colors hover:bg-green-500/20"
+  "inline-flex items-center gap-2 rounded-md border border-green-500 bg-black px-3 py-1.5 text-sm text-green-400 transition-colors hover:bg-green-500/20 active:bg-green-500/20 coarse:min-h-[44px]"
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mt-8">
       {/* The "## " is drawn by CSS, so the heading's text, and what crawlers read, stays the title alone. */}
-      <h2 className="mb-3 text-xs uppercase tracking-wider text-green-500 before:content-['##_'] md:text-sm">{title}</h2>
+      <h2 className="mb-3 text-sm uppercase tracking-wider text-green-500 before:content-['##_']">{title}</h2>
       {children}
     </section>
   )
@@ -232,13 +232,13 @@ function SiblingLink({
       onClick={(event) => onOpenProject(event, project.slug)}
       className={`group block rounded-md border border-green-500/40 p-4 transition-colors hover:border-green-500 hover:bg-green-500/5 ${isNext ? "sm:text-right" : ""}`}
     >
-      <span className={`flex items-center gap-1.5 text-xs text-green-300/60 ${isNext ? "sm:justify-end" : ""}`}>
+      <span className={`flex items-center gap-1.5 text-sm text-green-300/60 ${isNext ? "sm:justify-end" : ""}`}>
         {!isNext && <ArrowLeft size={12} aria-hidden="true" />}
         {isNext ? "Next project" : "Previous project"}
         {isNext && <ArrowRight size={12} aria-hidden="true" />}
       </span>
       <span className="mt-1 block font-semibold text-green-400 group-hover:text-green-300">{project.title}</span>
-      {project.tagline && <span className="block text-xs text-green-300/60">{capitalize(project.tagline)}</span>}
+      {project.tagline && <span className="block text-sm text-green-300/60">{capitalize(project.tagline)}</span>}
     </a>
   )
 }

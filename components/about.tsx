@@ -345,7 +345,7 @@ export default function About() {
                 onClick={handleBioToggle}
                 aria-expanded={isBioExpanded}
                 aria-controls="bio-text"
-                className="mt-4 self-start text-green-400 hover:text-green-300 transition-colors duration-200 flex items-center gap-1"
+                className="mt-4 self-start text-green-400 hover:text-green-300 active:text-green-300 transition-colors duration-200 flex items-center gap-1 coarse:min-h-[44px]"
               >
                 {isBioExpanded ? (
                   <>
@@ -985,7 +985,7 @@ export default function About() {
                       {/* Learn More button */}
                       <button
                         onClick={() => toggleExperience(index)}
-                        className="mt-3 px-3 py-1.5 text-green-400 hover:text-green-300 transition-all duration-200 flex items-center gap-2 text-sm border border-green-500/30 hover:border-green-400 rounded-md bg-green-500/5 hover:bg-green-500/10"
+                        className="mt-3 px-3 py-1.5 text-green-400 hover:text-green-300 transition-all duration-200 flex items-center gap-2 text-sm border border-green-500/30 hover:border-green-400 rounded-md bg-green-500/5 hover:bg-green-500/10 active:bg-green-500/10 coarse:min-h-[44px]"
                       >
                         {expandedExperiences.has(index) ? (
                           <>
@@ -1116,13 +1116,13 @@ export default function About() {
                             href={project.github}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md"
+                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 active:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md coarse:min-h-[44px]"
                           >
                             <Github size={16} className="mr-1" />
                             Code
                           </a>
                         ) : (
-                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50">
+                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50 coarse:min-h-[44px]">
                             <Github size={16} className="mr-1" />
                             Code
                           </span>
@@ -1143,13 +1143,13 @@ export default function About() {
                             href={project.demo}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md"
+                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 active:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md coarse:min-h-[44px]"
                           >
                             <ExternalLink size={16} className="mr-1" />
                             Check it out!
                           </a>
                         ) : (
-                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50">
+                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50 coarse:min-h-[44px]">
                             <ExternalLink size={16} className="mr-1" />
                             Check it out!
                           </span>

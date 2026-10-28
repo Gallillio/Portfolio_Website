@@ -331,11 +331,11 @@ html::-webkit-scrollbar-thumb:hover {
    inside the safe area. */
 .scroll-to-top {
   bottom: 1.5rem;
-  right: 1.5rem;
+  right: calc(1.5rem + env(safe-area-inset-right, 0px));
 }
 @media (max-width: 767px) {
   .scroll-to-top {
-    bottom: calc(var(--terminal-dock-h, 0px) + var(--terminal-prompt-h, 0px) + 0.75rem);
+    bottom: calc(var(--terminal-dock-h, 0px) + var(--terminal-prompt-h, 0px) + var(--kb, 0px) + 0.75rem);
     right: calc(1rem + env(safe-area-inset-right, 0px));
   }
 }
