@@ -21,10 +21,12 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        // On touch screens every size is at least 44px tall, a finger's target
+        // (Apple's minimum); a mouse keeps the compact sizes.
+        default: "h-9 px-4 py-2 coarse:h-11",
+        sm: "h-8 rounded-md px-3 text-xs coarse:h-11 coarse:px-4 coarse:text-sm",
+        lg: "h-10 rounded-md px-8 coarse:h-11",
+        icon: "h-9 w-9 coarse:h-11 coarse:w-11",
       },
     },
     defaultVariants: {

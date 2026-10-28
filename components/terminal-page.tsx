@@ -10,7 +10,8 @@ import { JsonLd } from "@/components/static-page"
  */
 export default function TerminalPage({ jsonLd }: { jsonLd: object[] }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-4 md:p-8 bg-black">
+    // No padding on a phone, where the terminal is the page.
+    <main className="flex min-h-screen flex-col items-center justify-between max-md:p-0 md:p-8 bg-black">
       {jsonLd.map((data, index) => (
         <JsonLd key={index} data={data} />
       ))}

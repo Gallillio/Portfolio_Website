@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"
 import Image, { getImageProps } from "next/image"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { getImageMeta, isGif } from "@/lib/image-meta"
+import { useCloseOnBack } from "@/lib/use-close-on-back"
 import type { ProjectImage } from "@/lib/types"
 
 /*
@@ -109,6 +110,37 @@ const ImageModal: React.FC<ImageModalProps> = ({ images, index, onIndexChange, o
     return () => window.removeEventListener("keydown", onKey)
   }, [isOpen, images.length, onClose, step])
 
+  // Back closes the viewer rather than leaving the project under it.
+  useCloseOnBack(isOpen, onClose, "image-viewer")
+
+  // A finger swipes between slides and swipes down to close. Read from touch
+  // events without preventing anything, so pinch-zoom still works; a gesture
+  // that ever had two fingers on the glass is a pinch and is ignored.
+  const swipe = useRef<{ x: number; y: number; pinch: boolean } | null>(null)
+  const swipeHandlers = {
+    onTouchStart: (e: React.TouchEvent) => {
+      if (e.touches.length > 1) {
+        if (swipe.current) swipe.current.pinch = true
+        return
+      }
+      swipe.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, pinch: false }
+    },
+    onTouchMove: (e: React.TouchEvent) => {
+      if (e.touches.length > 1 && swipe.current) swipe.current.pinch = true
+    },
+    onTouchEnd: (e: React.TouchEvent) => {
+      const start = swipe.current
+      if (!start || e.touches.length > 0) return
+      swipe.current = null
+      // Zoomed in, a drag pans the picture; it isn't a swipe.
+      if (start.pinch || (window.visualViewport?.scale ?? 1) > 1.05) return
+      const dx = e.changedTouches[0].clientX - start.x
+      const dy = e.changedTouches[0].clientY - start.y
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) && images.length > 1) step(dx < 0 ? 1 : -1)
+      else if (dy > 80 && dy > Math.abs(dx)) onClose()
+    },
+  }
+
   // Hold the page still and take focus while open; hand focus back on close.
   // Only opening and closing re-run this, so stepping slides leaves it alone.
   useEffect(() => {
@@ -162,21 +194,29 @@ const ImageModal: React.FC<ImageModalProps> = ({ images, index, onIndexChange, o
         tabIndex={-1}
         className="relative rounded-md bg-gray-900/95 outline-none"
         onClick={(e) => e.stopPropagation()}
+        {...swipeHandlers}
       >
         {/* Header Bar */}
-        <div className="flex items-center justify-between bg-black/50 px-4 py-2 border-b border-green-500/50 rounded-t-md">
+        <div className="flex items-center justify-between bg-black/50 px-4 py-1 border-b border-green-500/50 rounded-t-md">
           <div className="flex space-x-2">
             {/* Close Button */}
             <button
-              className="w-3 h-3 rounded-full bg-red-500 border border-red-600 hover:bg-red-600 transition-colors"
+              className="touch-hit w-3 h-3 rounded-full bg-red-500 border border-red-600 hover:bg-red-600 transition-colors"
               onClick={onClose}
               aria-label="Close"
             ></button>
             <div className="w-3 h-3 rounded-full bg-yellow-500/80 border border-yellow-600"></div>
             <div className="w-3 h-3 rounded-full bg-green-500/80 border border-green-600"></div>
           </div>
-          <button className="text-green-500 hover:text-green-400 transition-colors" onClick={onClose} aria-label="Close">
-            <X size={18} />
+          {/* Where you are in the set: dots alone are too small to read on a phone. */}
+          {images.length > 1 && (
+            <span className="font-mono text-xs text-green-400/80 tabular-nums" aria-live="polite">
+              {index + 1} / {images.length}
+            </span>
+          )}
+          {/* 44px to hit with a finger; the icon stays small. */}
+          <button className="-mr-3 flex h-11 w-11 items-center justify-center text-green-500 hover:text-green-400 transition-colors" onClick={onClose} aria-label="Close">
+            <X size={20} />
           </button>
         </div>
 
@@ -196,22 +236,22 @@ const ImageModal: React.FC<ImageModalProps> = ({ images, index, onIndexChange, o
               <button
                 onClick={() => step(-1)}
                 aria-label="Previous image"
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-800 text-white p-2 coarse:p-2.5 rounded-full hover:bg-gray-700 transition-colors"
               >
                 <ChevronLeft size={24} />
               </button>
               <button
                 onClick={() => step(1)}
                 aria-label="Next image"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-800 text-white p-2 coarse:p-2.5 rounded-full hover:bg-gray-700 transition-colors"
               >
                 <ChevronRight size={24} />
               </button>
             </>
           )}
-          {/* Indicator Dots */}
+          {/* Indicator Dots, for a mouse; a finger swipes, and the header counts. */}
           {images.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-2 bg-gray-800 bg-opacity-70 p-2 rounded-md">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-2 bg-gray-800 bg-opacity-70 p-2 rounded-md coarse:hidden">
               {images.map((_, dot) => (
                 <button
                   key={dot}

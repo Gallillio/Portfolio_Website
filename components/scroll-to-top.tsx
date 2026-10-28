@@ -130,7 +130,8 @@ export const ScrollToTop = () => {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 p-2 bg-gray-900 text-white rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300 z-50 flex items-center justify-center"
+          // Placed by .scroll-to-top in globals.css, clear of the phone's pinned prompt and dock.
+          className="scroll-to-top fixed p-2.5 bg-gray-900 text-white rounded-full shadow-lg hover:bg-gray-700 transition-colors duration-300 z-30 flex items-center justify-center"
           aria-label="Scroll to top"
         >
           <ArrowUp size={24} />

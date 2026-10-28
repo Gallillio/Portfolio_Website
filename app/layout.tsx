@@ -23,6 +23,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',  // Enable safe area on modern mobile devices
+  // Android shrinks the page when the keyboard opens, so the pinned prompt
+  // rises with it. iOS ignores this; components/terminal.tsx moves it there.
+  interactiveWidget: 'resizes-content',
+  themeColor: '#000000',
 };
 
 // The home page's metadata; the other pages build their own with pageMetadata

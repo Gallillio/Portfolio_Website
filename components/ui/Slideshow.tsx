@@ -5,6 +5,8 @@ import { useState, useEffect, useRef, TouchEvent } from "react";
 import Image from "next/image";
 import { getImageMeta, isGif } from "@/lib/image-meta";
 import { lightboxIntentHandlers } from "@/lib/image-modal";
+import { COARSE_POINTER, REDUCED_MOTION, useMediaQuery } from "@/lib/media";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ProjectImage } from "@/lib/types";
 
 interface SlideshowProps {
@@ -25,7 +27,17 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, onImageClick }) => {
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
-  const paused = hovered || focused || touching;
+  // No autoplay for a finger or for reduced motion. On a phone there's no hover
+  // to hold a slide still, so it moved on while someone was looking at it
+  // (NN/g's carousel advice; WCAG 2.2.2 wants a pause control otherwise).
+  // Touch gets arrows and a count instead.
+  const touch = useMediaQuery(COARSE_POINTER);
+  const reducedMotion = useMediaQuery(REDUCED_MOTION);
+  const paused = hovered || focused || touching || touch || reducedMotion;
+
+  const go = (by: number) => {
+    setCurrentImageIndex((prevIndex) => (prevIndex + by + images.length) % images.length);
+  };
 
   useEffect(() => {
     if (images.length < 2 || paused) return; // Only autoplay when there are multiple images
@@ -58,13 +70,8 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, onImageClick }) => {
       const swipeDistance = touchEndX.current - touchStartX.current;
 
       if (Math.abs(swipeDistance) > minSwipeDistance) {
-        if (swipeDistance > 0) {
-          // Swipe right, go to previous image
-          setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-        } else {
-          // Swipe left, go to next image
-          setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-        }
+        // Swipe right for the previous image, left for the next.
+        go(swipeDistance > 0 ? -1 : 1);
       }
     }
 
@@ -135,9 +142,34 @@ const Slideshow: React.FC<SlideshowProps> = ({ images, onImageClick }) => {
           </div>
         );
       })}
+      {/* Touch: arrows big enough for a thumb and a count, since 8px dots can be
+          neither read nor hit. Hidden with a mouse, which keeps the dots. */}
+      {images.length > 1 && (
+        <div className="hidden coarse:contents">
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="Previous image"
+            className="absolute left-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-gray-900/75 text-green-300 active:bg-gray-700"
+          >
+            <ChevronLeft size={22} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="Next image"
+            className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-gray-900/75 text-green-300 active:bg-gray-700"
+          >
+            <ChevronRight size={22} aria-hidden="true" />
+          </button>
+          <span aria-live="polite" className="absolute bottom-2 right-2 rounded bg-gray-900/80 px-2 py-0.5 font-mono text-xs tabular-nums text-green-300">
+            {currentImageIndex + 1} / {images.length}
+          </span>
+        </div>
+      )}
       {/* Indicator Dots with Background, only show if more than one image */}
       {images.length > 1 && (
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-gray-800 bg-opacity-70 p-2 rounded-md">
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2 bg-gray-800 bg-opacity-70 p-2 rounded-md coarse:hidden">
           {images.map((_, index) => (
             <button
               key={index}
