@@ -43,6 +43,12 @@ export interface ChatErrorBody {
   code: ChatErrorCode;
   message: string;
   retryable: boolean;
+  /**
+   * How long until a retry can succeed, for the three limit codes
+   * (RATE_LIMITED, UPSTREAM_RATE_LIMITED, UPSTREAM_QUOTA_EXHAUSTED). Relative
+   * rather than a timestamp, so a visitor's skewed clock cannot distort it.
+   */
+  retryAfterMs?: number;
   /** Upstream detail, included outside production only. */
   detail?: string;
 }

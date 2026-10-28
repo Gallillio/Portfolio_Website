@@ -9,7 +9,9 @@ export class ChatError extends Error {
   constructor(
     readonly code: ChatErrorCode,
     message: string,
-    readonly retryable: boolean = false
+    readonly retryable: boolean = false,
+    /** Set for the limit codes: how long until the chat can answer again. */
+    readonly retryAfterMs?: number
   ) {
     super(message);
     this.name = "ChatError";
@@ -26,6 +28,7 @@ export interface StreamChatHandlers {
     message: string;
     retryable: boolean;
     partial: string;
+    retryAfterMs?: number;
   }) => void | Promise<void>;
 }
 
@@ -54,10 +57,19 @@ export async function streamChat(
       } catch {
         // Not JSON — e.g. a proxy's HTML error page.
       }
+      // The header is the fallback for a body that lost the field (a proxy page).
+      const headerSec = Number(res.headers.get("retry-after"));
+      const retryAfterMs =
+        typeof parsed?.retryAfterMs === "number" && parsed.retryAfterMs > 0
+          ? parsed.retryAfterMs
+          : Number.isFinite(headerSec) && headerSec > 0
+            ? headerSec * 1000
+            : undefined;
       throw new ChatError(
         isChatErrorCode(parsed?.code) ? parsed.code : "UNKNOWN",
         parsed?.message || raw.slice(0, 300) || res.statusText || "Request failed.",
-        parsed?.retryable ?? false
+        parsed?.retryable ?? false,
+        retryAfterMs
       );
     }
 
@@ -93,6 +105,7 @@ export async function streamChat(
         message: error.message,
         retryable: error.retryable,
         partial: full,
+        retryAfterMs: error.retryAfterMs,
       });
       return;
     }

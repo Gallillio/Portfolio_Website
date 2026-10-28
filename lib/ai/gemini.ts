@@ -15,51 +15,30 @@ import {
   SYSTEM_INSTRUCTION,
 } from "@/lib/ai/config";
 import { PORTFOLIO_CONTEXT } from "@/lib/ai/context";
+import { parseQuotaError, type QuotaInfo } from "@/lib/ai/quota";
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
-/** Retrying a 400/401/403 only triples the latency of an error you were always going to show. */
-const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
-
 /**
- * Google returns 429 RESOURCE_EXHAUSTED for both the per-minute limits (RPM/TPM,
- * which clear within a minute) and the per-day cap (RPD, which resets at
- * midnight Pacific). The visitor-facing advice is completely different, so the
- * two are told apart here.
+ * Retrying a 400/401/403 only triples the latency of an error you were always
+ * going to show. A 429 is not retried either: the free-tier caps do not clear in
+ * the few seconds a retry could wait, and each retry spends a request of its own.
+ * The route turns the 429 into a countdown instead.
  */
-export type QuotaScope = "per-minute" | "per-day";
+const RETRYABLE_STATUS = new Set([500, 502, 503, 504]);
+const MAX_ATTEMPTS = 3;
 
 export class UpstreamError extends Error {
   constructor(
     readonly status: number,
     readonly googleStatus: string | undefined,
     readonly detail: string,
-    readonly quotaScope?: QuotaScope
+    /** Present on a 429: which cap was hit and how long Google says to wait. */
+    readonly quota?: QuotaInfo
   ) {
     super(`Gemini API request failed with ${status}: ${detail.slice(0, 300)}`);
     this.name = "UpstreamError";
   }
-}
-
-/**
- * Classify a 429 from the raw error body. Google documents the two cases as
- * distinct error codes but does not publish the exact payload shape, so this
- * matches defensively against the quota identifiers and RetryInfo that appear
- * in practice (e.g. "GenerateRequestsPerDayPerProjectPerModel-FreeTier").
- *
- * Defaults to "per-minute" when ambiguous, deliberately: wrongly telling a
- * visitor to come back tomorrow loses them, whereas wrongly telling them to
- * wait a minute costs one retry.
- */
-export function detectQuotaScope(body: string): QuotaScope {
-  const normalized = body.toLowerCase().replace(/[\s_-]/g, "");
-  if (/perday|requestsperday|dailylimit|perdayperproject/.test(normalized)) return "per-day";
-
-  // A retryDelay measured in hours can only be the daily cap.
-  const retryDelay = /"retrydelay":"(\d+(?:\.\d+)?)s"/.exec(normalized);
-  if (retryDelay && Number(retryDelay[1]) > 300) return "per-day";
-
-  return "per-minute";
 }
 
 function systemText(): string {
@@ -170,31 +149,26 @@ export async function fetchGeminiStream(
     const body = await response.text();
     const googleError = parseGoogleError(body);
 
+    const quota = response.status === 429 ? parseQuotaError(body) : undefined;
+
     console.error("[chat] upstream error", {
       requestId: opts.requestId,
       attempt,
       httpStatus: response.status,
       googleStatus: googleError.status,
       googleMessage: googleError.message,
-      quotaScope: response.status === 429 ? detectQuotaScope(body) : undefined,
+      quota,
       model: GEMINI_MODEL,
     });
-
-    const quotaScope = response.status === 429 ? detectQuotaScope(body) : undefined;
 
     lastError = new UpstreamError(
       response.status,
       googleError.status,
       googleError.message ?? body.slice(0, 1000),
-      quotaScope
+      quota
     );
 
-    // The daily cap will not clear for hours — retrying only delays the message.
-    if (quotaScope === "per-day") throw lastError;
-
-    // If quota-limited, hammering makes it worse: one sanity retry, not a strategy.
-    const maxAttempts = response.status === 429 ? 2 : 3;
-    if (!RETRYABLE_STATUS.has(response.status) || attempt >= maxAttempts - 1) {
+    if (!RETRYABLE_STATUS.has(response.status) || attempt >= MAX_ATTEMPTS - 1) {
       throw lastError;
     }
 

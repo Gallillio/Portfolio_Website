@@ -15,17 +15,21 @@ export interface DisplayMessage {
 }
 
 const DISPLAY: Record<ChatErrorCode, DisplayMessage> = {
+  // The three limit codes normally carry retryAfterMs and are drawn by
+  // components/chat-quota-notice.tsx with a live countdown. These lines are the
+  // fallback for a response that lost the wait time; keep the wording in step.
+  //
   // Google's per-minute limit (RPM/TPM). Clears within about a minute, so do NOT
   // tell the visitor to come back later — they'd leave when a retry would work.
   // Name the quota explicitly: otherwise this reads as the site being broken.
   UPSTREAM_RATE_LIMITED: {
-    text: "I've hit the per-minute cap on Gallillio's free AI quota — nothing's broken on my end, I just need a breather. Give me a minute and ask me again.",
+    text: "Sorry, this chat runs on Google's free Gemini API, which only allows a few messages per minute across everyone visiting the site, and that limit has just been reached. Give it a minute and ask again.",
     tone: "assistant",
   },
   // Google's per-day cap (RPD), which resets at midnight Pacific. This one
   // genuinely is "come back later".
   UPSTREAM_QUOTA_EXHAUSTED: {
-    text: "Ah — Gallillio has burned through his AI quota for today. He's been notified, and it resets in the morning. In the meantime, feel free to explore the rest of the portfolio — try 'projects', 'experience', or 'about'.",
+    text: "Sorry, this chat runs on Google's free Gemini API, and today's message allowance has been used up. It resets at midnight Pacific time. The rest of the site works as usual: try 'projects', 'experience' or 'about'.",
     tone: "assistant",
   },
   // Our own per-IP limiter: this one IS the visitor, so nudge them gently.
