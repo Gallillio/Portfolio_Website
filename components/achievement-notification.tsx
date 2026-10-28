@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Trophy, X, ChevronRight } from 'lucide-react';
 import type { Achievement } from '@/lib/achievements-context';
+import { usePublishHeight } from '@/lib/use-publish-height';
 
 interface AchievementNotificationProps {
   achievement: Achievement | null;
@@ -29,6 +30,9 @@ export default function AchievementNotification({
   const [isDismissing, setIsDismissing] = useState(false);
   const [held, setHeld] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  // While it shows, what else sits above the phone's prompt (New reply, the
+  // scroll-to-top button) moves up by its height and a gap (globals.css).
+  usePublishHeight(notificationRef, '--toast-h', achievement, 8);
 
   // Minimum distance (in pixels) to consider a swipe
   const minSwipeDistance = 50;
@@ -118,16 +122,22 @@ export default function AchievementNotification({
   const isSecret = achievement?.isSecret;
   const heading = isSecret ? 'Secret achievement unlocked' : 'Achievement unlocked';
 
-  // Desktop: the top right corner. Phone: under the terminal's pinned header
-  // (it publishes its height as --terminal-header-h), so the menu, chat and
-  // tabs stay reachable while it shows; the prompt is at the bottom. Centred
-  // with inset-x-0 + mx-auto rather than left-1/2 + -translate-x-1/2: the
-  // slide-down animation and the swipe both set `transform`.
+  // Desktop: the top right corner, outside the terminal window. Phone: just
+  // above the pinned prompt and dock (their heights are published as CSS
+  // variables), in reach of a thumb, where Material puts a passing message.
+  // It used to sit under the header, which is where a command's pinned rule
+  // and the start of the answer just opened are read from (components/
+  // terminal-output.tsx); there it covered both. Centered with inset-x-0 +
+  // mx-auto rather than left-1/2 + -translate-x-1/2: the entrance animation
+  // and the swipe both set `transform`.
   const positionClass = isMobile
-    ? "inset-x-0 mx-auto w-[calc(100%-1.5rem)] max-w-sm"
-    : "top-4 right-[calc(1rem+env(safe-area-inset-right,0px))] w-80";
+    ? "inset-x-0 mx-auto w-[calc(100%-1.5rem)] max-w-sm animate-rise-in"
+    : "top-4 right-[calc(1rem+env(safe-area-inset-right,0px))] w-80 animate-slide-down";
   const positionStyle = isMobile
-    ? { top: "calc(var(--terminal-header-h, env(safe-area-inset-top, 0px)) + 0.5rem)" }
+    ? {
+        bottom:
+          "max(calc(var(--terminal-dock-h, 0px) + var(--terminal-prompt-h, 0px) + var(--kb, 0px) + 0.5rem), calc(env(safe-area-inset-bottom, 0px) + 0.5rem))",
+      }
     : undefined;
 
   return (
@@ -141,7 +151,7 @@ export default function AchievementNotification({
       {achievement && (
         <div
           ref={notificationRef}
-          className={`fixed ${positionClass} bg-gray-900 border-2 ${isSecret ? 'border-yellow-400' : 'border-green-500'} rounded-md shadow-lg shadow-black/60 z-[60] animate-slide-down motion-reduce:animate-none cursor-pointer transition-transform duration-300 motion-reduce:transition-none`}
+          className={`fixed ${positionClass} bg-gray-900 border-2 ${isSecret ? 'border-yellow-400' : 'border-green-500'} rounded-md shadow-lg shadow-black/60 z-[60] motion-reduce:animate-none cursor-pointer transition-transform duration-300 motion-reduce:transition-none`}
           style={{
             ...positionStyle,
             transform: isDismissing && swipeDirection === 'left'

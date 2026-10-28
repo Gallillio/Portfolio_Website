@@ -1211,7 +1211,7 @@ function TerminalContent(): React.ReactNode {
                   {/* More arrived below while the visitor read further up. Pinned
                       just above the prompt (and the dock, on a phone). */}
                   {hasUnseenOutput && (
-                    <div className="sticky bottom-3 z-30 flex h-0 justify-center max-md:bottom-[calc(var(--terminal-dock-h,0px)+var(--terminal-prompt-h,0px)+var(--kb,0px)+0.75rem)]">
+                    <div className="sticky bottom-3 z-30 flex h-0 justify-center max-md:bottom-[calc(var(--terminal-dock-h,0px)+var(--terminal-prompt-h,0px)+var(--kb,0px)+var(--toast-h,0px)+0.75rem)]">
                       <button
                         type="button"
                         onClick={(event) => {
