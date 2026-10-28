@@ -291,6 +291,50 @@ html::-webkit-scrollbar-thumb:hover {
   mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
 }
 
+/* The phone's menus (components/command-sheet.tsx, components/page-menu.tsx)
+   slide in from their edge on the curve of an iOS sheet while the page behind
+   dims. [data-closed] is off-screen, where they open from and close to;
+   [data-dragging] leaves the position to the finger (lib/use-sheet-motion.ts,
+   which also has the slide's length). */
+.sheet-panel,
+.sheet-scrim {
+  transition:
+    transform 380ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 380ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.sheet[data-closed] .sheet-scrim {
+  opacity: 0;
+}
+.sheet-bottom[data-closed] .sheet-panel {
+  transform: translateY(100%);
+}
+.sheet-top[data-closed] .sheet-panel {
+  transform: translateY(-100%);
+}
+/* A touch iPad's sheet floats 1.5rem above the bottom edge. */
+@media (min-width: 768px) {
+  .sheet-bottom[data-closed] .sheet-panel {
+    transform: translateY(calc(100% + 1.5rem));
+  }
+}
+.sheet[data-dragging] .sheet-panel,
+.sheet[data-dragging] .sheet-scrim {
+  transition: none;
+}
+/* Less motion: a short fade where the menu is, no slide. A drag still
+   follows the finger, since the visitor is moving it themselves. */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel,
+  .sheet-scrim {
+    transition-property: opacity;
+    transition-duration: 150ms;
+  }
+  .sheet[data-closed] .sheet-panel {
+    transform: none;
+    opacity: 0;
+  }
+}
+
 /* components/scroll-to-top.tsx: bottom right, above whatever is pinned to the
    bottom of the screen (the phone's prompt and dock, a touch iPad's dock),
    inside the safe area. */

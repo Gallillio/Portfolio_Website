@@ -23,6 +23,7 @@ import { usePublishHeight } from "@/lib/use-publish-height"
 import ChatFollowUps from "./chat-follow-ups"
 import TerminalDock from "./terminal-dock"
 import CommandSheet from "./command-sheet"
+import PageMenu from "./page-menu"
 import { tabForPath, pathForTab, opensNewTab, projectSlugForPath, returnToProjectList } from "@/lib/routes"
 import { titleForPath } from "@/lib/seo"
 import { Maximize2, Minimize2, Menu, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
@@ -754,11 +755,13 @@ function TerminalContent(): React.ReactNode {
   // the header and prompt can still pin to the screen.
   const tabBoxClass = "max-md:overflow-y-visible max-md:overflow-x-clip md:coarse:min-h-0"
 
-  // The list of everything (components/command-sheet.tsx): the phone's menu,
-  // and "more" in the dock.
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const openSheet = useCallback(() => setSheetOpen(true), [])
-  const closeSheet = useCallback(() => setSheetOpen(false), [])
+  // A phone's two menus, one open at a time: the pages from the section
+  // bar's ☰ (components/page-menu.tsx), and the commands from the dock's ⋯
+  // (components/command-sheet.tsx).
+  const [menu, setMenu] = useState<"pages" | "commands" | null>(null)
+  const openPages = useCallback(() => setMenu("pages"), [])
+  const openCommands = useCallback(() => setMenu("commands"), [])
+  const closeMenu = useCallback(() => setMenu(null), [])
 
   const handleTabChange = (value: string) => {
     if (value === activeTab) reselectTab(value)
@@ -1023,13 +1026,14 @@ function TerminalContent(): React.ReactNode {
               <div className={`w-full flex justify-between rounded-none overflow-x-auto
                 ${chatLook ? 'bg-gray-800 border-b border-gray-400' : 'bg-gray-900 border-b border-green-500'}`}>
                 {/* A phone's section bar: where you are, and a tap for every
-                    section and command (components/command-sheet.tsx). The dock
-                    along the bottom has the main sections one tap away. */}
+                    page (components/page-menu.tsx), which drops down from
+                    under it. The dock along the bottom has the main sections
+                    one tap away, and its ⋯ has the commands. */}
                 <button
                   type="button"
-                  onClick={openSheet}
+                  onClick={openPages}
                   aria-haspopup="dialog"
-                  aria-label={`All sections and commands. Now in ${activeTab}`}
+                  aria-label={`Pages. Now on ${chatLook ? "chat" : activeTab}`}
                   className={`md:hidden flex min-h-[44px] flex-grow items-center gap-2 px-3 text-left font-mono text-sm
                     ${chatLook ? 'text-gray-400 active:bg-gray-700' : 'text-green-500 active:bg-green-500/10'}`}
                 >
@@ -1243,7 +1247,7 @@ function TerminalContent(): React.ReactNode {
                   isChatMode={isChatMode}
                   onRun={runInTerminal}
                   onTab={handleTabChange}
-                  onMore={openSheet}
+                  onMore={openCommands}
                   onType={() => terminalInputRef.current?.focus()}
                   className={`shrink-0 max-md:sticky max-md:bottom-0 ${activeTab === "terminal" ? "hidden max-md:flex md:coarse:flex" : "hidden max-md:flex"}`}
                 />
@@ -1317,14 +1321,15 @@ function TerminalContent(): React.ReactNode {
         </div>
       )}
 
-      <CommandSheet
-        open={sheetOpen}
-        onClose={closeSheet}
+      <PageMenu
+        open={menu === "pages"}
+        onClose={closeMenu}
         activeTab={activeTab}
         isChatMode={isChatMode}
         onTab={handleTabChange}
-        onRun={runInTerminal}
+        anchorRef={headerRef}
       />
+      <CommandSheet open={menu === "commands"} onClose={closeMenu} onRun={runInTerminal} onPages={openPages} />
 
       {!isMinimized && (
         <AchievementNotification

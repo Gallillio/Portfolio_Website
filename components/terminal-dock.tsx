@@ -10,7 +10,7 @@ interface TerminalDockProps {
   onRun: (command: string) => void
   /** Opens a tab. */
   onTab: (tab: string) => void
-  /** Opens the full list of commands and tabs. */
+  /** Opens the list of commands (components/command-sheet.tsx). */
   onMore: () => void
   /** Focuses the prompt, which opens the keyboard: for asking a question. */
   onType: () => void
@@ -110,7 +110,7 @@ const TerminalDock = forwardRef<HTMLElement, TerminalDockProps & { className?: s
         type="button"
         onClick={onMore}
         aria-haspopup="dialog"
-        aria-label="All commands and sections"
+        aria-label="All commands"
         className={`mr-2 flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-md border ${
           chat ? "border-gray-600 text-gray-200 active:bg-gray-700" : "border-green-500/40 text-green-400 active:bg-green-500/15"
         }`}
