@@ -14,6 +14,7 @@ import ProjectDetail from "@/components/project-detail"
 import { Tooltip } from "@/components/ui/tooltip"
 import type { ProjectImage } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { fuzzyFilter } from "@/lib/fuzzy"
 import { opensNewTab, projectPath, projectSlugForPath, returnToProjectList } from "@/lib/routes"
 import { tabScroller } from "@/lib/scroll"
 
@@ -251,10 +252,9 @@ export default function Projects() {
     ...technologies.map(tech => ({ id: tech, label: tech }))
   ]
 
-  // Filter options based on search term
-  const filteredOptions = filterOptions.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Filter options based on search term: forgiving, best match first, so
+  // "postgress" finds PostgreSQL (lib/fuzzy.ts).
+  const filteredOptions = fuzzyFilter(filterOptions, searchTerm, option => option.label)
 
   // Get the count of selected filters (excluding "all")
   const selectedCount = selectedFilters.has("all") 

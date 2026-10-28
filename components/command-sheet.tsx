@@ -4,6 +4,7 @@ import React, { useEffect, useId, useMemo, useState } from "react"
 import { Search, X } from "lucide-react"
 import { availableCommands } from "@/lib/commands"
 import { commandRegistry } from "@/lib/command-registry"
+import { fuzzyFilter } from "@/lib/fuzzy"
 import { useAfterClose, useCloseOnBack } from "@/lib/use-close-on-back"
 import { useLockPageScroll } from "@/lib/use-lock-page-scroll"
 import { useSheetMotion } from "@/lib/use-sheet-motion"
@@ -68,11 +69,15 @@ export default function CommandSheet({ open, onClose, onRun, onPages }: CommandS
     onClose()
   }
 
-  const query = filter.trim().toLowerCase()
+  // Forgiving, best match first: "corses" finds courses (lib/fuzzy.ts).
+  const query = filter.trim()
   const { commands, pageMatches } = useMemo(() => {
-    const matches = (item: Command) =>
-      !query || item.name.includes(query) || item.description.toLowerCase().includes(query)
-    return { commands: COMMANDS.filter(matches), pageMatches: PAGES.filter(matches).length }
+    const name = (item: Command) => item.name
+    const description = (item: Command) => item.description
+    return {
+      commands: fuzzyFilter(COMMANDS, query, name, description),
+      pageMatches: fuzzyFilter(PAGES, query, name, description).length,
+    }
   }, [query])
 
   return (
