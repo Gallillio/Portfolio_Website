@@ -17,8 +17,8 @@ import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
 import { contact, cv } from "@/lib/profile-extras"
 import { hasTextSelection } from "@/lib/utils"
-import { isCoarsePointer, PHONE_WIDTH } from "@/lib/media"
-import { tabScroller } from "@/lib/scroll"
+import { isCoarsePointer, PHONE_WIDTH, prefersReducedMotion } from "@/lib/media"
+import { tabScroller, transcriptBlocks } from "@/lib/scroll"
 import { usePublishHeight } from "@/lib/use-publish-height"
 import ChatFollowUps from "./chat-follow-ups"
 import TerminalDock from "./terminal-dock"
@@ -322,6 +322,50 @@ function TerminalContent(): React.ReactNode {
     setHasUnseenOutput(false)
   }, [transcriptScroller])
 
+  const scrollTranscriptTo = (top: number) => {
+    transcriptScroller()?.el.scrollTo({ top, behavior: prefersReducedMotion() ? "auto" : "smooth" })
+  }
+
+  // Cmd+Up/Down (Ctrl elsewhere; on a Mac Ctrl+Up is Mission Control) steps
+  // from one command's block to the next, as in Warp and VS Code's terminal.
+  // The prompt leaves those keys alone, keeping plain Up/Down for its history.
+  useEffect(() => {
+    if (activeTab !== "terminal") return
+    const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return
+      if (!(mac ? event.metaKey : event.ctrlKey) || event.altKey || event.shiftKey) return
+      const scroller = transcriptScroller()
+      if (!scroller) return
+      event.preventDefault()
+      const now = scroller.top
+      const tops = transcriptBlocks(outputEndRef.current).map((block) => Math.min(scroller.bottom, scroller.topFor(block)))
+      const top =
+        event.key === "ArrowUp"
+          ? [...tops].reverse().find((t) => t < now - 2) ?? 0
+          : tops.find((t) => t > now + 2) ?? scroller.bottom
+      scroller.el.scrollTo({ top, behavior: prefersReducedMotion() ? "auto" : "smooth" })
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [activeTab, transcriptScroller])
+
+  // Where the newest block reads from: its rule at the top of the view when it
+  // is taller than the screen, or the end when all of it fits. Landing at the
+  // end of a long answer meant scrolling back up to find where it began.
+  const newestBlockTop = useCallback(() => {
+    const scroller = transcriptScroller()
+    if (!scroller) return 0
+    const blocks = transcriptBlocks(outputEndRef.current)
+    const newest = blocks[blocks.length - 1]
+    return newest ? Math.min(scroller.bottom, scroller.topFor(newest)) : scroller.bottom
+  }, [transcriptScroller])
+
+  // An answer being written follows its growth only until the question that
+  // asked for it reaches the top of the view, then holds there to be read from
+  // the start while the rest arrives below, with "New reply" offering the way
+  // down. Someone who scrolls down past the question to the live end is
+  // followed from there.
   const followStream = useCallback(() => {
     const scroller = transcriptScroller()
     if (!scroller) return
@@ -329,8 +373,11 @@ function TerminalContent(): React.ReactNode {
       setHasUnseenOutput(true)
       return
     }
-    scroller.top = scroller.el.scrollHeight
-  }, [transcriptScroller])
+    const hold = newestBlockTop()
+    const top = scroller.top > hold + 1 ? scroller.bottom : hold
+    scroller.top = top
+    if (top < scroller.bottom - 1) setHasUnseenOutput(true)
+  }, [transcriptScroller, newestBlockTop])
 
   // Reaching the end by scrolling clears the button.
   useEffect(() => {
@@ -346,25 +393,33 @@ function TerminalContent(): React.ReactNode {
   }, [hasUnseenOutput, transcriptScroller])
 
   useEffect(() => {
-    // While streaming, followStream owns the scroll position frame by frame;
-    // a competing smooth animation here fights it for the whole response.
-    if (isBotResponding) return
     // Only follow new output if the user hasn't scrolled up to read something,
     // or has just run a command.
     const reveal = revealNextOutputRef.current
+    if (isBotResponding) {
+      // The question just went in: show it, with the answer to come below.
+      // From here followStream owns the scroll position frame by frame; a
+      // competing smooth animation here would fight it for the whole response.
+      if (reveal) {
+        revealNextOutputRef.current = false
+        // At once: a smooth scroll still under way when the answer starts
+        // would read to followStream as the visitor scrolling away.
+        transcriptScroller()?.el.scrollTo({ top: newestBlockTop(), behavior: "auto" })
+      }
+      return
+    }
     revealNextOutputRef.current = false
     if (!reveal && !isPinnedToBottom()) {
       // An answer finished while the visitor was reading higher up.
       if (isChatMode) setHasUnseenOutput(true)
       return
     }
-    // Scroll the transcript to the bottom when history changes: its own box on
-    // a larger screen (scrollIntoView also scrolled the page, which on a short
-    // screen pushed the window's title bar and tabs off the top), the page on a
-    // phone, where the prompt is pinned at the bottom anyway.
-    scrollTranscriptToEnd()
+    // Scroll the transcript when history changes: its own box on a larger
+    // screen (scrollIntoView also scrolled the page, which on a short screen
+    // pushed the window's title bar and tabs off the top), the page on a phone.
+    scrollTranscriptTo(newestBlockTop())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [history, activeTab, isBotResponding, isPinnedToBottom, scrollTranscriptToEnd])
+  }, [history, activeTab, isBotResponding, isPinnedToBottom, newestBlockTop])
 
   // Responses are committed as a JSX element, never a raw string:
   // TerminalOutput.renderLine() rewrites bare strings, turning words like
@@ -1144,8 +1199,14 @@ function TerminalContent(): React.ReactNode {
                       <p className="text-sm">You&apos;re chatting with Ahmed&apos;s AI assistant. Ask anything about Ahmed or his work. Type <code className="bg-gray-700 px-1 rounded">exit</code> to return to terminal mode.</p>
                     </div>
                   )}
-                  <TerminalOutput history={history} onCommandClick={handleCommandClick} isChatMode={isChatMode} />
-                  <StreamingMessage ref={streamingRef} active={isBotResponding} onGrow={followStream} />
+                  {/* The answer being written goes in its question's block, under
+                      its rule, which stays pinned while it streams. */}
+                  <TerminalOutput
+                    history={history}
+                    onCommandClick={handleCommandClick}
+                    isChatMode={isChatMode}
+                    liveTail={<StreamingMessage ref={streamingRef} active={isBotResponding} onGrow={followStream} />}
+                  />
                   <div ref={outputEndRef} />
                   {/* More arrived below while the visitor read further up. Pinned
                       just above the prompt (and the dock, on a phone). */}
