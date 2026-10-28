@@ -34,6 +34,11 @@ const TYPING_CHAR_MS = 35
 const TYPING_MAX_MS = 400
 const TYPING_PAUSE_MS = 80
 
+// The C key whatever the case or layout: Caps Lock gives "C", and an Arabic or
+// Cyrillic layout gives its own letter, so the physical key decides then.
+const isCKey = (e: React.KeyboardEvent) =>
+  e.key.toLowerCase() === "c" || (!/^[a-z]$/i.test(e.key) && e.code === "KeyC")
+
 const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ onCommand, onStop, isChatMode = false, isBotResponding = false }, ref) => {
   const [input, setInput] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
@@ -232,6 +237,12 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     return el.scrollHeight <= parseFloat(getComputedStyle(el).lineHeight) * 1.5
   }
 
+  // Ctrl+C with text selected is copy outside a Mac, so it's left alone then.
+  const hasSelection = () => {
+    const el = inputRef.current
+    return hasTextSelection() || (!!el && el.selectionStart !== el.selectionEnd)
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Enter sends. Shift+Enter is a newline, but only in chat: commands are one
     // line. isComposing leaves Enter to IME users confirming a word.
@@ -264,11 +275,12 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     } else if (e.key === "Tab" && suggestion) {
       e.preventDefault()
       setInput(prev => prev + suggestion)
-    } else if (e.ctrlKey && e.key === "c") {
-      // Exit chatbot mode when Ctrl + C is pressed
-      if (isChatMode) {
-        onCommand("exit") // Call the onCommand function with "exit"
-      }
+    } else if (e.ctrlKey && isCKey(e) && isChatMode && !hasSelection()) {
+      // Ctrl+C interrupts, as in a shell: it stops an answer being written and
+      // keeps the visitor in chat. At an idle prompt it leaves chat.
+      e.preventDefault()
+      if (isBotResponding) onStop?.()
+      else onCommand("exit")
     }
   }
 
@@ -387,8 +399,8 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
           )}
         </div>
         {completeButton}
-        {/* Ctrl+C leaves chat on a keyboard; this stops just the answer, and is
-            the only way to on a touch screen. */}
+        {/* Does what Ctrl+C does mid-answer, and is the only way to on a touch
+            screen. */}
         {isChatMode && isBotResponding && onStop && (
           <button
             type="button"

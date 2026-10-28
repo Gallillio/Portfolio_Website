@@ -452,8 +452,8 @@ function TerminalContent(): React.ReactNode {
   };
 
   // Stops the answer being written and keeps what has arrived, staying in
-  // chat. Ctrl+C leaves chat altogether; this is the touch screen's way out of
-  // a long answer.
+  // chat. Ctrl+C and the Stop button both land here; the button is the touch
+  // screen's way out of a long answer.
   const stopResponse = () => {
     if (!isBotResponding) return;
     const partial = streamedTextRef.current;
