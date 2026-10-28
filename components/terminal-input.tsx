@@ -5,9 +5,12 @@ import { ArrowRight } from "lucide-react"
 import { useAchievements } from "@/lib/achievements-context"
 import { availableCommands } from "@/lib/commands"
 import { hasTextSelection } from "@/lib/utils"
+import { isCoarsePointer, prefersReducedMotion } from "@/lib/media"
 
 interface TerminalInputProps {
   onCommand: (command: string) => void
+  /** Stops the answer being written, keeping what has arrived. */
+  onStop?: () => void
   isChatMode?: boolean
   isBotResponding?: boolean
 }
@@ -15,9 +18,23 @@ interface TerminalInputProps {
 export interface TerminalInputRef {
   setValue: (value: string) => void;
   focus: () => void;
+  /**
+   * Types a command into the prompt and runs it, as if the visitor had typed it
+   * and pressed Enter, so the achievements count it the same way. On a touch
+   * screen the prompt is left unfocused: a tapped command shouldn't open the
+   * keyboard.
+   */
+  run: (command: string) => void;
 }
 
-const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ onCommand, isChatMode = false, isBotResponding = false }, ref) => {
+// A tapped command types itself out quickly, then runs: fast enough that no one
+// waits for it, slow enough to read as typing. Long chat questions type faster
+// so the whole line still takes TYPING_MAX_MS.
+const TYPING_CHAR_MS = 35
+const TYPING_MAX_MS = 400
+const TYPING_PAUSE_MS = 80
+
+const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ onCommand, onStop, isChatMode = false, isBotResponding = false }, ref) => {
   const [input, setInput] = useState("")
   const [commandHistory, setCommandHistory] = useState<string[]>([])
   const [historyIndex, setHistoryIndex] = useState(-1)
@@ -33,13 +50,18 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     )
     return matchingCommand ? matchingCommand.slice(input.length) : ""
   }, [input])
-  const [isSwiping, setIsSwiping] = useState(false)
-  const [touchStartX, setTouchStartX] = useState(0)
   const [animateArrow, setAnimateArrow] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const suggestionContainerRef = useRef<HTMLDivElement>(null)
   const { executeCommand: trackCommand, markCommandExecuted, visitTab, executeSecretCommand } = useAchievements()
   const [hasMarkedVisit, setHasMarkedVisit] = useState(false)
+  // The next step of a command typing itself out. A new tap or a key press
+  // cancels it, so the latest choice wins.
+  const typingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const cancelTyping = () => {
+    if (typingTimer.current) clearTimeout(typingTimer.current)
+    typingTimer.current = null
+  }
+  useEffect(() => cancelTyping, [])
 
   // Expose methods through ref
   useImperativeHandle(ref, () => ({
@@ -48,7 +70,27 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     // into a jump to the bottom. Callers that genuinely want to move the view
     // there scroll explicitly.
     focus: () => inputRef.current?.focus({ preventScroll: true }),
-    setValue: (value: string) => setInput(value)
+    setValue: (value: string) => setInput(value),
+    run: (command: string) => {
+      cancelTyping()
+      if (prefersReducedMotion() || !command) {
+        submitRef.current(command, { fromTap: true })
+        return
+      }
+      const step = Math.min(TYPING_CHAR_MS, TYPING_MAX_MS / command.length)
+      let typed = 0
+      const tick = () => {
+        typed++
+        setInput(command.slice(0, typed))
+        typingTimer.current = typed < command.length
+          ? setTimeout(tick, step)
+          : setTimeout(() => {
+              typingTimer.current = null
+              submitRef.current(command, { fromTap: true })
+            }, TYPING_PAUSE_MS)
+      }
+      tick()
+    },
   }))
 
   // Mark this tab as visited for the site explorer achievement - only once
@@ -127,14 +169,18 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
 
   // Shared by the form's submit and Enter in the textarea (a textarea, unlike
   // an input, doesn't submit its form on Enter).
-  const submit = () => {
-    if (!input.trim()) return
+  // run() also lands here, with the text it typed out.
+  const submit = (text: string = input, { fromTap = false } = {}) => {
+    if (!text.trim()) return
     // Ignore submits while a response streams. We gate here rather than on the
     // input's `disabled` attribute, because a disabled input fires no keydown —
     // which silently swallowed the Ctrl+C cancel below for the whole response.
-    if (isBotResponding) return
+    if (isBotResponding) {
+      if (fromTap) setInput("")
+      return
+    }
 
-    const trimmedInput = input.trim()
+    const trimmedInput = text.trim()
     
     // Process command for achievements
     markCommandExecuted() // Count total commands
@@ -159,13 +205,20 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     setCommandHistory((prev) => [...prev, trimmedInput])
     setHistoryIndex(-1)
     setInput("")
-    
-    // Ensure the input is visible after command execution
+
+    // Keep typing where the visitor was typing. A tapped command leaves the
+    // keyboard closed on a touch screen; the terminal scrolls to its output.
+    if (fromTap && isCoarsePointer()) return
     setTimeout(() => {
-      inputRef.current?.focus()
-      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+      inputRef.current?.focus({ preventScroll: true })
     }, 100)
   }
+  // The typing timers outlive the render that started them; they call the
+  // latest submit, which sees the current chat mode and streaming state.
+  const submitRef = useRef(submit)
+  useEffect(() => {
+    submitRef.current = submit
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -249,44 +302,28 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
     inputRef.current?.focus({ preventScroll: true })
   }
 
-  // Handle touch events for swipe gesture
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (suggestion) {
-      setTouchStartX(e.touches[0].clientX)
-      setIsSwiping(true)
-      // Prevent default to stop screen movement
-      e.preventDefault()
-    }
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isSwiping || !suggestion) return
-    
-    // Prevent default scrolling behavior when swiping on suggestion
-    e.preventDefault()
-    e.stopPropagation()
-    
-    const currentX = e.touches[0].clientX
-    const diff = currentX - touchStartX
-    
-    // If swiped right more than 50px, complete the suggestion
-    if (diff > 50) {
-      setInput(prev => prev + suggestion)
-      setIsSwiping(false)
-    }
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (isSwiping) {
-      // Prevent default behavior to stop screen movement
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    setIsSwiping(false)
-  }
+  // Tab completes on a keyboard; on a touch screen the completion is a button
+  // beside the prompt. Pointer down is prevented so the tap doesn't take focus
+  // from the prompt and close the keyboard mid-word.
+  const completeButton = suggestion && !isChatMode && (
+    <button
+      type="button"
+      onPointerDown={(e) => e.preventDefault()}
+      onClick={(e) => {
+        e.stopPropagation()
+        setInput((prev) => prev + suggestion)
+      }}
+      className="hidden coarse:inline-flex shrink-0 items-center gap-1 self-center rounded border border-green-500/50 px-2.5 min-h-[36px] ml-2 font-mono text-sm text-green-300 active:bg-green-500/20"
+      aria-label={`Complete to ${input}${suggestion}`}
+    >
+      {input}{suggestion}
+      <ArrowRight size={14} aria-hidden="true" />
+    </button>
+  )
 
   return (
-    <div onClick={focusInput} className="cursor-text">
+    // The whole row takes a tap, so the prompt is easy to hit with a finger.
+    <div onClick={focusInput} className="cursor-text coarse:min-h-[44px] coarse:py-1">
       <form onSubmit={handleSubmit} className="flex items-start mt-2">
         <div className="flex items-center text-green-500 mr-2">
           {isChatMode ? (
@@ -301,21 +338,16 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             </>
           )}
         </div>
-        <div 
-          className="flex-1 relative"
-          ref={suggestionContainerRef}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-          style={{ touchAction: suggestion ? 'none' : 'auto' }}
-        >
+        <div className="flex-1 relative min-w-0">
           <textarea
             ref={inputRef}
             rows={1}
             value={input}
             // Commands are one line; a pasted newline would break the match.
-            onChange={(e) => setInput(isChatMode ? e.target.value : e.target.value.replace(/\n/g, " "))}
+            onChange={(e) => {
+              cancelTyping()
+              setInput(isChatMode ? e.target.value : e.target.value.replace(/\n/g, " "))
+            }}
             onKeyDown={handleKeyDown}
             // Arabic lines up right-to-left, with the caret where the phone puts it.
             dir="auto"
@@ -327,7 +359,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             className={`block w-full resize-none overflow-y-auto max-h-[7.5rem] bg-transparent border-none outline-none font-mono ${caretClass} ${showBlock ? "pl-3" : ""} ${isChatMode ? "text-blue-300" : "text-green-500 placeholder:text-gray-500"} ${isBotResponding ? "opacity-50 cursor-not-allowed" : ""}`}
             autoFocus
             aria-label="Terminal input"
-            placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking... (Ctrl+C to stop)" : "Type your message...") : "Type a command..."}
+            placeholder={isChatMode ? (isBotResponding ? "Gallillio Assistant is thinking..." : "Type your message...") : "Type a command..."}
             readOnly={isBotResponding}
           />
           {showBlock && (
@@ -344,7 +376,7 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
                 {input}
                 {suggestion}
               </span>
-              <span className={`ml-2 text-green-500/60 transition-all duration-700 ${
+              <span className={`ml-2 text-green-500/60 transition-all duration-700 coarse:hidden ${
                 animateArrow ? 'translate-x-3 text-green-400' : ''
               }`}>
                 <ArrowRight size={16} className="animate-pulse" />
@@ -352,6 +384,22 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
             </div>
           )}
         </div>
+        {completeButton}
+        {/* Ctrl+C leaves chat on a keyboard; this stops just the answer, and is
+            the only way to on a touch screen. */}
+        {isChatMode && isBotResponding && onStop && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onStop()
+            }}
+            className="ml-2 inline-flex shrink-0 items-center gap-1.5 self-center rounded border border-gray-500 px-2.5 py-1 coarse:min-h-[40px] font-mono text-sm text-gray-200 hover:bg-gray-700 active:bg-gray-700"
+          >
+            <span aria-hidden="true" className="inline-block h-2.5 w-2.5 bg-current" />
+            Stop
+          </button>
+        )}
       </form>
     </div>
   )

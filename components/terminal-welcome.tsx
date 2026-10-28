@@ -7,7 +7,7 @@ import { links } from "@/lib/profile-data"
 import { useAchievements } from "@/lib/achievements-context"
 
 interface WelcomeBannerProps {
-  /** Puts a command into the input, matching what command links elsewhere do. */
+  /** Types a command into the prompt and runs it, as command links elsewhere do. */
   onRun: (command: string) => void
 }
 
@@ -16,8 +16,9 @@ const ENTRIES: { command: string; description: string }[] = [
   { command: "help", description: "See all commands" },
 ]
 
+// Finger-sized on touch screens (Apple's 44pt), the slim terminal look with a mouse.
 const LINK_CLASS =
-  "inline-flex items-center gap-1.5 rounded border border-green-500/40 px-2 py-0.5 text-green-300 transition-colors hover:border-green-400 hover:bg-green-500/10 hover:text-green-200"
+  "inline-flex items-center gap-1.5 rounded border border-green-500/40 px-2 py-0.5 text-green-300 transition-colors hover:border-green-400 hover:bg-green-500/10 hover:text-green-200 coarse:min-h-[44px] coarse:px-3 coarse:text-sm active:bg-green-500/10"
 
 /**
  * Opening banner. Replaces seven lines of undifferentiated prose with a command
@@ -70,22 +71,31 @@ export default function WelcomeBanner({ onRun }: WelcomeBannerProps) {
       </div>
 
       {/* Grid rather than space-padded columns: padding wraps raggedly on narrow screens. */}
-      <div className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+      {/* On touch screens each row is one 44px button, command and description
+          together, so the whole line takes the tap. */}
+      <div className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 coarse:gap-y-0">
         {ENTRIES.map(({ command, description }) => (
-          <React.Fragment key={command}>
-            <button
-              type="button"
-              onClick={() => onRun(command)}
-              className="cursor-pointer text-left text-green-300 hover:text-green-200 hover:underline"
-            >
-              {command}
-            </button>
+          <button
+            key={command}
+            type="button"
+            onClick={(event) => {
+              // Not up to the output, whose click focuses the prompt.
+              event.stopPropagation()
+              onRun(command)
+            }}
+            className="group col-span-2 grid cursor-pointer grid-cols-subgrid items-center text-left coarse:min-h-[44px] coarse:active:bg-green-500/10"
+          >
+            <span className="text-green-300 group-hover:text-green-200 group-hover:underline coarse:underline coarse:decoration-green-500/50 underline-offset-4">{command}</span>
             <span className="text-gray-400">{description}</span>
-          </React.Fragment>
+          </button>
         ))}
       </div>
 
-      <div className="mt-3 text-gray-400">or pick a tab above ↑</div>
+      {/* Phones have the sections in the bar along the bottom; larger screens in the tabs. */}
+      <div className="mt-3 text-gray-400">
+        <span className="md:hidden">or pick a section below ↓</span>
+        <span className="hidden md:inline">or pick a tab above ↑</span>
+      </div>
     </div>
   )
 }

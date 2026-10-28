@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import { usePathname } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import TerminalInput, { TerminalInputRef } from "./terminal-input"
@@ -17,9 +17,15 @@ import AchievementNotification from "@/components/achievement-notification"
 import { executeCommand } from "@/lib/commands"
 import { contact, cv } from "@/lib/profile-extras"
 import { hasTextSelection } from "@/lib/utils"
+import { isCoarsePointer, PHONE_WIDTH } from "@/lib/media"
+import { tabScroller } from "@/lib/scroll"
+import { usePublishHeight } from "@/lib/use-publish-height"
+import ChatFollowUps from "./chat-follow-ups"
+import TerminalDock from "./terminal-dock"
+import CommandSheet from "./command-sheet"
 import { tabForPath, pathForTab, opensNewTab, projectSlugForPath, returnToProjectList } from "@/lib/routes"
 import { titleForPath } from "@/lib/seo"
-import { Maximize2, Minimize2, Menu, X, ChevronRight, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
+import { Maximize2, Minimize2, Menu, MessageSquare, Terminal as TerminalIcon } from "lucide-react"
 import { AchievementsProvider, useAchievements } from "@/lib/achievements-context"
 import type { Command, ChatMessage } from '@/lib/types'
 import { streamChat } from "@/lib/ai/chat-client"
@@ -125,7 +131,7 @@ function TerminalContent(): React.ReactNode {
       projectsPlaceRef.current = {
         path: current,
         depth: state?.projectDepth ?? 0,
-        scroll: document.querySelector("[data-tab-scroll]")?.scrollTop ?? 0,
+        scroll: tabScroller(document.querySelector<HTMLElement>("[data-tab-scroll]"))?.top ?? 0,
       }
     }
     setActiveTabState(tab)
@@ -145,15 +151,10 @@ function TerminalContent(): React.ReactNode {
   const [isMobile, setIsMobile] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [isClosing, setIsClosing] = useState(false)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isChatMode, setIsChatMode] = useState(false)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [isBotResponding, setIsBotResponding] = useState(false)
   const streamingRef = useRef<StreamingMessageRef>(null)
-  // Starter-question buttons are created in the render that enters chat mode, so
-  // capturing handleCommand directly would freeze isChatMode at false. Resolve
-  // the handler at click time instead.
-  const handleCommandRef = useRef<(input: string) => void>(() => {})
   const abortRef = useRef<AbortController | null>(null)
   // Guards against a late stream completion resurrecting a chat the user already exited.
   const requestGenRef = useRef(0)
@@ -162,7 +163,18 @@ function TerminalContent(): React.ReactNode {
   const terminalRef = useRef<HTMLDivElement>(null)
   const outputEndRef = useRef<HTMLDivElement>(null)
   const terminalInputRef = useRef<TerminalInputRef>(null)
-  const { 
+  // The answer streamed so far, which Stop keeps.
+  const streamedTextRef = useRef("")
+  // Set when a command runs: its output is shown even if the visitor had
+  // scrolled up, which otherwise holds the view where it is.
+  const revealNextOutputRef = useRef(false)
+  // Every tap or click on a command lands here: it types itself into the
+  // prompt and runs. Stable, because history entries keep the handlers they
+  // were rendered with.
+  const runCommand = useCallback((command: string) => {
+    terminalInputRef.current?.run(command)
+  }, [])
+  const {
     lastUnlockedAchievement, 
     clearLastUnlockedAchievement, 
     executeSecretCommand,
@@ -174,21 +186,10 @@ function TerminalContent(): React.ReactNode {
     enableNightOwl,
     activateChatMode
   } = useAchievements()
-  const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const hamburgerButtonRef = useRef<HTMLDivElement>(null)
-  const scrollTimer = useRef<NodeJS.Timeout | null>(null)
 
   // Initial setup on component mount
   useEffect(() => {
-    // Set initial mobile state and fullscreen
-    const initialIsMobile = window.innerWidth < 768
-    setIsMobile(initialIsMobile)
-    
-    // Set fullscreen automatically on mobile
-    if (initialIsMobile) {
-      setIsFullscreen(true)
-      setAnimationClass("animate-expand")
-    }
+    setIsMobile(window.innerWidth < 768)
   }, [])
 
   // Back and Forward change the address without a click: follow it to the tab it
@@ -240,79 +241,54 @@ function TerminalContent(): React.ReactNode {
     };
   }, [executeSecretCommand, setActiveTab]);
 
-  // Check if we're on a mobile device and handle responsive behavior
+  // Phones have no window to make fullscreen: the terminal is the page there,
+  // and the page scrolls. Shrinking a fullscreen desktop window to phone width
+  // leaves fullscreen, which also locks the page's scrolling.
   useEffect(() => {
     const checkIfMobile = () => {
       const isMobileNow = window.innerWidth < 768
-      const wasMobile = isMobile
-      
       setIsMobile(isMobileNow)
-      
-      // Set fullscreen automatically when transitioning to mobile
-      if (isMobileNow && !wasMobile) {
-        setIsFullscreen(true)
-        setAnimationClass("animate-expand")
-      }
-      // Exit fullscreen when transitioning from mobile to desktop
-      else if (!isMobileNow && wasMobile && isFullscreen) {
-        setIsFullscreen(false)
-        setAnimationClass("animate-contract")
-      }
+      if (isMobileNow && isFullscreen) setIsFullscreen(false)
     }
-    
-    // Initial check
     checkIfMobile()
-    
-    // Add event listener for window resize
     window.addEventListener('resize', checkIfMobile)
-    
-    // Cleanup
     return () => {
       window.removeEventListener('resize', checkIfMobile)
     }
-  }, [isMobile, isFullscreen])
+  }, [isFullscreen])
 
-  // Effect to detect virtual keyboard visibility on mobile
+  // How far the on-screen keyboard reaches over the page, as --kb on the root,
+  // and data-kb-open while it is up. The phone's pinned prompt rises by --kb
+  // and the dock steps aside. On iOS the keyboard covers the page without
+  // resizing it, so the prompt has to move itself; Android resizes the page
+  // (interactive-widget in app/layout.tsx) and --kb stays near 0 there.
   useEffect(() => {
-    // Function to check if virtual keyboard is likely open
-    const checkKeyboard = () => {
-      // Only run this check on mobile devices
-      if (window.innerWidth < 768) {
-        // If the visual viewport is significantly smaller than the layout viewport,
-        // it's likely that a keyboard is shown
-        const heightDiff = window.innerHeight - (window.visualViewport?.height || 0);
-        const isKeyboardOpen = heightDiff > 150 // Typical keyboard heights are > 150px
-
-        if (isKeyboardOpen) {
-          // Scroll to make the input field visible when keyboard opens
-          setTimeout(() => {
-            if (terminalInputRef.current) {
-              const inputElement = document.querySelector('[aria-label="Terminal input"]')
-              if (inputElement) {
-                inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              }
-            }
-          }, 300)
-        }
-      }
+    const viewport = window.visualViewport
+    if (!viewport) return
+    const root = document.documentElement
+    let frame = 0
+    const update = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const kb = Math.max(0, Math.round(window.innerHeight - viewport.height - viewport.offsetTop))
+        root.style.setProperty("--kb", `${kb}px`)
+        root.toggleAttribute("data-kb-open", kb > 120)
+      })
     }
-
-    // Set up event listeners for visual viewport changes
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', checkKeyboard)
-      window.visualViewport.addEventListener('scroll', checkKeyboard)
-    }
-
-    // Also check on window resize
-    window.addEventListener('resize', checkKeyboard)
-
-    // Cleanup
+    update()
+    viewport.addEventListener("resize", update)
+    viewport.addEventListener("scroll", update)
+    // iOS 26 can leave the viewport offset stale after the keyboard closes.
+    window.addEventListener("focusout", update)
+    window.addEventListener("pageshow", update)
     return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', checkKeyboard)
-        window.visualViewport.removeEventListener('scroll', checkKeyboard)
-      }
-      window.removeEventListener('resize', checkKeyboard)
+      cancelAnimationFrame(frame)
+      viewport.removeEventListener("resize", update)
+      viewport.removeEventListener("scroll", update)
+      window.removeEventListener("focusout", update)
+      window.removeEventListener("pageshow", update)
+      root.style.removeProperty("--kb")
+      root.removeAttribute("data-kb-open")
     }
   }, [])
 
@@ -321,57 +297,135 @@ function TerminalContent(): React.ReactNode {
     setHistory([welcomeEntry()])
   }
 
-  useEffect(() => {
-    handleCommandRef.current = handleCommand
-  })
-
   // Called on every streamed repaint. Uses "auto" rather than "smooth" (a
   // restarting smooth animation per frame looks broken) and stays put if the
   // user has scrolled up to re-read something.
   // Auto-scrolling is only welcome when the user is already following along at
   // the bottom. If they have scrolled up to read something, moving the view is
   // an interruption.
-  const isPinnedToBottom = useCallback(() => {
-    const scroller = outputEndRef.current?.closest(
-      "[data-terminal-scroll]"
-    ) as HTMLElement | null
-    if (!scroller) return true
-    return scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight <= 80
-  }, [])
+  // The transcript's own box on larger screens, the page on a phone (lib/scroll.ts).
+  const transcriptScroller = useCallback(
+    () => tabScroller(outputEndRef.current?.closest<HTMLElement>("[data-terminal-scroll]")),
+    []
+  )
+
+  const isPinnedToBottom = useCallback(() => transcriptScroller()?.atBottom() ?? true, [transcriptScroller])
+
+  // New output arrived below while the visitor was reading further up: the
+  // "new reply" button offers the way down instead of the view jumping there.
+  const [hasUnseenOutput, setHasUnseenOutput] = useState(false)
+
+  const scrollTranscriptToEnd = useCallback((behavior: ScrollBehavior = "smooth") => {
+    const scroller = transcriptScroller()
+    scroller?.el.scrollTo({ top: scroller.el.scrollHeight, behavior })
+    setHasUnseenOutput(false)
+  }, [transcriptScroller])
 
   const followStream = useCallback(() => {
-    const anchor = outputEndRef.current
-    if (!anchor) return
-    const scroller = anchor.closest("[data-terminal-scroll]") as HTMLElement | null
-    if (scroller) {
-      if (!isPinnedToBottom()) return
-      scroller.scrollTop = scroller.scrollHeight
+    const scroller = transcriptScroller()
+    if (!scroller) return
+    if (!scroller.atBottom()) {
+      setHasUnseenOutput(true)
       return
     }
-    anchor.scrollIntoView({ behavior: "auto", block: "end" })
-  }, [isPinnedToBottom])
+    scroller.top = scroller.el.scrollHeight
+  }, [transcriptScroller])
+
+  // Reaching the end by scrolling clears the button.
+  useEffect(() => {
+    if (!hasUnseenOutput) return
+    const scroller = transcriptScroller()
+    if (!scroller) return
+    const target = scroller.page ? window : scroller.el
+    const onScroll = () => {
+      if (scroller.atBottom()) setHasUnseenOutput(false)
+    }
+    target.addEventListener("scroll", onScroll, { passive: true })
+    return () => target.removeEventListener("scroll", onScroll)
+  }, [hasUnseenOutput, transcriptScroller])
 
   useEffect(() => {
     // While streaming, followStream owns the scroll position frame by frame;
     // a competing smooth animation here fights it for the whole response.
     if (isBotResponding) return
-    // Only follow new output if the user hasn't scrolled up to read something.
-    if (!isPinnedToBottom()) return
-    // Scroll the transcript to the bottom when history changes. Its own scroll box
-    // only: scrollIntoView also scrolled the page, which on a short screen (a
-    // phone in landscape) pushed the window's title bar and tabs off the top.
-    const scroller = outputEndRef.current?.closest("[data-terminal-scroll]")
-    scroller?.scrollTo({ top: scroller.scrollHeight, behavior: "smooth" })
-    
-    // Also ensure input is visible when history changes
-    // This helps when the keyboard might cover the input
-    if (window.innerWidth < 768 && activeTab === "terminal") {
-      ensureInputVisible();
+    // Only follow new output if the user hasn't scrolled up to read something,
+    // or has just run a command.
+    const reveal = revealNextOutputRef.current
+    revealNextOutputRef.current = false
+    if (!reveal && !isPinnedToBottom()) {
+      // An answer finished while the visitor was reading higher up.
+      if (isChatMode) setHasUnseenOutput(true)
+      return
     }
-  }, [history, activeTab, isBotResponding, isPinnedToBottom])
+    // Scroll the transcript to the bottom when history changes: its own box on
+    // a larger screen (scrollIntoView also scrolled the page, which on a short
+    // screen pushed the window's title bar and tabs off the top), the page on a
+    // phone, where the prompt is pinned at the bottom anyway.
+    scrollTranscriptToEnd()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, activeTab, isBotResponding, isPinnedToBottom, scrollTranscriptToEnd])
+
+  // Responses are committed as a JSX element, never a raw string:
+  // TerminalOutput.renderLine() rewrites bare strings, turning words like
+  // "projects" into clickable commands and bare URLs into links. A full answer
+  // carries the question it answers, which picks its follow-up suggestions.
+  const commitAssistant = (content: string, tone: "normal" | "soft" | "error", question?: string) => {
+    const key = `chat-${messageKeyRef.current++}`;
+    const label = tone === "error" ? "Chatbot Error:" : "Gallillio Assistant:";
+    const bodyClass =
+      tone === "error" ? "text-red-400" : tone === "soft" ? "text-amber-300" : "";
+    setHistory(prev => [
+      ...prev,
+      {
+        command: "",
+        output: [
+          <div key={key} className={`whitespace-pre-wrap font-normal text-sm ${bodyClass}`}>
+            {renderTerminalMarkdown(
+              content,
+              <span className="text-purple-400">{label} </span>
+            )}
+          </div>,
+          ...(question !== undefined
+            ? [<ChatFollowUps key={`${key}-next`} question={question} answer={content} onAsk={runCommand} />]
+            : []),
+        ],
+        timestamp: new Date(),
+        isError: tone === "error"
+      }
+    ]);
+  };
+
+  // Stops the answer being written and keeps what has arrived, staying in
+  // chat. Ctrl+C leaves chat altogether; this is the touch screen's way out of
+  // a long answer.
+  const stopResponse = () => {
+    if (!isBotResponding) return;
+    const partial = streamedTextRef.current;
+    requestGenRef.current++;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    streamingRef.current?.reset();
+    setIsBotResponding(false);
+    if (partial.trim()) {
+      setChatHistory(prevChat => [...prevChat, { role: 'model', content: partial }]);
+      commitAssistant(partial, "normal");
+    }
+    setHistory(prev => [
+      ...prev,
+      {
+        command: "",
+        output: [<span key={`stopped-${messageKeyRef.current++}`} className="text-gray-500">^C answer stopped</span>],
+        timestamp: new Date(),
+        isError: false
+      }
+    ]);
+  };
 
   const handleCommand = async (input: string) => {
     const trimmedInput = input.trim();
+    // Whatever the visitor just ran is what they want to see, even if they
+    // had scrolled up to reread something before tapping it.
+    revealNextOutputRef.current = true;
 
     if (isChatMode) {
       if (trimmedInput.toLowerCase() === 'exit') {
@@ -417,42 +471,21 @@ function TerminalContent(): React.ReactNode {
       abortRef.current = new AbortController();
       streamingRef.current?.reset();
 
-      // Responses are committed as a JSX element, never a raw string:
-      // TerminalOutput.renderLine() rewrites bare strings, turning words like
-      // "projects" into clickable commands and bare URLs into links.
-      const commitAssistant = (content: string, tone: "normal" | "soft" | "error") => {
-        const key = `chat-${messageKeyRef.current++}`;
-        const label = tone === "error" ? "Chatbot Error:" : "Gallillio Assistant:";
-        const bodyClass =
-          tone === "error" ? "text-red-400" : tone === "soft" ? "text-amber-300" : "";
-        setHistory(prev => [
-          ...prev,
-          {
-            command: "",
-            output: [
-              <div key={key} className={`whitespace-pre-wrap font-normal text-sm ${bodyClass}`}>
-                {renderTerminalMarkdown(
-                  content,
-                  <span className="text-purple-400">{label} </span>
-                )}
-              </div>
-            ],
-            timestamp: new Date(),
-            isError: tone === "error"
-          }
-        ]);
-      };
+      streamedTextRef.current = "";
 
       await streamChat(
         { message: trimmedInput, history: chatHistory, signal: abortRef.current.signal },
         {
-          onDelta: (text) => streamingRef.current?.append(text),
+          onDelta: (text) => {
+            streamedTextRef.current += text;
+            streamingRef.current?.append(text);
+          },
           onDone: async (full) => {
             if (generation !== requestGenRef.current) return;
             await streamingRef.current?.finish();
             if (generation !== requestGenRef.current) return;
             setChatHistory(prevChat => [...prevChat, { role: 'model', content: full }]);
-            commitAssistant(full, "normal");
+            commitAssistant(full, "normal", trimmedInput);
             streamingRef.current?.reset();
           },
           onError: async (error) => {
@@ -512,7 +545,6 @@ function TerminalContent(): React.ReactNode {
       
       setTimeout(() => {
         unlockAllAchievements();
-        ensureInputVisible();
       }, 100);
       
       return
@@ -536,7 +568,6 @@ function TerminalContent(): React.ReactNode {
       
       enableNightOwl();
       
-      ensureInputVisible();
       
       return
     }
@@ -574,7 +605,6 @@ function TerminalContent(): React.ReactNode {
 
       setHistory((prev) => [...prev, { ...newCommand, ...response }]);
       
-      ensureInputVisible();
       
       return;
     }
@@ -585,7 +615,7 @@ function TerminalContent(): React.ReactNode {
       setIsChatMode(true)
       activateChatMode()
       response.output = [
-        <ChatIntro key="chat-intro" onAsk={(question) => handleCommandRef.current(question)} />,
+        <ChatIntro key="chat-intro" onAsk={runCommand} />,
       ]
     } else if (response.specialAction === "switchTab" && response.tabName) {
       setActiveTab(response.tabName)
@@ -618,27 +648,8 @@ function TerminalContent(): React.ReactNode {
 
     setHistory((prev) => [...prev, { ...newCommand, ...response, isError: response.isError ?? false }])
     
-    ensureInputVisible();
   }
   
-  const ensureInputVisible = () => {
-    if (window.innerWidth < 768) {
-      outputEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      
-      setTimeout(() => {
-        if (terminalInputRef.current) {
-          terminalInputRef.current.focus();
-          const inputElement = document.querySelector('[aria-label="Terminal input"]');
-          if (inputElement instanceof HTMLElement) {
-            inputElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'end'
-            });
-          }
-        }
-      }, 400);
-    }
-  }
 
   const toggleFullscreen = () => {
     if (isFullscreen) {
@@ -681,11 +692,6 @@ function TerminalContent(): React.ReactNode {
   const handleRestore = () => {
     setIsMinimized(false)
     setIsClosing(false)
-    
-    if (isMobile) {
-      setIsFullscreen(true)
-      setAnimationClass("animate-expand")
-    }
   }
 
   useEffect(() => {
@@ -706,17 +712,17 @@ function TerminalContent(): React.ReactNode {
     }
   }, [isFullscreen])
 
+  // A click anywhere in the output types into the prompt, as in a terminal. Not
+  // on a touch screen: there it would open the keyboard on every stray tap and
+  // every scroll that ends in one, so a finger focuses the prompt by tapping
+  // the prompt itself.
   const focusInput = useCallback(() => {
     // This runs on every click anywhere in the output. Focusing an input
     // collapses the document selection, so bail out while the user is
     // selecting text — otherwise double-click-to-select can never work.
-    if (hasTextSelection()) return;
+    if (hasTextSelection() || isCoarsePointer()) return;
 
     terminalInputRef.current?.focus();
-    
-    if (window.innerWidth < 768) {
-      ensureInputVisible();
-    }
   }, [terminalInputRef]);
 
   useEffect(() => {
@@ -732,210 +738,94 @@ function TerminalContent(): React.ReactNode {
     clearLastUnlockedAchievement()
   }
 
-  const handleCommandClick = (command: string) => {
-    if (terminalInputRef.current) {
-      terminalInputRef.current.setValue(command)
-      terminalInputRef.current.focus()
-    }
-  }
+  const handleCommandClick = runCommand
 
-  const [keyboardAdjustedHeight, setKeyboardAdjustedHeight] = useState(0);
-  
-  useEffect(() => {
-    if (window.visualViewport) {
-      const handleVisualViewportChange = () => {
-        if (window.innerWidth < 768) {
-          const heightDiff = window.innerHeight - (window.visualViewport?.height || 0);
-          if (heightDiff > 150) {
-            setKeyboardAdjustedHeight(window.visualViewport?.height ? window.visualViewport.height - 120 : 0);
-          } else {
-            setKeyboardAdjustedHeight(0);
-          }
-        }
-      };
-      
-      window.visualViewport.addEventListener('resize', handleVisualViewportChange);
-      return () => {
-        window.visualViewport?.removeEventListener('resize', handleVisualViewportChange);
-      };
-    }
-  }, []);
-  
-  // Phones are always fullscreen, so their height comes from a media query, not
-  // from isMobile: the server cannot know the screen, and a height decided after
-  // hydration made the whole page jump (CLS 0.45 on a phone).
+  // Each tab's height. Desktop: 70% of the screen in the window, or the whole
+  // screen in fullscreen. A phone: no height at all, the content runs on and the
+  // page scrolls. A touch iPad: the terminal fills the screen and the tab fills
+  // what the header and dock leave (a flex column, see the window's classes).
+  // All media queries, not isMobile: the server can't know the screen, and a
+  // height decided after hydration made the page jump (CLS 0.45 on a phone).
   const contentHeight = isFullscreen && !isMobile
     ? "h-[calc(100vh-120px)]"
-    : "max-md:h-[calc(100vh-120px)] md:h-[70vh]";
+    : "md:h-[70vh] md:coarse:h-full";
+  // A tab's own scroll box, which a phone gives up for the page's (lib/scroll.ts).
+  // overflow-x clip rather than hidden on a phone: clip makes no scroll box, so
+  // the header and prompt can still pin to the screen.
+  const tabBoxClass = "max-md:overflow-y-visible max-md:overflow-x-clip md:coarse:min-h-0"
 
-  // While the on-screen keyboard is up, fit the content to what is still
-  // visible. An inline style, not a class: this used to assemble an arbitrary
-  // height class at runtime, which Tailwind never generates, so with the
-  // keyboard open the panels lost their height, grew to full length inside the
-  // clipped window, and the conversation could no longer be scrolled.
-  const contentStyle =
-    keyboardAdjustedHeight > 0 && (isFullscreen || isMobile)
-      ? { height: `${keyboardAdjustedHeight}px` }
-      : undefined;
-
-  const toggleMobileMenu = () => {
-    if (isScrolling) {
-      setMenuOpenedDuringScroll(true);
-    }
-    setMobileMenuOpen(prev => !prev);
-  }
+  // The list of everything (components/command-sheet.tsx): the phone's menu,
+  // and "more" in the dock.
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const openSheet = useCallback(() => setSheetOpen(true), [])
+  const closeSheet = useCallback(() => setSheetOpen(false), [])
 
   const handleTabChange = (value: string) => {
     if (value === activeTab) reselectTab(value)
     else setActiveTab(value)
-    setMobileMenuOpen(false);
   }
 
-  const handleHelpClick = () => {
-    setActiveTab("terminal");
-    setMobileMenuOpen(false);
-    
-    setTimeout(() => {
-      if (terminalInputRef.current) {
-        terminalInputRef.current.setValue("help");
-        terminalInputRef.current.focus();
-      }
-    }, 50);
-  };
+  // A command chosen outside the terminal tab runs in the terminal: open it,
+  // then give its prompt, which mounts with the tab, a beat to appear.
+  // In chat, a command from the dock or the list would go to the assistant as a
+  // question; leave chat first (exit itself is the dock's way out of chat).
+  const runInTerminal = (command: string) => {
+    const leaveChat = isChatMode && command !== "exit"
+    if (leaveChat) handleCommand("exit")
+    if (activeTab === "terminal" && !leaveChat) {
+      runCommand(command)
+      return
+    }
+    if (activeTab !== "terminal") setActiveTab("terminal")
+    setTimeout(() => runCommand(command), 60)
+  }
 
-  const [menuOpenedDuringScroll, setMenuOpenedDuringScroll] = useState(false);
+  // On a phone the tabs share the page's scroll, so a new tab starts at its top
+  // (the Projects tab then restores its own place), and the terminal at its
+  // prompt, the end of the transcript.
+  const previousTabRef = useRef(activeTab)
+  useLayoutEffect(() => {
+    if (previousTabRef.current === activeTab) return
+    previousTabRef.current = activeTab
+    if (!window.matchMedia(PHONE_WIDTH).matches) return
+    if (activeTab === "terminal") requestAnimationFrame(() => scrollTranscriptToEnd("auto"))
+    else if (activeTab !== "projects") window.scrollTo(0, 0)
+  }, [activeTab, scrollTranscriptToEnd])
 
-  const [isScrolling, setIsScrolling] = useState(false);
+  // Heights for whatever has to clear the pinned bars (lib/use-publish-height.ts).
+  const headerRef = useRef<HTMLDivElement>(null)
+  const titleBarRef = useRef<HTMLDivElement>(null)
+  const dockRef = useRef<HTMLElement>(null)
+  const promptRef = useRef<HTMLDivElement>(null)
+  const layoutKey = `${activeTab}-${isMinimized}-${isClosing}`
+  usePublishHeight(headerRef, "--terminal-header-h", layoutKey)
+  usePublishHeight(titleBarRef, "--terminal-title-h", layoutKey)
+  usePublishHeight(dockRef, "--terminal-dock-h", layoutKey)
+  usePublishHeight(promptRef, "--terminal-prompt-h", layoutKey)
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        mobileMenuOpen && 
-        mobileMenuRef.current && 
-        hamburgerButtonRef.current && 
-        !mobileMenuRef.current.contains(event.target as Node) && 
-        !hamburgerButtonRef.current.contains(event.target as Node)
-      ) {
-        setMobileMenuOpen(false);
-      }
-    };
-    
-    const handleWheel = () => {
-      setIsScrolling(true);
-      
-      if (scrollTimer.current) {
-        clearTimeout(scrollTimer.current);
-      }
-      
-      if (mobileMenuOpen && !menuOpenedDuringScroll) {
-        scrollTimer.current = setTimeout(() => {
-          setMobileMenuOpen(false);
-        }, 1000);
-        return;
-      }
-      
-      scrollTimer.current = setTimeout(() => {
-        setIsScrolling(false);
-        
-        setTimeout(() => {
-          setMenuOpenedDuringScroll(false);
-        }, 1000);
-      }, 300);
-    };
-    
-    const handleTouchMove = () => {
-      setIsScrolling(true);
-      
-      if (scrollTimer.current) {
-        clearTimeout(scrollTimer.current);
-      }
-      
-      if (mobileMenuOpen && !menuOpenedDuringScroll) {
-        scrollTimer.current = setTimeout(() => {
-          setMobileMenuOpen(false);
-        }, 1000);
-        return;
-      }
-      
-      scrollTimer.current = setTimeout(() => {
-        setIsScrolling(false);
-        
-        setTimeout(() => {
-          setMenuOpenedDuringScroll(false);
-        }, 1000);
-      }, 300);
-    };
-    
-    let touchStartY = 0;
-    
-    const handleTouchStart = (e: Event) => {
-      const touchEvent = e as unknown as TouchEvent;
-      touchStartY = touchEvent.touches[0].clientY;
-    };
-    
-    const handleTouchEnd = (e: Event) => {
-      if (!mobileMenuOpen) return;
-      
-      const touchEvent = e as unknown as TouchEvent;
-      const touchEndY = touchEvent.changedTouches[0].clientY;
-      const diff = Math.abs(touchEndY - touchStartY);
-      
-      if (diff > 5 && !menuOpenedDuringScroll) {
-        setMobileMenuOpen(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('wheel', handleWheel, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: true });
-    document.addEventListener('touchstart', handleTouchStart as EventListener, { passive: true });
-    document.addEventListener('touchend', handleTouchEnd as EventListener, { passive: true });
-    
-    const scrollableAreas = document.querySelectorAll('.overflow-y-auto, .overflow-auto');
-    scrollableAreas.forEach(area => {
-      area.addEventListener('wheel', handleWheel, { passive: true });
-      area.addEventListener('touchmove', handleTouchMove, { passive: true });
-      area.addEventListener('touchstart', handleTouchStart as EventListener, { passive: true });
-      area.addEventListener('touchend', handleTouchEnd as EventListener, { passive: true });
-    });
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('wheel', handleWheel);
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchstart', handleTouchStart as EventListener);
-      document.removeEventListener('touchend', handleTouchEnd as EventListener);
-      
-      if (scrollTimer.current) {
-        clearTimeout(scrollTimer.current);
-      }
-      
-      scrollableAreas.forEach(area => {
-        area.removeEventListener('wheel', handleWheel);
-        area.removeEventListener('touchmove', handleTouchMove);
-        area.removeEventListener('touchstart', handleTouchStart as EventListener);
-        area.removeEventListener('touchend', handleTouchEnd as EventListener);
-      });
-    };
-  }, [mobileMenuOpen, isScrolling, menuOpenedDuringScroll]);
+  const chatLook = isChatMode && activeTab === "terminal"
 
   return (
     <>
       <div
         ref={terminalRef}
         className={`bg-black transition-all duration-700 ease-in-out transform-gpu overflow-hidden
-          ${isChatMode && activeTab === "terminal" ? 'border border-gray-400 rounded-lg chat-mode' : 'border border-green-500'} 
+          ${chatLook ? 'border border-gray-400 rounded-lg chat-mode' : 'border border-green-500'}
           ${isMinimized || isClosing
             ? isMobile
               ? 'fixed inset-4 z-50 rounded-md shadow-xl'
               : 'w-full max-w-5xl 2xl:max-w-6xl rounded-md relative'
             : isFullscreen && !isMobile
               ? 'fixed inset-0 z-50 max-w-none rounded-none border-green-400'
-              // Media queries, as for contentHeight: fullscreen on phones from the first paint.
-              : 'max-md:fixed max-md:inset-0 max-md:z-50 max-md:max-w-none max-md:rounded-none max-md:border-green-400 md:w-full md:max-w-5xl 2xl:max-w-6xl md:rounded-md md:relative'
+              // Media queries, as for contentHeight. A phone: the terminal is the
+              // page, a screen-tall column that grows and scrolls with it. Nothing
+              // here may clip or transform, or the header, prompt and dock could
+              // no longer pin to the screen. A touch iPad: the window fills the
+              // screen, as fullscreen does on a desktop.
+              : 'max-md:flex max-md:min-h-[100svh] max-md:w-full max-md:flex-col max-md:overflow-visible max-md:rounded-none max-md:border-0 max-md:transform-none md:w-full md:max-w-5xl 2xl:max-w-6xl md:rounded-md md:relative md:coarse:fixed md:coarse:inset-0 md:coarse:z-50 md:coarse:flex md:coarse:h-[100dvh] md:coarse:max-w-none md:coarse:flex-col md:coarse:rounded-none md:coarse:border-0'
           } ${animationClass} ${isMinimized || isClosing ? 'h-10 overflow-hidden' : ''}
-          ${isChatMode && activeTab === "terminal" 
-            ? 'shadow-gray-400/30 hover:shadow-gray-400/50' 
+          ${chatLook
+            ? 'shadow-gray-400/30 hover:shadow-gray-400/50'
             : 'shadow-green-500/30 hover:shadow-green-500/50'} shadow-xl hover:shadow-2xl`}
         style={{
           transitionProperty: "all",
@@ -943,440 +833,424 @@ function TerminalContent(): React.ReactNode {
           transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)"
         }}
       >
-        <div className={`flex items-center justify-between px-4 py-2 cursor-default terminal-title-fixed
-          ${isChatMode && activeTab === "terminal" ? 'bg-gray-800 border-b border-gray-400' : 'bg-gray-900 border-b border-green-500'}`}>
-          <div className="flex space-x-2">
-            <button 
-              className="group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
-              onClick={handleClose}
-              aria-label="Close terminal"
-            >
-              <div className="w-3 h-3 rounded-full bg-red-500 group-hover:bg-red-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(239,68,68,0.7)]"></div>
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
-                width="10" 
-                height="10" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="4" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-            
-            <button 
-              className="group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
-              onClick={handleMinimize}
-              aria-label="Minimize terminal"
-            >
-              <div className="w-3 h-3 rounded-full bg-yellow-500 group-hover:bg-yellow-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(234,179,8,0.7)]"></div>
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
-                width="10" 
-                height="10" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="4" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-            </button>
-            
-            <button 
-              className="group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
-              onClick={isMinimized ? handleRestore : (!isMobile ? toggleFullscreen : undefined)}
-              aria-label={isFullscreen ? "Exit fullscreen" : (isMinimized ? "Restore" : "Enter fullscreen")}
-            >
-              <div className={`w-3 h-3 rounded-full transition-all duration-200 bg-green-500 group-hover:bg-green-600 group-hover:shadow-[0_0_3px_rgba(34,197,94,0.7)]'}`}></div>
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
-                width="10" 
-                height="10" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="white" 
-                strokeWidth="4" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                {isMinimized ? (
-                  <>
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </>
-                ) : isFullscreen ? (
-                  <>
-                    <polyline points="4 14 10 14 10 20"></polyline>
-                    <polyline points="20 10 14 10 14 4"></polyline>
-                    <line x1="14" y1="10" x2="21" y2="3"></line>
-                    <line x1="3" y1="21" x2="10" y2="14"></line>
-                  </>
-                ) : (
-                  <>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <polyline points="9 21 3 21 3 15"></polyline>
-                    <line x1="21" y1="3" x2="14" y2="10"></line>
-                    <line x1="3" y1="21" x2="10" y2="14"></line>
-                  </>
-                )}
-              </svg>
-            </button>
-          </div>
-          <div 
-            className={`font-mono text-sm flex items-center gap-2 transition-colors duration-300
-              ${isChatMode && activeTab === "terminal" ? 'text-gray-300' : 'text-green-500'}`}
-            onDoubleClick={isMinimized ? handleRestore : undefined}
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full max-md:flex max-md:flex-1 max-md:flex-col md:coarse:flex md:coarse:min-h-0 md:coarse:flex-1 md:coarse:flex-col"
+        >
+          {/* The title bar and the section bar, pinned together to the top of a
+              phone's screen, under the status bar (safe-area padding). On a
+              short screen (a phone on its side) only the section bar stays:
+              .terminal-header in globals.css. */}
+          <div
+            ref={headerRef}
+            className={`terminal-header shrink-0 max-md:sticky max-md:z-40 max-md:pt-[env(safe-area-inset-top)] ${chatLook ? 'bg-gray-800' : 'bg-gray-900'}`}
           >
-            {isChatMode && activeTab === "terminal" ? (
-              <>
-                <MessageSquare size={14} className="animate-pulse" />
-                chat@Gallillio:~
-              </>
-            ) : (
-              <>portfolio@Gallillio:~</>
-            )}
-            
-            {/* Chat/terminal toggle for phones. Shown by a media query, like the
-                desktop buttons below, so the title bar doesn't rearrange on hydration. */}
-            <button
-              onClick={() => {
-                if (activeTab !== "terminal") {
-                  setActiveTab("terminal");
-                }
-                if (!isChatMode) {
-                  activateChatMode();
-                }
-                setIsChatMode(!isChatMode);
-              }}
-              className={`md:hidden ml-2 p-1 rounded-md transition-colors duration-300
-                ${isChatMode 
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                  : 'bg-gray-900 text-green-400 hover:bg-gray-800'}`}
-              title={isChatMode ? "Switch to command mode" : "Switch to chat mode"}
-            >
-              {isChatMode ? (
-                <TerminalIcon size={14} />
-              ) : (
-                <MessageSquare size={14} />
-              )}
-            </button>
-          </div>
-          {!isMinimized && (
-            <div className="hidden md:flex gap-2 items-center">
-              {/* Change chat/terminal toggle to show on all tabs */}
-              <button 
-                onClick={() => {
-                  if (activeTab !== "terminal") {
-                    setActiveTab("terminal");
-                  }
-                  if (!isChatMode) {
-                    activateChatMode();
-                  }
-                  setIsChatMode(!isChatMode);
-                }} 
-                className={`p-1 rounded-md transition-colors duration-300 mr-2
-                  ${isChatMode 
-                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                    : 'bg-gray-900 text-green-400 hover:bg-gray-800'}`}
-                title={isChatMode ? "Switch to command mode" : "Switch to chat mode"}
-              >
-                {isChatMode ? (
-                  <TerminalIcon size={16} />
-                ) : (
-                  <MessageSquare size={16} />
-                )}
-              </button>
-            <button 
-              onClick={toggleFullscreen} 
-              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-                className={`transition-colors duration-300
-                  ${isChatMode && activeTab === "terminal" ? 'text-gray-400 hover:text-gray-300' : 'text-green-500 hover:text-green-400'}`}
-            >
-              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </button>
-            </div>
-          )}
-        </div>
-
-        {!isMinimized && (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className={`w-full flex justify-between rounded-none overflow-x-auto terminal-header-fixed
-              ${isChatMode && activeTab === "terminal" ? 'bg-gray-800 border-b border-gray-400' : 'bg-gray-900 border-b border-green-500'}`}>
-              <div
-                className="md:hidden flex-grow cursor-pointer"
-                onClick={toggleMobileMenu}
-                ref={hamburgerButtonRef}
-                role="button"
-                tabIndex={0}
-                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-                aria-expanded={mobileMenuOpen}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault()
-                    toggleMobileMenu()
-                  }
-                }}
-              >
-                <div className="flex items-center p-2">
-                  <div className={`flex items-center focus:outline-none ml-1
-                    ${isChatMode && activeTab === "terminal" ? 'text-gray-400 hover:text-gray-300' : 'text-green-500 hover:text-green-400'}`}>
-                    {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-                    <span className="font-mono text-sm ml-2">
-                      /{activeTab} 
-                      <span className={`terminal-cursor ${isChatMode && activeTab === "terminal" ? 'chat-cursor' : ''}`}></span>
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="hidden md:block">
-                <TabsList className={`bg-transparent border-none rounded-none h-auto text-gray-400
-                  ${isChatMode && activeTab === "terminal" ? 'chat-tabs' : ''}`}>
-                <TabsTrigger
-                  value="terminal"
-                    className={`custom-tab touch-optimized rounded-none border-r
-                      ${isChatMode && activeTab === "terminal" 
-                        ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
-                        : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
+            <div ref={titleBarRef} className={`flex items-center justify-between gap-3 px-4 py-2 cursor-default
+              ${chatLook ? 'bg-gray-800 border-b border-gray-400' : 'bg-gray-900 border-b border-green-500'}`}>
+              {/* Wider apart on touch screens, so each light's enlarged tap area
+                  (.touch-hit) stays its own. */}
+              <div className="flex shrink-0 space-x-2 coarse:space-x-5">
+                <button
+                  className="touch-hit group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+                  onClick={handleClose}
+                  aria-label="Close terminal"
+                >
+                  <div className="w-3 h-3 rounded-full bg-red-500 group-hover:bg-red-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(239,68,68,0.7)]"></div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    {isChatMode && activeTab === "terminal" ? (
-                      <div className="flex items-center gap-1">
-                        <MessageSquare size={14} />
-                        Chat
-                      </div>
-                    ) : (
-                      "Terminal"
-                    )}
-                </TabsTrigger>
-                <PageTab
-                  value="projects"
-                  href="/projects"
-                  onReselect={() => reselectTab("projects")}
-                    className={`custom-tab touch-optimized rounded-none border-r
-                      ${isChatMode && activeTab === "terminal" 
-                        ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
-                        : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                >
-                  Projects
-                </PageTab>
-                <PageTab
-                  value="about"
-                  href="/about"
-                    className={`custom-tab touch-optimized rounded-none border-r
-                      ${isChatMode && activeTab === "terminal" 
-                        ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
-                        : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                >
-                    <TabLabel short="About" full="About / Experience" />
-                </PageTab>
-                <TabsTrigger
-                  value="contact"
-                    className={`custom-tab touch-optimized rounded-none border-r
-                      ${isChatMode && activeTab === "terminal" 
-                        ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
-                        : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                >
-                    <TabLabel short="Contact" full="Contact / CV" />
-                </TabsTrigger>
-                <PageTab
-                  value="my-achievements"
-                  href="/achievements"
-                    className={`custom-tab touch-optimized rounded-none border-r
-                      ${isChatMode && activeTab === "terminal" 
-                        ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400' 
-                        : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
-                >
-                    <TabLabel short="Achievements" full="My Achievements / Publications / Certifications" />
-                </PageTab>
-              </TabsList>
-              </div>
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
 
-              <TabsList className={`bg-transparent border-none rounded-none h-auto ml-auto flex-grow hidden md:flex text-gray-400
-                ${isChatMode && activeTab === "terminal" ? 'chat-tabs' : ''}`}>
-                <TabsTrigger
-                  value="your-achievements"
-                  className={`custom-tab touch-optimized rounded-none w-full flex justify-end pr-6
-                    ${isChatMode && activeTab === "terminal" 
-                      ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300' 
-                      : 'data-[state=active]:bg-black data-[state=active]:text-green-500'}`}
+                <button
+                  className="touch-hit group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+                  onClick={handleMinimize}
+                  aria-label="Minimize terminal"
                 >
-                  <span>Your Achievements</span>
-                </TabsTrigger>
-              </TabsList>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500 group-hover:bg-yellow-600 transition-all duration-200 group-hover:shadow-[0_0_3px_rgba(234,179,8,0.7)]"></div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+
+                <button
+                  className="touch-hit group relative w-3 h-3 flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+                  onClick={isMinimized ? handleRestore : (!isMobile ? toggleFullscreen : undefined)}
+                  aria-label={isFullscreen ? "Exit fullscreen" : (isMinimized ? "Restore" : "Enter fullscreen")}
+                >
+                  <div className={`w-3 h-3 rounded-full transition-all duration-200 bg-green-500 group-hover:bg-green-600 group-hover:shadow-[0_0_3px_rgba(34,197,94,0.7)]'}`}></div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 drop-shadow-[0_0_1px_rgba(255,255,255,0.7)]"
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    {isMinimized ? (
+                      <>
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </>
+                    ) : isFullscreen ? (
+                      <>
+                        <polyline points="4 14 10 14 10 20"></polyline>
+                        <polyline points="20 10 14 10 14 4"></polyline>
+                        <line x1="14" y1="10" x2="21" y2="3"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                      </>
+                    ) : (
+                      <>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                      </>
+                    )}
+                  </svg>
+                </button>
+              </div>
+              {/* min-w-0 and truncate: on a 320px phone the title gives way
+                  rather than run into the lights. */}
+              <div
+                className={`min-w-0 font-mono text-sm flex items-center gap-2 transition-colors duration-300
+                  ${chatLook ? 'text-gray-300' : 'text-green-500'}`}
+                onDoubleClick={isMinimized ? handleRestore : undefined}
+              >
+                {chatLook ? (
+                  <>
+                    <MessageSquare size={14} className="shrink-0 animate-pulse motion-reduce:animate-none" />
+                    <span className="truncate">chat@Gallillio:~</span>
+                  </>
+                ) : (
+                  <span className="truncate">portfolio@Gallillio:~</span>
+                )}
+
+                {/* Chat/terminal toggle for phones. Shown by a media query, like the
+                    desktop buttons below, so the title bar doesn't rearrange on hydration. */}
+                <button
+                  onClick={() => {
+                    if (activeTab !== "terminal") {
+                      setActiveTab("terminal");
+                    }
+                    if (!isChatMode) {
+                      activateChatMode();
+                    }
+                    setIsChatMode(!isChatMode);
+                  }}
+                  className={`touch-hit md:hidden ml-2 p-1 rounded-md transition-colors duration-300
+                    ${isChatMode
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-900 text-green-400 hover:bg-gray-800'}`}
+                  title={isChatMode ? "Switch to command mode" : "Switch to chat mode"}
+                  aria-label={isChatMode ? "Leave chat" : "Chat with my AI assistant"}
+                >
+                  {isChatMode ? (
+                    <TerminalIcon size={14} aria-hidden="true" />
+                  ) : (
+                    <MessageSquare size={14} aria-hidden="true" />
+                  )}
+                </button>
+              </div>
+              {!isMinimized && (
+                <div className="hidden md:flex gap-2 items-center">
+                  {/* Change chat/terminal toggle to show on all tabs */}
+                  <button
+                    onClick={() => {
+                      if (activeTab !== "terminal") {
+                        setActiveTab("terminal");
+                      }
+                      if (!isChatMode) {
+                        activateChatMode();
+                      }
+                      setIsChatMode(!isChatMode);
+                    }}
+                    className={`touch-hit p-1 rounded-md transition-colors duration-300 mr-2
+                      ${isChatMode
+                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        : 'bg-gray-900 text-green-400 hover:bg-gray-800'}`}
+                    title={isChatMode ? "Switch to command mode" : "Switch to chat mode"}
+                    aria-label={isChatMode ? "Leave chat" : "Chat with my AI assistant"}
+                  >
+                    {isChatMode ? (
+                      <TerminalIcon size={16} aria-hidden="true" />
+                    ) : (
+                      <MessageSquare size={16} aria-hidden="true" />
+                    )}
+                  </button>
+                  {/* A touch iPad is always full screen, so the button would do nothing there. */}
+                  <button
+                    onClick={toggleFullscreen}
+                    aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                    title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                    className={`coarse:hidden transition-colors duration-300
+                      ${chatLook ? 'text-gray-400 hover:text-gray-300' : 'text-green-500 hover:text-green-400'}`}
+                  >
+                    {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                  </button>
+                </div>
+              )}
             </div>
 
-            {mobileMenuOpen && (
-              <div 
-                ref={mobileMenuRef}
-                className={`md:hidden absolute top-[2.5rem] left-0 w-full z-50 font-mono text-sm shadow-lg shadow-black/50
-                  ${isChatMode && activeTab === "terminal" 
-                    ? 'bg-gray-800 border-b border-gray-400' 
-                    : 'bg-gray-900 border-b border-green-500'}`}
-              >
-                <div className={`p-2 border-b text-xs
-                  ${isChatMode && activeTab === "terminal" 
-                    ? 'bg-black text-gray-400 border-gray-400/50' 
-                    : 'bg-black text-green-500 border-green-500/50'}`}>
-                  <span className="opacity-80">
-                    {isChatMode && activeTab === "terminal" ? "chat@Gallillio:~" : "portfolio@Gallillio:~"}
-                  </span> 
-                  <span className={isChatMode && activeTab === "terminal" ? "text-gray-300" : "text-green-400"}>$</span> ls -la /pages
-                </div>
-                <div className="flex flex-col">
-                  {[
-                    { id: "terminal", label: isChatMode && activeTab === "terminal" ? "chat" : "terminal", desc: isChatMode && activeTab === "terminal" ? "AI assistant" : "Command line interface" },
-                    { id: "projects", label: "projects", desc: "View my work" },
-                    { id: "about", label: "about", desc: "My background" },
-                    { id: "contact", label: "contact", desc: "Get in touch" },
-                    { id: "my-achievements", label: "my-achievements", desc: "My accomplishments" },
-                    { id: "your-achievements", label: "your-achievements", desc: "Your unlocked achievements" }
-                  ].map((item, index) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleTabChange(item.id)}
-                      className={`mobile-menu-item touch-optimized text-left px-4 py-3 flex items-center border-b transition-colors cursor-pointer ${
-                        isChatMode && activeTab === "terminal"
-                          ? `border-gray-400/30 ${activeTab === item.id ? "bg-black text-gray-300" : "text-gray-400 hover:bg-gray-800"}`
-                          : `border-green-500/30 ${activeTab === item.id ? "bg-black text-green-400" : "text-green-500 hover:bg-gray-800"}`
-                      }`}
-                      style={{
-                        animationDelay: `${index * 70}ms`,
-                        animation: "fadeInDown 0.3s ease-out forwards"
-                      }}
+            {!isMinimized && (
+              <div className={`w-full flex justify-between rounded-none overflow-x-auto
+                ${chatLook ? 'bg-gray-800 border-b border-gray-400' : 'bg-gray-900 border-b border-green-500'}`}>
+                {/* A phone's section bar: where you are, and a tap for every
+                    section and command (components/command-sheet.tsx). The dock
+                    along the bottom has the main sections one tap away. */}
+                <button
+                  type="button"
+                  onClick={openSheet}
+                  aria-haspopup="dialog"
+                  aria-label={`All sections and commands. Now in ${activeTab}`}
+                  className={`md:hidden flex min-h-[44px] flex-grow items-center gap-2 px-3 text-left font-mono text-sm
+                    ${chatLook ? 'text-gray-400 active:bg-gray-700' : 'text-green-500 active:bg-green-500/10'}`}
+                >
+                  <Menu size={20} aria-hidden="true" />
+                  <span>
+                    /{chatLook ? "chat" : activeTab}
+                    <span className={`terminal-cursor ${chatLook ? 'chat-cursor' : ''}`}></span>
+                  </span>
+                </button>
+
+                <div className="hidden md:block">
+                  <TabsList className={`bg-transparent border-none rounded-none h-auto text-gray-400
+                    ${chatLook ? 'chat-tabs' : ''}`}>
+                    <TabsTrigger
+                      value="terminal"
+                      className={`custom-tab touch-optimized rounded-none border-r
+                        ${chatLook
+                          ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400'
+                          : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
                     >
-                      <ChevronRight size={14} className="mr-2" />
-                      <span className="mr-2 opacity-70">{activeTab === item.id ? ">" : "$"}</span>
-                      <span className={isChatMode && activeTab === "terminal" ? "text-gray-300" : "text-green-400"}>cd</span>
-                      <span className="mx-1">/</span>
-                      <span className={activeTab === item.id ? (isChatMode && activeTab === "terminal" ? "text-gray-200" : "text-green-300") : ""}>{item.label}</span>
-                      <span className={`ml-2 text-xs hidden sm:inline ${isChatMode && activeTab === "terminal" ? "text-gray-400/50" : "text-green-500/50"}`}>{item.desc}</span>
-                    </button>
-                  ))}
+                      {chatLook ? (
+                        <div className="flex items-center gap-1">
+                          <MessageSquare size={14} />
+                          Chat
+                        </div>
+                      ) : (
+                        "Terminal"
+                      )}
+                    </TabsTrigger>
+                    <PageTab
+                      value="projects"
+                      href="/projects"
+                      onReselect={() => reselectTab("projects")}
+                      className={`custom-tab touch-optimized rounded-none border-r
+                        ${chatLook
+                          ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400'
+                          : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
+                    >
+                      Projects
+                    </PageTab>
+                    <PageTab
+                      value="about"
+                      href="/about"
+                      className={`custom-tab touch-optimized rounded-none border-r
+                        ${chatLook
+                          ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400'
+                          : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
+                    >
+                      <TabLabel short="About" full="About / Experience" />
+                    </PageTab>
+                    <TabsTrigger
+                      value="contact"
+                      className={`custom-tab touch-optimized rounded-none border-r
+                        ${chatLook
+                          ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400'
+                          : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
+                    >
+                      <TabLabel short="Contact" full="Contact / CV" />
+                    </TabsTrigger>
+                    <PageTab
+                      value="my-achievements"
+                      href="/achievements"
+                      className={`custom-tab touch-optimized rounded-none border-r
+                        ${chatLook
+                          ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300 border-gray-400'
+                          : 'data-[state=active]:bg-black data-[state=active]:text-green-500 border-green-500'}`}
+                    >
+                      <TabLabel short="Achievements" full="My Achievements / Publications / Certifications" />
+                    </PageTab>
+                  </TabsList>
                 </div>
-                <div className={`p-3 text-xs border-t ${
-                  isChatMode && activeTab === "terminal"
-                    ? "bg-black text-gray-400/70 border-gray-400/30"
-                    : "bg-black text-green-500/70 border-green-500/30"
-                }`}>
-                  Type <span 
-                    className={`cursor-pointer underline decoration-dotted underline-offset-2 ${
-                      isChatMode && activeTab === "terminal"
-                        ? "text-gray-300 hover:text-gray-200"
-                        : "text-green-400 hover:text-green-300"
-                    }`}
-                    onClick={handleHelpClick}
-                  >help</span> in terminal for available commands
-                </div>
+
+                <TabsList className={`bg-transparent border-none rounded-none h-auto ml-auto flex-grow hidden md:flex text-gray-400
+                  ${chatLook ? 'chat-tabs' : ''}`}>
+                  <TabsTrigger
+                    value="your-achievements"
+                    className={`custom-tab touch-optimized rounded-none w-full flex justify-end pr-6
+                      ${chatLook
+                        ? 'data-[state=active]:bg-black data-[state=active]:text-gray-300'
+                        : 'data-[state=active]:bg-black data-[state=active]:text-green-500'}`}
+                  >
+                    <span>Your Achievements</span>
+                  </TabsTrigger>
+                </TabsList>
               </div>
             )}
+          </div>
 
-            <TabsContent 
-              value="terminal" 
-              className="p-0 m-0"
-            >
-              <div
-                data-terminal-scroll
-                style={contentStyle}
-                className={`${contentHeight} overflow-y-auto overflow-x-auto p-4 pt-6 font-mono cursor-text custom-scrollbar transition-all duration-700 ease-in-out
-                  ${isChatMode ? 'bg-gray-900 text-gray-300 chat-terminal-content' : 'bg-black text-green-500'}`}
-                onClick={focusInput}
+          {!isMinimized && (
+            <>
+              <TabsContent
+                value="terminal"
+                className="p-0 m-0 max-md:flex max-md:flex-1 max-md:flex-col md:coarse:min-h-0 md:coarse:flex-1"
               >
-                {isChatMode && (
-                  <div className={`mb-6 p-3 rounded-lg border animate-fadeIn ${isChatMode ? 'bg-gray-800/50 border-gray-500/30 text-gray-300' : 'bg-green-900/10 border-green-500/30 text-green-400'}`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <MessageSquare size={16} className="text-blue-400" />
-                      <span className="font-semibold text-blue-400">Chat Mode Active</span>
+                <div
+                  data-terminal-scroll
+                  className={`${contentHeight} ${tabBoxClass} overflow-y-auto overflow-x-auto p-4 pt-6 max-md:flex-1 max-md:pb-0 font-mono cursor-text custom-scrollbar transition-all duration-700 ease-in-out
+                    ${isChatMode ? 'bg-gray-900 text-gray-300 chat-terminal-content' : 'bg-black text-green-500'}`}
+                  onClick={focusInput}
+                >
+                  {isChatMode && (
+                    <div className={`mb-6 p-3 rounded-lg border animate-fadeIn motion-reduce:animate-none ${isChatMode ? 'bg-gray-800/50 border-gray-500/30 text-gray-300' : 'bg-green-900/10 border-green-500/30 text-green-400'}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <MessageSquare size={16} className="text-blue-400" />
+                        <span className="font-semibold text-blue-400">Chat Mode Active</span>
+                      </div>
+                      <p className="text-sm">You&apos;re chatting with Ahmed&apos;s AI assistant. Ask anything about Ahmed or his work. Type <code className="bg-gray-700 px-1 rounded">exit</code> to return to terminal mode.</p>
                     </div>
-                    <p className="text-sm">You&apos;re chatting with Ahmed&apos;s AI assistant. Ask anything about Ahmed or his work. Type <code className="bg-gray-700 px-1 rounded">exit</code> to return to terminal mode.</p>
-                  </div>
-                )}
-                <TerminalOutput history={history} onCommandClick={handleCommandClick} isChatMode={isChatMode} />
-                <StreamingMessage ref={streamingRef} active={isBotResponding} onGrow={followStream} />
-                <div ref={outputEndRef} />
-                {!isClosing && (
-                  <TerminalInput 
-                    ref={terminalInputRef} 
-                    onCommand={handleCommand} 
-                    isChatMode={isChatMode}
-                    isBotResponding={isBotResponding}
-                  />
-                )}
-              </div>
-            </TabsContent>
+                  )}
+                  <TerminalOutput history={history} onCommandClick={handleCommandClick} isChatMode={isChatMode} />
+                  <StreamingMessage ref={streamingRef} active={isBotResponding} onGrow={followStream} />
+                  <div ref={outputEndRef} />
+                  {/* More arrived below while the visitor read further up. Pinned
+                      just above the prompt (and the dock, on a phone). */}
+                  {hasUnseenOutput && (
+                    <div className="sticky bottom-3 z-30 flex h-0 justify-center max-md:bottom-[calc(var(--terminal-dock-h,0px)+var(--terminal-prompt-h,0px)+0.75rem)]">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          scrollTranscriptToEnd()
+                        }}
+                        className="flex min-h-[40px] -translate-y-full items-center gap-1.5 rounded-full border border-blue-400/60 bg-gray-800 px-4 font-mono text-sm text-blue-200 shadow-lg shadow-black/60 active:bg-gray-700"
+                      >
+                        New reply <span aria-hidden="true">↓</span>
+                      </button>
+                    </div>
+                  )}
+                  {!isClosing && (
+                    // A phone pins the prompt to the bottom of the screen, above
+                    // the dock and, through --kb, above the keyboard (globals.css).
+                    <div
+                      ref={promptRef}
+                      className={`terminal-prompt max-md:sticky max-md:z-20 max-md:-mx-4 max-md:px-4 max-md:pb-2 ${isChatMode ? 'max-md:bg-gray-900' : 'max-md:bg-black'}`}
+                      style={{ bottom: "var(--terminal-dock-h, 0px)" }}
+                    >
+                      <TerminalInput
+                        ref={terminalInputRef}
+                        onCommand={handleCommand}
+                        onStop={stopResponse}
+                        isChatMode={isChatMode}
+                        isBotResponding={isBotResponding}
+                      />
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
 
-            <TabsContent 
-              value="projects" 
-              className="p-0 m-0"
-            >
-              <div 
-                style={contentStyle}
-                data-tab-scroll
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+              <TabsContent
+                value="projects"
+                className="p-0 m-0 max-md:flex-1 md:coarse:min-h-0 md:coarse:flex-1"
               >
-                <Projects />
-              </div>
-            </TabsContent>
+                <div
+                  data-tab-scroll
+                  className={`${contentHeight} ${tabBoxClass} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+                >
+                  <Projects />
+                </div>
+              </TabsContent>
 
-            <TabsContent 
-              value="about" 
-              className="p-0 m-0"
-            >
-              <div 
-                style={contentStyle}
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+              <TabsContent
+                value="about"
+                className="p-0 m-0 max-md:flex-1 md:coarse:min-h-0 md:coarse:flex-1"
               >
-                <About />
-              </div>
-            </TabsContent>
+                <div
+                  className={`${contentHeight} ${tabBoxClass} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+                >
+                  <About />
+                </div>
+              </TabsContent>
 
-            <TabsContent 
-              value="contact" 
-              className="p-0 m-0"
-            >
-              <div 
-                style={contentStyle}
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+              <TabsContent
+                value="contact"
+                className="p-0 m-0 max-md:flex-1 md:coarse:min-h-0 md:coarse:flex-1"
               >
-                <Contact />
-              </div>
-            </TabsContent>
+                <div
+                  className={`${contentHeight} ${tabBoxClass} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+                >
+                  <Contact />
+                </div>
+              </TabsContent>
 
-            <TabsContent 
-              value="my-achievements" 
-              className="p-0 m-0"
-            >
-              <div 
-                style={contentStyle}
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+              <TabsContent
+                value="my-achievements"
+                className="p-0 m-0 max-md:flex-1 md:coarse:min-h-0 md:coarse:flex-1"
               >
-                <MyAchievements />
-              </div>
-            </TabsContent>
+                <div
+                  className={`${contentHeight} ${tabBoxClass} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+                >
+                  <MyAchievements />
+                </div>
+              </TabsContent>
 
-            <TabsContent 
-              value="your-achievements" 
-              className="p-0 m-0"
-            >
-              <div 
-                style={contentStyle}
-                className={`${contentHeight} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+              <TabsContent
+                value="your-achievements"
+                className="p-0 m-0 max-md:flex-1 md:coarse:min-h-0 md:coarse:flex-1"
               >
-                <YourAchievements />
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
+                <div
+                  className={`${contentHeight} ${tabBoxClass} overflow-y-auto transition-height duration-700 ease-in-out pt-2`}
+                >
+                  <YourAchievements />
+                </div>
+              </TabsContent>
+
+              {/* The thumb's bar: every tab on a phone, the terminal tab on a
+                  touch iPad (which has its tabs along the top for the rest). */}
+              {!isClosing && (
+                <TerminalDock
+                  ref={dockRef}
+                  activeTab={activeTab}
+                  isChatMode={isChatMode}
+                  onRun={runInTerminal}
+                  onTab={handleTabChange}
+                  onMore={openSheet}
+                  onType={() => terminalInputRef.current?.focus()}
+                  className={`shrink-0 max-md:sticky max-md:bottom-0 ${activeTab === "terminal" ? "hidden max-md:flex md:coarse:flex" : "hidden max-md:flex"}`}
+                />
+              )}
+            </>
+          )}
+        </Tabs>
       </div>
 
       {(isMinimized || isClosing) && (
@@ -1442,6 +1316,15 @@ function TerminalContent(): React.ReactNode {
           </button>
         </div>
       )}
+
+      <CommandSheet
+        open={sheetOpen}
+        onClose={closeSheet}
+        activeTab={activeTab}
+        isChatMode={isChatMode}
+        onTab={handleTabChange}
+        onRun={runInTerminal}
+      />
 
       {!isMinimized && (
         <AchievementNotification

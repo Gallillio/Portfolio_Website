@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from 'react';
-import { Trophy } from 'lucide-react';
+import { Trophy, X, ChevronRight } from 'lucide-react';
 import type { Achievement } from '@/lib/achievements-context';
 
 interface AchievementNotificationProps {
@@ -11,9 +11,13 @@ interface AchievementNotificationProps {
   isMobile: boolean;
 }
 
-export default function AchievementNotification({ 
-  achievement, 
-  onClose, 
+// Long enough to read twice; the timer holds while a finger or the mouse is on
+// the toast (WCAG 2.2.1).
+const SHOW_MS = 7000;
+
+export default function AchievementNotification({
+  achievement,
+  onClose,
   onNavigate,
   isMobile
 }: AchievementNotificationProps) {
@@ -23,21 +27,30 @@ export default function AchievementNotification({
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isDismissing, setIsDismissing] = useState(false);
+  const [held, setHeld] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
 
   // Minimum distance (in pixels) to consider a swipe
   const minSwipeDistance = 50;
 
-  // Auto-dismiss notification after 7 seconds
+  // Each toast starts fresh: a swipe from the last one mustn't carry over.
   useEffect(() => {
-    if (achievement) {
+    setIsDismissing(false);
+    setSwipeOffset(0);
+    setSwipeDirection(null);
+    setHeld(false);
+  }, [achievement]);
+
+  // Auto-dismiss, unless someone is holding or pointing at it.
+  useEffect(() => {
+    if (achievement && !held) {
       const timer = setTimeout(() => {
         onClose();
-      }, 7000);
-      
+      }, SHOW_MS);
+
       return () => clearTimeout(timer);
     }
-  }, [achievement, onClose]);
+  }, [achievement, onClose, held]);
 
   // Handle swipe animation and dismiss
   useEffect(() => {
@@ -45,7 +58,7 @@ export default function AchievementNotification({
       const timer = setTimeout(() => {
         onClose();
       }, 300); // Match the duration of the swipe-out animation
-      
+
       return () => clearTimeout(timer);
     }
   }, [isDismissing, onClose]);
@@ -55,19 +68,20 @@ export default function AchievementNotification({
     setTouchStart(e.targetTouches[0].clientX);
     setTouchEnd(null);
     setSwiping(true);
+    setHeld(true);
   };
 
   // Handle touch move
   const onTouchMove = (e: React.TouchEvent) => {
     if (!touchStart) return;
-    
+
     const currentTouch = e.targetTouches[0].clientX;
     setTouchEnd(currentTouch);
-    
+
     // Calculate swipe offset for animation
     const offset = currentTouch - touchStart;
     setSwipeOffset(offset);
-    
+
     // Determine swipe direction
     if (offset > 0) {
       setSwipeDirection('right');
@@ -79,13 +93,14 @@ export default function AchievementNotification({
   // Handle touch end
   const onTouchEnd = () => {
     setSwiping(false);
-    
+    setHeld(false);
+
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchEnd - touchStart;
     const isLeftSwipe = distance < -minSwipeDistance;
     const isRightSwipe = distance > minSwipeDistance;
-    
+
     // If swipe distance exceeds threshold, dismiss notification
     if (isLeftSwipe || isRightSwipe) {
       setIsDismissing(true);
@@ -94,120 +109,91 @@ export default function AchievementNotification({
       setSwipeOffset(0);
       setSwipeDirection(null);
     }
-    
+
     // Reset touch coordinates
     setTouchStart(null);
     setTouchEnd(null);
   };
 
-  if (!achievement) return null;
-  
-  const isSecret = achievement.isSecret;
-  
-  // Position class based on mobile or desktop. Mobile centers with
-  // inset-x-0 + mx-auto rather than left-1/2 + -translate-x-1/2: both the
-  // slide-down animation and the swipe style below set `transform`, which
-  // silently dropped the centring translate and pushed the toast half off the
-  // right edge of every phone.
+  const isSecret = achievement?.isSecret;
+  const heading = isSecret ? 'Secret achievement unlocked' : 'Achievement unlocked';
+
+  // Desktop: the top right corner. Phone: under the terminal's pinned header
+  // (it publishes its height as --terminal-header-h), so the menu, chat and
+  // tabs stay reachable while it shows; the prompt is at the bottom. Centred
+  // with inset-x-0 + mx-auto rather than left-1/2 + -translate-x-1/2: the
+  // slide-down animation and the swipe both set `transform`.
   const positionClass = isMobile
-    ? "top-4 inset-x-0 mx-auto w-[95%] max-w-sm"
+    ? "inset-x-0 mx-auto w-[calc(100%-1.5rem)] max-w-sm"
     : "top-4 right-4 w-80";
-
-  // Padding and styling based on mobile or desktop
-  const paddingClass = isMobile
-    ? "p-2"
-    : "p-4";
-
-  const animationClass = isMobile
-    ? "animate-slide-down"
-    : "animate-slide-down";
+  const positionStyle = isMobile
+    ? { top: "calc(var(--terminal-header-h, env(safe-area-inset-top, 0px)) + 0.5rem)" }
+    : undefined;
 
   return (
-    <div 
-      ref={notificationRef}
-      className={`fixed ${positionClass} bg-gray-900 border-2 border-green-500 ${paddingClass} rounded-md shadow-lg z-50 ${animationClass} cursor-pointer transition-transform duration-300`}
-      style={{ 
-        transform: isDismissing && swipeDirection === 'left' 
-          ? 'translateX(-100vw)' 
-          : isDismissing && swipeDirection === 'right' 
-          ? 'translateX(100vw)' 
-          : swiping 
-          ? `translateX(${swipeOffset}px)` 
-          : 'translateX(0)' 
-      }}
-      onClick={() => {
-        if (!swiping) {
-          onNavigate(); // Navigate to YourAchievements
-          onClose(); // Close the notification
-        }
-      }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      {isMobile ? (
-        // Mobile optimized layout
-        <div className="flex items-center gap-2">
-          <div className={`p-2 rounded-full ${isSecret ? 'bg-yellow-400/80' : 'bg-green-500/20'}`}>
-            {achievement.icon || <Trophy className="h-4 w-4 text-green-400" />}
-          </div>
-          <div className="flex-grow truncate">
-            <div className="flex items-center justify-between">
-              <h3 className={`font-bold text-sm ${isSecret ? 'text-yellow-400' : 'text-green-400'}`}>
-                {isSecret ? '🌟 Secret Unlocked!' : 'Achievement!'}
-              </h3>
-              <button 
-                className="text-green-500 hover:text-green-400 -mr-1"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent triggering the onNavigate
-                  onClose(); // Close the notification
-                }}
-                aria-label="Close notification"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            <p className="text-green-300 text-xs font-medium truncate">{achievement.title}</p>
-          </div>
-        </div>
-      ) : (
-        // Desktop layout remains the same
-        <div className="flex items-center gap-3">
-          <div className={`p-3 rounded-full ${isSecret ? 'bg-yellow-400' : 'bg-green-500/20'}`}>
-            {achievement.icon || <Trophy className="h-6 w-6 text-green-400" />}
-          </div>
-          <div className="flex-grow">
-            <h3 className={`font-bold ${isSecret ? 'text-yellow-400' : 'text-green-400'}`}>
-              {isSecret ? '🌟 Secret Achievement Unlocked!' : 'Achievement Unlocked!'}
-            </h3>
-            <p className="text-green-300 text-sm font-medium">{achievement.title}</p>
-          </div>
-          
-          <button 
-            className="text-green-500 hover:text-green-400"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent triggering the onNavigate
-              onClose(); // Close the notification
-            }}
-            aria-label="Close notification"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      )}
+    <>
+      {/* Always in the page, so screen readers hear each unlock without the
+          toast taking focus (WCAG 4.1.3). */}
+      <div role="status" className="sr-only">
+        {achievement ? `${heading}: ${achievement.title}` : ""}
+      </div>
 
-      {isMobile && (
-        <div className="mt-1 opacity-70 text-[0.6rem] text-green-400 text-center">
-          Swipe to dismiss • Tap to view
+      {achievement && (
+        <div
+          ref={notificationRef}
+          className={`fixed ${positionClass} bg-gray-900 border-2 ${isSecret ? 'border-yellow-400' : 'border-green-500'} rounded-md shadow-lg shadow-black/60 z-[60] animate-slide-down motion-reduce:animate-none cursor-pointer transition-transform duration-300 motion-reduce:transition-none`}
+          style={{
+            ...positionStyle,
+            transform: isDismissing && swipeDirection === 'left'
+              ? 'translateX(-100vw)'
+              : isDismissing && swipeDirection === 'right'
+              ? 'translateX(100vw)'
+              : swiping
+              ? `translateX(${swipeOffset}px)`
+              : 'translateX(0)',
+            touchAction: 'pan-y',
+          }}
+          onClick={() => {
+            if (!swiping) {
+              onNavigate(); // Navigate to YourAchievements
+              onClose(); // Close the notification
+            }
+          }}
+          onPointerEnter={(e) => e.pointerType === 'mouse' && setHeld(true)}
+          onPointerLeave={(e) => e.pointerType === 'mouse' && setHeld(false)}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <div className={`flex items-center ${isMobile ? 'gap-3 py-1.5 pl-3' : 'gap-3 p-4 pr-1'}`}>
+            <div className={`shrink-0 rounded-full ${isMobile ? 'p-2' : 'p-3'} ${isSecret ? 'bg-yellow-400/80' : 'bg-green-500/20'}`}>
+              {achievement.icon || <Trophy className={isMobile ? "h-4 w-4 text-green-400" : "h-6 w-6 text-green-400"} />}
+            </div>
+            <div className="min-w-0 flex-grow">
+              <h3 className={`font-bold ${isMobile ? 'text-sm' : ''} ${isSecret ? 'text-yellow-400' : 'text-green-400'}`}>
+                {isSecret ? '🌟 ' : ''}{heading}
+              </h3>
+              <p className={`text-green-300 font-medium truncate ${isMobile ? 'text-sm' : 'text-sm'}`}>{achievement.title}</p>
+              {isMobile && (
+                <p className="mt-0.5 flex items-center text-xs text-green-400/80">
+                  View your achievements <ChevronRight size={12} aria-hidden="true" />
+                </p>
+              )}
+            </div>
+            {/* 44px, so a finger closes it without opening it. */}
+            <button
+              className="flex h-11 w-11 shrink-0 items-center justify-center text-green-500 hover:text-green-400"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering the onNavigate
+                onClose(); // Close the notification
+              }}
+              aria-label="Close notification"
+            >
+              <X size={isMobile ? 18 : 16} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
-

@@ -435,7 +435,7 @@ export default function About() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tabs list with horizontal scroll, from md up. Both navigations are in the
             HTML and CSS picks one: choosing after hydration made the page jump on phones. */}
-          <div className="mt-8 overflow-x-auto pb-2 max-md:hidden">
+          <div className="mt-8 overflow-x-auto pb-2 max-md:hidden coarse:hidden">
             <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto text-gray-400">
               <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
                 Skills
@@ -461,8 +461,10 @@ export default function About() {
             </TabsList>
           </div>
 
-        {/* Mobile-friendly section selector */}
-          <div className="mb-6 mt-6 bg-gray-900 pt-3 pb-3 border border-green-500 rounded-md shadow-md md:hidden">
+        {/* Mobile-friendly section selector. Touch iPads get it too: there the
+            row above scrolled sideways with its last sections cut off and
+            nothing to say more were there; these wrap, so all of them show. */}
+          <div className="mb-6 mt-6 bg-gray-900 pt-3 pb-3 border border-green-500 rounded-md shadow-md md:hidden md:coarse:block">
             
             <div className="about-section-nav px-4">
               <div className="flex flex-wrap gap-2">
@@ -477,7 +479,7 @@ export default function About() {
                 ].map((section) => (
                   <button
                     key={section.id}
-                    className={`px-4 py-2 text-sm rounded-md whitespace-nowrap transition-all touch-optimized
+                    className={`min-h-[44px] px-4 py-2 text-sm rounded-md whitespace-nowrap transition-all touch-optimized
                       ${activeTab === section.id 
                         ? 'bg-green-500 text-black font-medium shadow-md transform scale-105' 
                         : 'bg-gray-800 text-green-300 border border-green-500/30 hover:bg-green-500/10'}

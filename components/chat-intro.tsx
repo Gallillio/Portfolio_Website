@@ -3,7 +3,7 @@
 import React from "react"
 
 interface ChatIntroProps {
-  /** Sends the question immediately, so a visitor can get an answer without typing. */
+  /** Types the question out and sends it, so a visitor can get an answer without typing. */
   onAsk: (question: string) => void
 }
 
@@ -36,13 +36,17 @@ export default function ChatIntro({ onAsk }: ChatIntroProps) {
 
       <div className="mt-3 flex gap-3">
         <span className="select-none text-gray-500">Try:</span>
-        <div className="flex flex-col items-start gap-1">
+        <div className="flex flex-col items-start gap-1 coarse:gap-2">
           {STARTERS.map((question) => (
             <button
               key={question}
               type="button"
-              onClick={() => onAsk(question)}
-              className="cursor-pointer text-left text-blue-300 hover:text-blue-200 hover:underline"
+              onClick={(event) => {
+                // Not up to the output, whose click focuses the prompt.
+                event.stopPropagation()
+                onAsk(question)
+              }}
+              className="touch-hit cursor-pointer text-left text-blue-300 hover:text-blue-200 hover:underline coarse:underline coarse:decoration-blue-300/40 underline-offset-4"
             >
               {question}
             </button>

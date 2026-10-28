@@ -510,15 +510,17 @@ export function AchievementsProvider({ children }: { children: ReactNode }) {
     checkAchievements();
   }, [state, checkAchievements]);
 
-  // Handle showing the next achievement in the queue
+  // Handle showing the next achievement in the queue. A short gap between two,
+  // so the second reads as a new toast rather than the first one changing.
   useEffect(() => {
-    // If no achievement is currently showing and there are achievements in the queue
-    if (!lastUnlockedAchievement && achievementQueue.length > 0) {
+    if (lastUnlockedAchievement || achievementQueue.length === 0) return
+    const timer = setTimeout(() => {
       // Show the first achievement in the queue
       setLastUnlockedAchievement(achievementQueue[0]);
       // Remove it from the queue
       setAchievementQueue(prev => prev.slice(1));
-    }
+    }, 400);
+    return () => clearTimeout(timer);
   }, [lastUnlockedAchievement, achievementQueue]);
 
   // Clear the last unlocked achievement (after notification is shown)

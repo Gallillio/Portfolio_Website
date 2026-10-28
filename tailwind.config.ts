@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss"
 import defaultTheme from "tailwindcss/defaultTheme"
 import tailwindcssAnimate from "tailwindcss-animate"
+import plugin from "tailwindcss/plugin"
 
 const config = {
   darkMode: ["class"],
@@ -85,7 +86,16 @@ const config = {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [
+    tailwindcssAnimate,
+    // coarse: a finger is the main pointer (phones, iPads without a trackpad);
+    // fine: a mouse or trackpad. Touch layouts key off these, not screen width,
+    // so a large iPad gets them and a narrow desktop window doesn't.
+    plugin(({ addVariant }) => {
+      addVariant("coarse", "@media (pointer: coarse)")
+      addVariant("fine", "@media (pointer: fine)")
+    }),
+  ],
 } satisfies Config
 
 export default config

@@ -15,6 +15,7 @@ import { Tooltip } from "@/components/ui/tooltip"
 import type { ProjectImage } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { opensNewTab, projectPath, projectSlugForPath, returnToProjectList } from "@/lib/routes"
+import { tabScroller } from "@/lib/scroll"
 
 // Tags a card shows before folding the rest into a "+N" chip; the project page lists them all.
 const VISIBLE_TECH_COUNT = 6
@@ -41,7 +42,7 @@ function ProjectDescription({
         <a
           href={href}
           onClick={onOpen}
-          className="mt-2 inline-flex items-center gap-1 text-sm text-green-400 underline-offset-4 hover:text-green-300 hover:underline"
+          className="mt-2 inline-flex items-center gap-1 text-sm text-green-400 underline-offset-4 hover:text-green-300 hover:underline coarse:min-h-[44px] coarse:underline"
         >
           {/* The name is in the link text, not only an aria-label, so search engines read a descriptive link. */}
           Read more<span className="sr-only"> about {title}</span>
@@ -179,8 +180,8 @@ export default function Projects() {
   const closeLightbox = useCallback(() => setLightbox(null), [])
   const showSlide = useCallback((index: number) => setLightbox((current) => current && { ...current, index }), [])
 
-  // The tab's own scroll box (components/terminal.tsx); the page around it stays put.
-  const scrollBox = () => rootRef.current?.closest<HTMLElement>("[data-tab-scroll]") ?? null
+  // What scrolls the tab: its own box in the window, or the page on a phone (lib/scroll.ts).
+  const scrollBox = () => tabScroller(rootRef.current?.closest<HTMLElement>("[data-tab-scroll]"))
 
   // Every link to a project is a real link: crawlers follow it, and a cmd, ctrl or
   // middle click opens the project in a new tab. A plain click opens it here, as a
@@ -195,7 +196,7 @@ export default function Projects() {
     if (!openProject) {
       // Leaving the cards: note on their entry where they were scrolled to and which
       // card was used, for when Back brings the visitor here again.
-      window.history.replaceState({ ...state, projectsScroll: scrollBox()?.scrollTop ?? 0, projectsFocus: slug }, "")
+      window.history.replaceState({ ...state, projectsScroll: scrollBox()?.top ?? 0, projectsFocus: slug }, "")
       projectDepth = 1
     }
     window.history.pushState({ projectDepth }, "", section ? `${projectPath(slug)}#${section}` : projectPath(slug))
@@ -222,22 +223,22 @@ export default function Projects() {
     const state = window.history.state
     const hashTarget = window.location.hash && document.getElementById(window.location.hash.slice(1))
     // The target's scroll-margin leaves room for the pinned bar, as the browser's own jump does.
-    const scrollTopFor = (target: HTMLElement) =>
-      target.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - parseFloat(getComputedStyle(target).scrollMarginTop)
+    const scrollTopFor = (target: HTMLElement) => box.topFor(target)
     if (previousSlug === shownSlug) {
       // The tab has just opened. Back from another tab, pick up where the visitor
       // left off (components/terminal.tsx keeps the position); on a page load,
       // follow a #section in the address. Focus stays on the tab that was used.
-      if (typeof state?.projectsScroll === "number") box.scrollTop = state.projectsScroll
-      else if (hashTarget) box.scrollTop = scrollTopFor(hashTarget)
+      if (typeof state?.projectsScroll === "number") box.top = state.projectsScroll
+      else if (hashTarget) box.top = scrollTopFor(hashTarget)
+      else if (box.page) box.top = 0
       return
     }
     if (shownSlug) {
-      box.scrollTop = hashTarget ? scrollTopFor(hashTarget) : 0
+      box.top = hashTarget ? scrollTopFor(hashTarget) : 0
       headingRef.current?.focus({ preventScroll: true })
     } else {
-      box.scrollTop = state?.projectsScroll ?? 0
-      const card = state?.projectsFocus && box.querySelector<HTMLElement>(`[data-project-slug="${state.projectsFocus}"]`)
+      box.top = state?.projectsScroll ?? 0
+      const card = state?.projectsFocus && rootRef.current?.querySelector<HTMLElement>(`[data-project-slug="${state.projectsFocus}"]`)
       if (card) card.focus({ preventScroll: true })
     }
     // Runs when the shown project changes, never on other renders.
@@ -493,7 +494,7 @@ export default function Projects() {
                   <div className="flex flex-wrap items-center gap-2">
                     {/* The title opens the project's write-up, which has an address of its own to share. */}
                     {projectHref ? (
-                      <a href={projectHref} onClick={openThis} data-project-slug={slug} className="underline-offset-4 hover:underline">
+                      <a href={projectHref} onClick={openThis} data-project-slug={slug} className="touch-hit underline-offset-4 hover:underline">
                         {project.title}
                       </a>
                     ) : (
@@ -532,7 +533,7 @@ export default function Projects() {
                   const label = `${hiddenTechnologies.length} more: ${hiddenTechnologies.join(", ")}`
                   const chipClass = cn(badgeVariants({ variant: "outline" }), "border-green-500/50 text-green-400/80")
                   return projectHref ? (
-                    <a href={projectHref} onClick={openThis} title={label} aria-label={label} className={cn(chipClass, "hover:border-green-500 hover:text-green-300")}>
+                    <a href={projectHref} onClick={openThis} title={label} aria-label={label} className={cn(chipClass, "touch-hit hover:border-green-500 hover:text-green-300")}>
                       +{hiddenTechnologies.length}
                     </a>
                   ) : (

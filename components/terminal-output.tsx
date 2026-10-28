@@ -1,8 +1,9 @@
 import type { Command, CommandResponse } from "@/lib/types"
-import { useState, useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { availableCommands } from "@/lib/commands"
 import { cv } from "@/lib/profile-extras"
 import { Tooltip } from "@/components/ui/tooltip"
+import { COARSE_POINTER, useMediaQuery } from "@/lib/media"
 
 interface TerminalOutputProps {
   history: Array<Command & CommandResponse>
@@ -10,133 +11,96 @@ interface TerminalOutputProps {
   isChatMode?: boolean
 }
 
+const linkColor = (isChatMode?: boolean) => (isChatMode ? "text-blue-400" : "text-green-400")
+
+// The ╔═╗ ║ title ║ ╚═╝ headings and └─── rules that box command output. They
+// must keep their width to line up, so they shrink to fit a narrow phone
+// (.terminal-frame in globals.css) rather than wrap or push the page sideways.
+const isFrameLine = (line: React.ReactNode) => typeof line === "string" && /^[╔║╚└]/.test(line)
+
+/**
+ * A click anywhere in the output focuses the prompt, so with a mouse a link
+ * follows on ctrl or cmd click, as links in a terminal do, and says so in a
+ * tooltip. A tap follows it straight away: a touch screen has neither the key
+ * nor the hover. Before, iPads (touch, 768-1024px) got the mouse rules and no
+ * tap did anything.
+ */
+function useFollowOnModifier() {
+  const touch = useMediaQuery(COARSE_POINTER)
+  const onClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!touch && !event.ctrlKey && !event.metaKey) event.preventDefault()
+    },
+    [touch]
+  )
+  return { touch, onClick }
+}
+
 const TerminalLink = ({ href, isChatMode }: { href: string; isChatMode?: boolean }) => {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
-
-  useEffect(() => {
-    // Check if device is mobile/touch screen
-    const checkDeviceType = () => {
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        ('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0)
-      
-      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
-      
-      setIsMobile(isMobileDevice && !isTabletDevice)
-      setIsTablet(isTabletDevice)
-    }
-
-    checkDeviceType()
-    window.addEventListener('resize', checkDeviceType)
-    return () => window.removeEventListener('resize', checkDeviceType)
-  }, [])
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (isMobile || e.ctrlKey) {
-      window.open(href, '_blank')
-    }
-  }, [href, isMobile])
-
+  const { touch, onClick } = useFollowOnModifier()
   return (
-    <Tooltip text="Follow Link: ctrl + click" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
-      <span 
-        className={`underline cursor-pointer relative ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
-        onClick={handleClick}
-      >
+    <Tooltip text="Follow Link: ctrl + click" showTooltip={!touch}>
+      <a href={href} target="_blank" rel="noopener noreferrer" onClick={onClick} className={`underline cursor-pointer relative break-all ${linkColor(isChatMode)}`}>
         {href}
-      </span>
+      </a>
     </Tooltip>
   )
 }
 
 const CommandLink = ({ command, onClick, isChatMode }: { command: string; onClick: (command: string) => void; isChatMode?: boolean }) => {
-  const handleClick = () => {
-    // If in chat mode, don't make commands clickable
-    if (isChatMode) return;
-    
-    onClick(command)
-    
-    // Ensure the terminal input is visible after clicking
-    setTimeout(() => {
-      // Find the terminal input field
-      const terminalInput = document.querySelector('[aria-label="Terminal input"]')
-      if (terminalInput instanceof HTMLElement) {
-        terminalInput.focus()
-        // Scroll to the input field
-        terminalInput.scrollIntoView({ behavior: 'smooth', block: 'end' })
-      }
-    }, 100)
-  }
+  // Command words in a chat reply are prose, not links.
+  if (isChatMode) return <span className="text-gray-300">{command}</span>
 
-  // In chat mode handleClick above is a no-op, so the styling must not promise a
-  // click. Otherwise every command word in a chat reply looks interactive and
-  // does nothing. Elsewhere, use a brighter green than the surrounding
-  // text-green-400 body so the affordance is actually visible.
+  // A real button, so it can be reached with the keyboard. It runs the command;
+  // stopPropagation keeps the output's click-to-focus from opening the keyboard
+  // on a phone. Underlined on touch screens, where there is no hover to show it.
   return (
-    <span
-      className={
-        isChatMode
-          ? 'text-gray-300'
-          : 'cursor-pointer text-green-300 hover:text-green-200 hover:underline'
-      }
-      onClick={handleClick}
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation()
+        onClick(command)
+      }}
+      className="touch-hit cursor-pointer text-green-300 underline-offset-4 hover:text-green-200 hover:underline coarse:underline coarse:decoration-green-500/50"
     >
       {command}
-    </span>
+    </button>
   )
 }
 
 // Component for tab links (for Projects, Your Achievements, etc.)
 const TabLink = ({ tabName, displayName, isChatMode }: { tabName: string; displayName: string; isChatMode?: boolean }) => {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
+  const touch = useMediaQuery(COARSE_POINTER)
 
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        ('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0)
-      
-      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
-      
-      setIsMobile(isMobileDevice && !isTabletDevice)
-      setIsTablet(isTabletDevice)
-    }
-
-    checkDeviceType()
-    window.addEventListener('resize', checkDeviceType)
-    return () => window.removeEventListener('resize', checkDeviceType)
-  }, [])
-
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation()
     // List of about section tabs that need special handling
     const aboutSectionTabs = ['experience', 'skills', 'education', 'freelance', 'courses']
-    
+
     // Check if this is an about section tab
     if (aboutSectionTabs.includes(tabName)) {
       // Switch to the about tab
       window.dispatchEvent(new CustomEvent('switch-terminal-tab', { detail: { tabName: 'about' } }))
-      
+
       // After a small delay to ensure the about tab is loaded, switch to the specific section
       setTimeout(() => {
         // Try to use postMessage to communicate with the inner tab
         try {
-          window.postMessage({ 
-            type: 'navigate-about-section', 
+          window.postMessage({
+            type: 'navigate-about-section',
             sectionId: tabName,
             shouldScrollToNav: true  // Add flag to indicate scrolling to navbar
           }, '*')
         } catch (error) {
           console.error(`Error navigating to ${tabName} section:`, error)
         }
-        
+
         // Also try to find and click the tab directly
         setTimeout(() => {
           const sectionTab = document.querySelector(`[value="${tabName}"]`) as HTMLElement
           if (sectionTab) {
             sectionTab.click()
-            
+
             // Remove direct scrolling from here as it's now handled in the About component
           }
         }, 100)
@@ -148,152 +112,56 @@ const TabLink = ({ tabName, displayName, isChatMode }: { tabName: string; displa
   }, [tabName])
 
   return (
-    <Tooltip text="Click to switch tab" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
-      <span 
-        className={`underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
-        onClick={handleClick}
-      >
+    <Tooltip text="Click to switch tab" showTooltip={!touch}>
+      <button type="button" className={`touch-hit underline cursor-pointer ${linkColor(isChatMode)}`} onClick={handleClick}>
         {displayName}
-      </span>
+      </button>
     </Tooltip>
   )
 }
 
 const CVLink = ({ isChatMode }: { isChatMode?: boolean }) => {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
-
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        ('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0)
-      
-      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
-      
-      setIsMobile(isMobileDevice && !isTabletDevice)
-      setIsTablet(isTabletDevice)
-    }
-
-    checkDeviceType()
-    window.addEventListener('resize', checkDeviceType)
-    return () => window.removeEventListener('resize', checkDeviceType)
-  }, [])
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    event.preventDefault()
-    if (isMobile || event.ctrlKey) {
-      const link = document.createElement('a')
-      link.href = cv.path
-      link.download = cv.downloadName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    }
-  }
-
+  const { touch, onClick } = useFollowOnModifier()
   return (
-    <Tooltip text="Download CV: ctrl + click" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
-      <span className={`hover:underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}>
-        <a
-          href="#"
-          onClick={handleClick}
-          className={`underline ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
-          tabIndex={-1}
-        >
-          {cv.path}
-        </a>
-      </span>
+    <Tooltip text="Download CV: ctrl + click" showTooltip={!touch}>
+      <a href={cv.path} download={cv.downloadName} onClick={onClick} className={`underline cursor-pointer ${linkColor(isChatMode)}`}>
+        {cv.path}
+      </a>
     </Tooltip>
   )
 }
 
 // Component for email links (for Contact command)
 const EmailLink = ({ email, isChatMode }: { email: string; isChatMode?: boolean }) => {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
-  
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        ('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0)
-      
-      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
-      
-      setIsMobile(isMobileDevice && !isTabletDevice)
-      setIsTablet(isTabletDevice)
-    }
+  const touch = useMediaQuery(COARSE_POINTER)
 
-    checkDeviceType()
-    window.addEventListener('resize', checkDeviceType)
-    return () => window.removeEventListener('resize', checkDeviceType)
-  }, [])
-
+  // The achievement context isn't reachable from here, so the terminal hears
+  // about the click through an event and unlocks it.
   const handleClick = () => {
-    // Open email client
-    window.location.href = `mailto:${email}`;
-    
-    // Try to get achievements context and trigger achievement
-    try {
-      // This is a workaround since we can't use hooks directly in this component
-      const achievementEvent = new CustomEvent('contact-email-clicked');
-      window.dispatchEvent(achievementEvent);
-    } catch (error) {
-      console.error('Error triggering contact achievement:', error);
-    }
-  };
+    window.dispatchEvent(new CustomEvent('contact-email-clicked'))
+  }
 
   return (
-    <Tooltip text="Click to send email" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
-      <span 
-        className={`underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
-        onClick={handleClick}
-      >
+    <Tooltip text="Click to send email" showTooltip={!touch}>
+      <a href={`mailto:${email}`} onClick={handleClick} className={`underline cursor-pointer break-all ${linkColor(isChatMode)}`}>
         {email}
-      </span>
+      </a>
     </Tooltip>
-  );
-};
+  )
+}
 
 // Component for phone links (for Contact command)
 const PhoneLink = ({ phone, isChatMode }: { phone: string; isChatMode?: boolean }) => {
-  const [isMobile, setIsMobile] = useState(false)
-  const [isTablet, setIsTablet] = useState(false)
-  
-  useEffect(() => {
-    const checkDeviceType = () => {
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-        ('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0)
-      
-      const isTabletDevice = isMobileDevice && window.innerWidth >= 768 && window.innerWidth <= 1024
-      
-      setIsMobile(isMobileDevice && !isTabletDevice)
-      setIsTablet(isTabletDevice)
-    }
-
-    checkDeviceType()
-    window.addEventListener('resize', checkDeviceType)
-    return () => window.removeEventListener('resize', checkDeviceType)
-  }, [])
-
-  const handleClick = () => {
-    // Open phone dialer (tel: URIs must not contain the display spacing)
-    window.location.href = `tel:${phone.replace(/\s+/g, "")}`;
-  };
-
+  const touch = useMediaQuery(COARSE_POINTER)
   return (
-    <Tooltip text="Click to call" isMobile={isMobile} isTablet={isTablet} showTooltip={true}>
-      <span 
-        className={`underline cursor-pointer ${isChatMode ? 'text-blue-400' : 'text-green-400'}`}
-        onClick={handleClick}
-      >
+    <Tooltip text="Click to call" showTooltip={!touch}>
+      {/* tel: URIs must not contain the display spacing */}
+      <a href={`tel:${phone.replace(/\s+/g, "")}`} className={`underline cursor-pointer ${linkColor(isChatMode)}`}>
         {phone}
-      </span>
+      </a>
     </Tooltip>
-  );
-};
+  )
+}
 
 export default function TerminalOutput({ history, onCommandClick, isChatMode = false }: TerminalOutputProps) {
   const renderLine = (line: React.ReactNode, index: number) => {
@@ -433,7 +301,7 @@ export default function TerminalOutput({ history, onCommandClick, isChatMode = f
               </div>
             )}
             {item.output.map((line, lineIndex) => (
-              <div key={lineIndex}>{renderLine(line, index)}</div>
+              <div key={lineIndex} className={isFrameLine(line) ? "terminal-frame" : undefined}>{renderLine(line, index)}</div>
             ))}
           </div>
         </div>

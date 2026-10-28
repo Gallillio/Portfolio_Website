@@ -121,12 +121,15 @@
   @apply absolute bottom-0 left-0 w-full h-0.5 bg-green-500 transform scale-x-0 transition-transform duration-300 ease-in-out;
 }
 
-.custom-tab:hover::before {
-  @apply scale-x-100;
-}
+/* Hover only where there is one: a tap on iOS leaves :hover stuck on. */
+@media (hover: hover) {
+  .custom-tab:hover::before {
+    @apply scale-x-100;
+  }
 
-.custom-tab:hover {
-  @apply text-green-400 bg-green-500/10;
+  .custom-tab:hover {
+    @apply text-green-400 bg-green-500/10;
+  }
 }
 
 /* Custom scrollbar styles */
@@ -209,20 +212,20 @@ html::-webkit-scrollbar-thumb:hover {
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Add safe area insets for modern mobile browsers */
+  /* Safe areas at the sides (a phone in landscape). Top and bottom belong to
+     the terminal's pinned header and dock, which pad themselves, so the page
+     can scroll under the status bar and the home indicator. */
   body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Prevent unwanted zooming on input focus */
+  /* iOS zooms into a focused field set below 16px. Buttons never cause it, so
+     they keep the size their own classes give them. */
   input,
   textarea,
-  select,
-  button {
-    font-size: 16px; /* Prevents iOS zoom on focus */
+  select {
+    font-size: 16px;
   }
 
   /* Fix for iOS 100vh issue */
@@ -234,22 +237,122 @@ html::-webkit-scrollbar-thumb:hover {
   }
 }
 
-/* Custom modifier for terminal tabs to make them fixed */
-.terminal-header-fixed {
-  position: sticky;
-  top: 34px; /* Height of the title bar */
-  z-index: 40;
-  background-color: #000;
+/* A phone: the terminal is the page, and the page scrolls (components/terminal.tsx). */
+@media (max-width: 767px) {
+  /* Jumps to an anchor and scrollIntoView stop clear of the pinned header,
+     and of the prompt and dock at the bottom. */
+  html {
+    scroll-padding-top: var(--terminal-header-h, 0px);
+    scroll-padding-bottom: calc(var(--terminal-dock-h, 0px) + var(--terminal-prompt-h, 0px));
+  }
+
+  /* Where the pinned header sticks (components/terminal.tsx). A phone on its
+     side is about 350px tall: there the title bar scrolls away and only the
+     section bar stays, as a negative top lets the header slide up by the title
+     bar's height before it sticks. */
+  .terminal-header {
+    top: 0;
+  }
+  @media (max-height: 500px) {
+    .terminal-header {
+      top: calc(-1 * var(--terminal-title-h, 0px));
+    }
+  }
+
+  /* The pinned prompt rides up over the iOS keyboard, which covers the page
+     without resizing it. --kb is how far it reaches; 0 on Android, which
+     resizes the page instead. */
+  .terminal-prompt {
+    transform: translateY(calc(-1 * var(--kb, 0px)));
+  }
 }
 
-/* Custom modifier for terminal title bar to make it fixed */
-.terminal-title-fixed {
-  position: sticky;
-  top: 0;
-  z-index: 41; /* Higher than the tabs navbar */
-  background-color: #111827; /* bg-gray-900 */
-  width: 100%;
-  left: 0;
+/* While the keyboard is up the dock steps aside, leaving the room to the
+   conversation; the prompt then sits directly above the keyboard. */
+:root[data-kb-open] .terminal-dock {
+  display: none;
+}
+
+/* The dock's chips scroll sideways on a small phone. The fade marks the side
+   with more (data-more, set by components/terminal-dock.tsx). */
+.dock-chips {
+  scrollbar-width: none;
+}
+.dock-chips::-webkit-scrollbar {
+  display: none;
+}
+.dock-chips[data-more="end"] {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 2rem), transparent);
+}
+.dock-chips[data-more="start"] {
+  mask-image: linear-gradient(90deg, transparent, #000 2rem);
+}
+.dock-chips[data-more="both"] {
+  mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
+}
+
+/* components/scroll-to-top.tsx: bottom right, above whatever is pinned to the
+   bottom of the screen (the phone's prompt and dock, a touch iPad's dock),
+   inside the safe area. */
+.scroll-to-top {
+  bottom: 1.5rem;
+  right: 1.5rem;
+}
+@media (max-width: 767px) {
+  .scroll-to-top {
+    bottom: calc(var(--terminal-dock-h, 0px) + var(--terminal-prompt-h, 0px) + 0.75rem);
+    right: calc(1rem + env(safe-area-inset-right, 0px));
+  }
+}
+@media (pointer: coarse) and (min-width: 768px) {
+  .scroll-to-top {
+    bottom: calc(var(--terminal-dock-h, 0px) + 1rem);
+  }
+}
+
+/* Touch screens: tabs a finger can hit (44px, Apple's minimum). */
+@media (pointer: coarse) {
+  .custom-tab {
+    min-height: 44px;
+  }
+}
+
+/* A touch iPad gets the laptop layout, which reads small at arm's length.
+   One step up of the root size scales the text and spacing with it
+   (text-sm 14px to about 15px). */
+@media (pointer: coarse) and (min-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+}
+
+/* The ║ box ║ headings and └── rules in command output are 37 to 39
+   characters that mustn't wrap. On a narrow phone they shrink to fit the
+   width instead of pushing the terminal sideways (23.4em is 39 characters
+   of a monospace font, 2.25rem the side padding). */
+.terminal-frame {
+  white-space: pre;
+  overflow: hidden;
+  font-size: min(1em, calc((100vw - 2.25rem) / 23.4));
+}
+
+/* Nothing moves for visitors who asked for less motion: no window zoom, no
+   slides, no pulsing glow; cursors hold still instead of blinking. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-expand,
+  .animate-contract,
+  .animate-fade-in,
+  .animate-slide-down,
+  .animate-slide-up,
+  .chat-mode,
+  .chat-cursor,
+  .terminal-cursor {
+    animation: none !important;
+  }
+  .terminal-cursor,
+  .chat-cursor {
+    opacity: 1;
+  }
 }
 
 :root {
@@ -311,18 +414,6 @@ html {
   background-color: black;
 }
 
-/* Terminal mobile menu animations */
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes blink {
   0%,
   100% {
@@ -331,10 +422,6 @@ html {
   50% {
     opacity: 0;
   }
-}
-
-.mobile-menu-item {
-  opacity: 0;
 }
 
 .terminal-cursor {
@@ -369,6 +456,21 @@ html {
 .about-section-nav {
   scrollbar-width: thin;
   scrollbar-color: rgba(34, 197, 94, 0.5) transparent;
+}
+
+/* A larger tap area without a larger look, for small controls and inline
+   command links: a finger needs about 44px (Apple) and never less than 24px
+   (WCAG 2.5.8). any-pointer, so an iPad with a trackpad keeps it too. Keep
+   neighbours further apart than the overhang, or the later one takes the tap. */
+@media (any-pointer: coarse) {
+  .touch-hit {
+    position: relative;
+  }
+  .touch-hit::after {
+    content: "";
+    position: absolute;
+    inset: -10px -6px;
+  }
 }
 
 /* Make touch targets more easily tappable */
@@ -411,8 +513,6 @@ html {
 }
 
 /* Add smooth transitions for terminal mode switching */
-.terminal-title-fixed,
-.terminal-header-fixed,
 .terminal-output,
 .terminal-line,
 .command-prompt,
