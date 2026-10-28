@@ -13,6 +13,41 @@ import React from "react"
 
 const INLINE = /(\*\*[^*\n]+\*\*|(?<![*\w])\*[^*\n]+\*(?!\w)|`[^`\n]+`)/g
 
+// A bare web address, without the punctuation that usually ends a sentence
+// after it. While streaming, a half-typed address links to where it has got
+// to; the next chunk replaces it.
+const WEB_ADDRESS = /https?:\/\/[^\s<>()]*[^\s<>().,;:!?'"*`\]]/g
+
+/**
+ * Plain text with its web addresses as links. On a phone a long address was
+ * one unbreakable word: it ran past the screen's edge, cut off, and couldn't
+ * be tapped. As links they open, and break-all lets them wrap.
+ */
+function linkify(text: string, keyPrefix: string): React.ReactNode[] {
+  const out: React.ReactNode[] = []
+  let last = 0
+  let i = 0
+  for (const match of text.matchAll(WEB_ADDRESS)) {
+    const at = match.index ?? 0
+    if (at > last) out.push(text.slice(last, at))
+    out.push(
+      <a
+        key={`${keyPrefix}-u${i}`}
+        href={match[0]}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="break-all text-cyan-300 underline"
+      >
+        {match[0]}
+      </a>
+    )
+    last = at + match[0].length
+    i++
+  }
+  if (last < text.length) out.push(text.slice(last))
+  return out
+}
+
 /** Bold / italic / code within a single line. Unmatched markers stay literal. */
 function renderInline(line: string, keyPrefix: string): React.ReactNode[] {
   const out: React.ReactNode[] = []
@@ -23,12 +58,12 @@ function renderInline(line: string, keyPrefix: string): React.ReactNode[] {
     const token = match[0]
     const at = match.index ?? 0
 
-    if (at > last) out.push(line.slice(last, at))
+    if (at > last) out.push(...linkify(line.slice(last, at), `${keyPrefix}-t${i}`))
 
     if (token.startsWith("**")) {
       out.push(
         <span key={`${keyPrefix}-b${i}`} className="font-semibold text-white">
-          {token.slice(2, -2)}
+          {linkify(token.slice(2, -2), `${keyPrefix}-b${i}`)}
         </span>
       )
     } else if (token.startsWith("`")) {
@@ -49,7 +84,7 @@ function renderInline(line: string, keyPrefix: string): React.ReactNode[] {
     i++
   }
 
-  if (last < line.length) out.push(line.slice(last))
+  if (last < line.length) out.push(...linkify(line.slice(last), `${keyPrefix}-t${i}`))
   return out
 }
 

@@ -173,7 +173,7 @@ export default function AchievementNotification({
               <h3 className={`font-bold ${isMobile ? 'text-sm' : ''} ${isSecret ? 'text-yellow-400' : 'text-green-400'}`}>
                 {isSecret ? '🌟 ' : ''}{heading}
               </h3>
-              <p className={`text-green-300 font-medium truncate ${isMobile ? 'text-sm' : 'text-sm'}`}>{achievement.title}</p>
+              <p className="text-green-300 font-medium line-clamp-2 text-sm">{achievement.title}</p>
               {isMobile && (
                 <p className="mt-0.5 flex items-center text-xs text-green-400/80">
                   View your achievements <ChevronRight size={12} aria-hidden="true" />

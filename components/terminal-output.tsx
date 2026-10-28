@@ -287,7 +287,7 @@ export default function TerminalOutput({ history, onCommandClick, isChatMode = f
               <span className="text-green-500 mr-1">$</span>
               {/* dir="auto": an Arabic message reads right-to-left, with its
                   punctuation in place, while the $ stays on the left. */}
-              <span dir="auto" className="text-green-300 whitespace-pre-wrap">{item.command}</span>
+              <span dir="auto" className="min-w-0 text-green-300 whitespace-pre-wrap [overflow-wrap:anywhere]">{item.command}</span>
             </div>
           )}
           <div className={`mt-1 whitespace-pre-wrap ${item.isError ? "text-red-500" : "text-green-400"}`}>

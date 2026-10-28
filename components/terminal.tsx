@@ -380,7 +380,7 @@ function TerminalContent(): React.ReactNode {
       {
         command: "",
         output: [
-          <div key={key} className={`whitespace-pre-wrap font-normal text-sm ${bodyClass}`}>
+          <div key={key} className={`whitespace-pre-wrap [overflow-wrap:anywhere] font-normal text-sm ${bodyClass}`}>
             {renderTerminalMarkdown(
               content,
               <span className="text-purple-400">{label} </span>

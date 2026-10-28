@@ -329,9 +329,10 @@ export default function Projects() {
                   <h3 className="text-green-400 font-bold">Filter by Technology</h3>
                   <button 
                     onClick={() => setDropdownOpen(false)}
-                    className="text-green-400 hover:text-green-300 p-1 rounded-full hover:bg-green-500/10"
+                    className="flex items-center justify-center text-green-400 hover:text-green-300 p-1 rounded-full hover:bg-green-500/10 coarse:h-11 coarse:w-11"
+                    aria-label="Close filters"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
                 {/* Search Input */}
@@ -350,13 +351,13 @@ export default function Projects() {
                       <button
                         key={option.id}
                         onClick={() => toggleFilter(option.id)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-md border transition-all duration-200 ${
+                        className={`flex min-h-[44px] items-center gap-2 px-3 py-2 rounded-md border transition-all duration-200 ${
                           selectedFilters.has(option.id)
                             ? 'border-green-500 bg-green-500/10 text-green-400'
                             : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
                         }`}
                       >
-                        <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
+                        <div className={`w-4 h-4 shrink-0 border rounded flex items-center justify-center transition-colors ${
                           selectedFilters.has(option.id)
                             ? 'border-green-500 bg-green-500'
                             : 'border-green-500/50'
@@ -365,7 +366,7 @@ export default function Projects() {
                             <Check className="h-3 w-3 text-black" />
                           )}
                         </div>
-                        <span className="truncate text-sm">{option.label}</span>
+                        <span className="min-w-0 text-left text-sm leading-tight [overflow-wrap:anywhere]">{option.label}</span>
                       </button>
                     ))}
                   </div>
@@ -407,13 +408,13 @@ export default function Projects() {
                     <button
                       key={option.id}
                       onClick={() => toggleFilter(option.id)}
-                      className={`flex items-center gap-2 px-2 py-2 rounded-md border transition-all duration-200 ${
+                      className={`flex min-h-[44px] items-center gap-2 px-2 py-2 rounded-md border transition-all duration-200 ${
                         selectedFilters.has(option.id)
                           ? 'border-green-500 bg-green-500/10 text-green-400'
                           : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
                       }`}
                     >
-                      <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
+                      <div className={`w-4 h-4 shrink-0 border rounded flex items-center justify-center transition-colors ${
                         selectedFilters.has(option.id)
                           ? 'border-green-500 bg-green-500'
                           : 'border-green-500/50'
@@ -422,7 +423,7 @@ export default function Projects() {
                           <Check className="h-3 w-3 text-black" />
                         )}
                       </div>
-                      <span className="truncate text-sm">{option.label}</span>
+                      <span className="min-w-0 text-left text-sm leading-tight [overflow-wrap:anywhere]">{option.label}</span>
                     </button>
                   ))}
                 </div>
