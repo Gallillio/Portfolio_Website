@@ -125,7 +125,7 @@ export default function AchievementNotification({
   // slide-down animation and the swipe both set `transform`.
   const positionClass = isMobile
     ? "inset-x-0 mx-auto w-[calc(100%-1.5rem)] max-w-sm"
-    : "top-4 right-4 w-80";
+    : "top-4 right-[calc(1rem+env(safe-area-inset-right,0px))] w-80";
   const positionStyle = isMobile
     ? { top: "calc(var(--terminal-header-h, env(safe-area-inset-top, 0px)) + 0.5rem)" }
     : undefined;
@@ -173,7 +173,7 @@ export default function AchievementNotification({
               <h3 className={`font-bold ${isMobile ? 'text-sm' : ''} ${isSecret ? 'text-yellow-400' : 'text-green-400'}`}>
                 {isSecret ? '🌟 ' : ''}{heading}
               </h3>
-              <p className={`text-green-300 font-medium truncate ${isMobile ? 'text-sm' : 'text-sm'}`}>{achievement.title}</p>
+              <p className="text-green-300 font-medium line-clamp-2 text-sm">{achievement.title}</p>
               {isMobile && (
                 <p className="mt-0.5 flex items-center text-xs text-green-400/80">
                   View your achievements <ChevronRight size={12} aria-hidden="true" />

@@ -13,6 +13,7 @@ import type { ReactNode } from 'react'
 import { parse } from 'date-fns'
 import { skillLogos } from "@/lib/skill-logos"
 import { Tooltip } from "@/components/ui/tooltip"
+import FilterSheet from "@/components/filter-sheet"
 import { followInPlace, projectPath } from "@/lib/routes"
 
 // Map of icon strings to Lucide components
@@ -60,7 +61,6 @@ export default function About() {
   // the tooltips read it; the section navigation switches with CSS instead.
   const [isMobile, setIsMobile] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
 
   // Add new state for timeline filters
   const [selectedFilters, setSelectedFilters] = useState<Set<string>>(new Set(['achievement', 'experience', 'education', 'freelance']))
@@ -310,47 +310,6 @@ export default function About() {
     })
   }
 
-  // Function to close the mobile section modal when clicking outside
-  const handleCloseModal = (event: MouseEvent) => {
-    if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-      setModalOpen(false);
-    }
-  };
-
-  // Handle clicks outside the modal
-  useEffect(() => {
-    if (modalOpen) {
-      document.addEventListener('mousedown', handleCloseModal);
-    } else {
-      document.removeEventListener('mousedown', handleCloseModal);
-    }
-    
-    return () => {
-      document.removeEventListener('mousedown', handleCloseModal);
-    };
-  }, [modalOpen]);
-
-  // Effect to scroll the active tab button into view
-  useEffect(() => {
-    const activeTabEl = document.querySelector(`[value="${activeTab}"]`) as HTMLElement;
-    if (activeTabEl) {
-      // Find the scroll container
-      const scrollContainer = activeTabEl.closest('.overflow-x-auto') as HTMLElement;
-      
-      if (scrollContainer) {
-        // On mobile/touch screens, position the tab at the far left
-        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-        
-        if (isTouchDevice || window.innerWidth < 768) {
-          // Set scroll position directly to position the tab at the far left
-          scrollContainer.scrollLeft = activeTabEl.offsetLeft;
-        } else {
-          // On desktop, use the native scrollIntoView
-          activeTabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-        }
-      }
-    }
-  }, [activeTab]);
 
   return (
     <div className="bg-black text-green-500 p-6 min-h-[70vh] font-mono">
@@ -386,7 +345,7 @@ export default function About() {
                 onClick={handleBioToggle}
                 aria-expanded={isBioExpanded}
                 aria-controls="bio-text"
-                className="mt-4 self-start text-green-400 hover:text-green-300 transition-colors duration-200 flex items-center gap-1"
+                className="mt-4 self-start text-green-400 hover:text-green-300 active:text-green-300 transition-colors duration-200 flex items-center gap-1 coarse:min-h-[44px]"
               >
                 {isBioExpanded ? (
                   <>
@@ -433,10 +392,12 @@ export default function About() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        {/* Tabs list with horizontal scroll, from md up. Both navigations are in the
-            HTML and CSS picks one: choosing after hydration made the page jump on phones. */}
-          <div className="mt-8 overflow-x-auto pb-2 max-md:hidden coarse:hidden">
-            <TabsList className="bg-gray-900 border border-green-500 inline-flex w-auto text-gray-400">
+        {/* Tabs list from md up. Both navigations are in the HTML and CSS picks
+            one: choosing after hydration made the page jump on phones. It wraps
+            rather than scrolling: in a window under ~1000px wide the scrolling
+            row hid Languages and Courses with nothing to say they were there. */}
+          <div className="mt-8 pb-2 max-md:hidden coarse:hidden">
+            <TabsList className="bg-gray-900 border border-green-500 inline-flex flex-wrap h-auto justify-start gap-y-1 w-auto text-gray-400">
               <TabsTrigger value="skills" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
                 Skills
               </TabsTrigger>
@@ -444,13 +405,13 @@ export default function About() {
                 Timeline
               </TabsTrigger>
               <TabsTrigger value="experience" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-                Professional Experience
+                Experience
               </TabsTrigger>
               <TabsTrigger value="education" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
                 Education
               </TabsTrigger>
               <TabsTrigger value="freelance" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
-                Freelance Projects
+                Freelance
               </TabsTrigger>
               <TabsTrigger value="languages" className="custom-tab touch-optimized data-[state=active]:bg-green-500 data-[state=active]:text-black whitespace-nowrap">
                 Languages
@@ -503,11 +464,14 @@ export default function About() {
                     <h3 className="text-lg font-bold text-green-400 border-b border-green-500/30 pb-2">
                       {category.name}
                     </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {/* Under 360px a tile has ~70px for text and "Microservices"
+                        spilled into its neighbor: less padding, smaller text,
+                        and long words hyphenate or break rather than overflow. */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-[359px]:gap-3">
                       {category.skills.map((skill, skillIndex) => (
                         <div
                           key={skillIndex}
-                          className="group relative p-4 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1 flex flex-col items-center justify-center"
+                          className="group relative p-4 max-[359px]:p-3 rounded-lg border border-green-500/30 hover:border-green-400 transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1 flex flex-col items-center justify-center"
                         >
                           <div className="absolute inset-0 bg-green-500/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                           <div className="relative z-10 flex flex-col items-center">
@@ -523,7 +487,7 @@ export default function About() {
                                 />
                               </div>
                             )}
-                            <span className="mt-2 text-center text-green-400">{skill}</span>
+                            <span className="mt-2 text-center text-green-400 hyphens-auto [overflow-wrap:anywhere] max-[359px]:text-sm">{skill}</span>
                           </div>
                         </div>
                       ))}
@@ -581,52 +545,33 @@ export default function About() {
                 </div>
               )}
 
-              {/* Modal for Mobile Filters */}
-              {modalOpen && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center">
-                  <div ref={modalRef} className="bg-gray-800 p-6 rounded-lg w-11/12 max-w-md relative">
-                    <h3 className="text-green-400 mb-4 font-bold flex items-center justify-between">
-                      <span>Filter Timeline</span>
-                      <button 
-                        onClick={() => setModalOpen(false)} 
-                        className="text-green-400 hover:text-green-300" 
-                        aria-label="Close modal"
-                      >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </h3>
-                    <div className="flex flex-col gap-4">
-                      {filterOptions.map((option) => (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            toggleFilter(option.id);
-                            // setModalOpen(false); // Close modal after selection
-                          }}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-md border transition-all duration-200 ${
-                            selectedFilters.has(option.id)
-                              ? 'border-green-500 bg-green-500/10 text-green-400'
-                              : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
-                          }`}
-                        >
-                          <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
-                            selectedFilters.has(option.id)
-                              ? 'border-green-500 bg-green-500'
-                              : 'border-green-500/50'
-                          }`}>
-                            {selectedFilters.has(option.id) && (
-                              <Check className="h-3 w-3 text-black" />
-                            )}
-                          </div>
-                          <span>{option.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              {/* Mobile filter sheet */}
+              <FilterSheet open={modalOpen} onClose={() => setModalOpen(false)} title="Filter Timeline">
+                <div className="flex flex-col gap-4">
+                  {filterOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => toggleFilter(option.id)}
+                      className={`flex min-h-[44px] items-center gap-2 px-4 py-2 rounded-md border transition-all duration-200 ${
+                        selectedFilters.has(option.id)
+                          ? 'border-green-500 bg-green-500/10 text-green-400'
+                          : 'border-green-500/30 hover:border-green-500/50 text-green-400/70'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 border rounded flex items-center justify-center transition-colors ${
+                        selectedFilters.has(option.id)
+                          ? 'border-green-500 bg-green-500'
+                          : 'border-green-500/50'
+                      }`}>
+                        {selectedFilters.has(option.id) && (
+                          <Check className="h-3 w-3 text-black" />
+                        )}
+                      </div>
+                      <span>{option.label}</span>
+                    </button>
+                  ))}
                 </div>
-              )}
+              </FilterSheet>
 
               {/* Timeline Items */}
               <div className="relative max-w-5xl mx-auto">
@@ -736,24 +681,11 @@ export default function About() {
                               className="text-left group/title"
                             >
                               <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
-                                <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
+                                <span className="group-hover/title:underline decoration-green-500 decoration-2">
                                   {item.type === 'achievement' ? item.title
                                     : item.type === 'experience' ? item.title
                                     : item.type === 'freelance' ? item.title
                                     : item.degree}
-                                  {item.type === 'achievement' && item.link && (
-                                    <a 
-                                      href={item.link}
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
-                                      onClick={(e) => e.stopPropagation()}
-                                      title={item.linkText || "View Link"}
-                                    >
-                                      <ExternalLink className="h-5 w-5" />
-                                      <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
-                                    </a>
-                                  )}
                                 </span>
                                 <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                   {item.type === 'achievement' ? item.subtitle
@@ -763,6 +695,21 @@ export default function About() {
                                 </span>
                               </h3>
                             </button>
+                            {/* Its own line, outside the title's button: a link inside a button
+                                is invalid HTML, and beside a long title it ran off a phone's edge. */}
+                            {item.type === 'achievement' && item.link && (
+                              <div>
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="mt-1 inline-flex items-center text-yellow-400 hover:text-yellow-300 active:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2 coarse:min-h-[44px]"
+                                >
+                                  <ExternalLink className="h-5 w-5" aria-hidden="true" />
+                                  <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
+                                </a>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -871,24 +818,11 @@ export default function About() {
                                   className="text-left group/title"
                                 >
                                   <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
-                                    <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
+                                    <span className="group-hover/title:underline decoration-green-500 decoration-2">
                                       {item.type === 'achievement' ? item.title
                                         : item.type === 'experience' ? item.title
                                         : item.type === 'freelance' ? item.title
                                         : item.degree}
-                                      {item.type === 'achievement' && item.link && (
-                                        <a 
-                                          href={item.link}
-                                          target="_blank" 
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
-                                          onClick={(e) => e.stopPropagation()}
-                                          title={item.linkText || "View Link"}
-                                        >
-                                          <ExternalLink className="h-5 w-5" />
-                                          <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
-                                        </a>
-                                      )}
                                     </span>
                                     <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                       {item.type === 'achievement' ? item.subtitle
@@ -898,6 +832,21 @@ export default function About() {
                                     </span>
                                   </h3>
                                 </button>
+                                {/* Its own line, outside the title's button: a link inside a button
+                                    is invalid HTML, and beside a long title it ran off a phone's edge. */}
+                                {item.type === 'achievement' && item.link && (
+                                  <div>
+                                    <a
+                                      href={item.link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="mt-1 inline-flex items-center text-yellow-400 hover:text-yellow-300 active:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2 coarse:min-h-[44px]"
+                                    >
+                                      <ExternalLink className="h-5 w-5" aria-hidden="true" />
+                                      <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
+                                    </a>
+                                  </div>
+                                )}
                               </div>
                               <div className="absolute left-1/2 w-4 h-4 bg-black border-2 border-green-500 rounded-full transform -translate-x-1/2 transition-transform duration-300 ease-in-out group-hover:scale-125 group-hover:border-green-400 z-10"></div>
                               <div className="absolute left-[38%] top-1/2 h-0.5 bg-green-500 w-[12%] origin-right transition-all duration-300 ease-in-out group-hover:bg-green-400"></div>
@@ -928,24 +877,11 @@ export default function About() {
                                   className="text-left group/title"
                                 >
                                   <h3 className="text-lg font-bold text-green-400 transition-colors duration-300 group-hover:text-green-300">
-                                    <span className="group-hover/title:underline decoration-green-500 decoration-2 inline-flex items-center">
+                                    <span className="group-hover/title:underline decoration-green-500 decoration-2">
                                       {item.type === 'achievement' ? item.title
                                         : item.type === 'experience' ? item.title
                                         : item.type === 'freelance' ? item.title
                                         : item.degree}
-                                      {item.type === 'achievement' && item.link && (
-                                        <a 
-                                          href={item.link}
-                                          target="_blank" 
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center ml-2 text-yellow-400 hover:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2"
-                                          onClick={(e) => e.stopPropagation()}
-                                          title={item.linkText || "View Link"}
-                                        >
-                                          <ExternalLink className="h-5 w-5" />
-                                          <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
-                                        </a>
-                                      )}
                                     </span>
                                     <span className="block text-base font-normal text-green-300/80 mt-0.5">
                                       {item.type === 'achievement' ? item.subtitle
@@ -955,6 +891,21 @@ export default function About() {
                                     </span>
                                   </h3>
                                 </button>
+                                {/* Its own line, outside the title's button: a link inside a button
+                                    is invalid HTML, and beside a long title it ran off a phone's edge. */}
+                                {item.type === 'achievement' && item.link && (
+                                  <div>
+                                    <a
+                                      href={item.link}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="mt-1 inline-flex items-center text-yellow-400 hover:text-yellow-300 active:text-yellow-300 transition-colors duration-200 hover:underline decoration-yellow-300 decoration-2 coarse:min-h-[44px]"
+                                    >
+                                      <ExternalLink className="h-5 w-5" aria-hidden="true" />
+                                      <span className="ml-1 text-sm">{item.linkText || "View Link"}</span>
+                                    </a>
+                                  </div>
+                                )}
                               </div>
                             </>
                           )}
@@ -1034,7 +985,7 @@ export default function About() {
                       {/* Learn More button */}
                       <button
                         onClick={() => toggleExperience(index)}
-                        className="mt-3 px-3 py-1.5 text-green-400 hover:text-green-300 transition-all duration-200 flex items-center gap-2 text-sm border border-green-500/30 hover:border-green-400 rounded-md bg-green-500/5 hover:bg-green-500/10"
+                        className="mt-3 px-3 py-1.5 text-green-400 hover:text-green-300 transition-all duration-200 flex items-center gap-2 text-sm border border-green-500/30 hover:border-green-400 rounded-md bg-green-500/5 hover:bg-green-500/10 active:bg-green-500/10 coarse:min-h-[44px]"
                       >
                         {expandedExperiences.has(index) ? (
                           <>
@@ -1165,13 +1116,13 @@ export default function About() {
                             href={project.github}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md"
+                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 active:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md coarse:min-h-[44px]"
                           >
                             <Github size={16} className="mr-1" />
                             Code
                           </a>
                         ) : (
-                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50">
+                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50 coarse:min-h-[44px]">
                             <Github size={16} className="mr-1" />
                             Code
                           </span>
@@ -1192,13 +1143,13 @@ export default function About() {
                             href={project.demo}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md"
+                            className="flex items-center border border-green-500 text-green-400 hover:bg-green-500/10 active:bg-green-500/10 transition-colors duration-200 px-3 py-1 rounded-md coarse:min-h-[44px]"
                           >
                             <ExternalLink size={16} className="mr-1" />
                             Check it out!
                           </a>
                         ) : (
-                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50">
+                          <span className="flex items-center border border-green-500 text-green-400 px-3 py-1 rounded-md cursor-not-allowed opacity-50 coarse:min-h-[44px]">
                             <ExternalLink size={16} className="mr-1" />
                             Check it out!
                           </span>

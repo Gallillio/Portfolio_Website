@@ -47,7 +47,7 @@ export default function MyAchievements() {
                       href={achievement.link} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center ml-2 text-green-400 hover:text-green-300 mt-2"
+                      className="inline-flex items-center ml-2 text-green-400 hover:text-green-300 mt-2 coarse:min-h-[44px]"
                     >
                       <ExternalLink className="h-5 w-5 text-yellow-400 hover:text-yellow-300 transition duration-200" />
                       <span className="ml-1 text-sm text-yellow-400 hover:text-yellow-300 transition duration-200">{achievement.linkText}</span>

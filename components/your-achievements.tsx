@@ -239,13 +239,13 @@ export default function YourAchievements() {
             <div className="flex justify-end mt-4">
               <button 
                 onClick={() => setIsModalOpen(false)} 
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md mr-2 transition-colors duration-300"
+                className="bg-gray-600 hover:bg-gray-700 active:bg-gray-700 text-white px-4 py-2 rounded-md mr-2 transition-colors duration-300 coarse:min-h-[44px]"
               >
                 Cancel
               </button>
               <button 
                 onClick={clearAchievementsData} 
-                className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-md transition-colors duration-300"
+                className="bg-red-900 hover:bg-red-800 active:bg-red-800 text-white px-4 py-2 rounded-md transition-colors duration-300 coarse:min-h-[44px]"
               >
                 Confirm
               </button>

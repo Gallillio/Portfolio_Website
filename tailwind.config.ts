@@ -4,6 +4,9 @@ import tailwindcssAnimate from "tailwindcss-animate"
 import plugin from "tailwindcss/plugin"
 
 const config = {
+  // hover: only where a pointer can hover. On a phone a tapped card or
+  // button kept its hover look (lifted, recolored) until the next tap.
+  future: { hoverOnlyWhenSupported: true },
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",

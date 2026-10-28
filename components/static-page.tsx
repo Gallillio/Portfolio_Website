@@ -10,6 +10,8 @@ const NAV = [
 ]
 
 export const linkClass = "text-green-400 underline-offset-4 hover:text-green-300 hover:underline"
+// The site nav's links: 44px tall on touch, where a finger needs the room.
+const navLinkClass = `${linkClass} coarse:inline-flex coarse:min-h-[44px] coarse:items-center`
 // For a link inside a sentence or next to plain text: color alone does not set
 // it apart from the gray text around it, so it is underlined too.
 export const inlineLinkClass = "text-green-400 underline decoration-green-500/60 underline-offset-4 hover:text-green-300"
@@ -35,11 +37,11 @@ export default function StaticPage({ path, children }: { path: string; children:
 
         <nav aria-label="Site" className="flex flex-wrap gap-x-5 gap-y-1 border-b border-green-500/40 bg-gray-900 px-4 py-2 text-sm">
           {NAV.map((item) => (
-            <Link key={item.href} href={item.href} className={linkClass}>
+            <Link key={item.href} href={item.href} className={navLinkClass}>
               {item.label}
             </Link>
           ))}
-          <a href={cv.path} download={cv.downloadName} className={linkClass}>
+          <a href={cv.path} download={cv.downloadName} className={navLinkClass}>
             CV
           </a>
         </nav>

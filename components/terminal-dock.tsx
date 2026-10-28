@@ -1,6 +1,6 @@
 "use client"
 
-import React, { forwardRef, useEffect, useRef, useState } from "react"
+import React, { forwardRef } from "react"
 import { MoreHorizontal } from "lucide-react"
 
 interface TerminalDockProps {
@@ -24,6 +24,11 @@ type Chip = { label: string; current?: boolean; onSelect: () => void }
  * terminal tab it sits under the prompt and its chips run commands there, so
  * the terminal still answers; elsewhere it moves between tabs.
  *
+ * Four chips at most, sharing the width, so all of them show on a 320px phone.
+ * The row used to scroll sideways, and whatever sat past the edge (chat, help,
+ * contact) went unseen; a tab bar shows everything or moves it behind "more".
+ * help is in "more" for that reason: the sheet lists what help prints.
+ *
  * Hidden while the on-screen keyboard is up (the root's data-kb-open, set in
  * components/terminal.tsx), which leaves the room to the conversation.
  */
@@ -44,7 +49,6 @@ const TerminalDock = forwardRef<HTMLElement, TerminalDockProps & { className?: s
           { label: "about", onSelect: () => onRun("about") },
           { label: "contact", onSelect: () => onRun("contact") },
           { label: "chat", onSelect: () => onRun("chat") },
-          { label: "help", onSelect: () => onRun("help") },
         ]
     : [
         { label: "terminal", onSelect: () => onTab("terminal") },
@@ -56,27 +60,6 @@ const TerminalDock = forwardRef<HTMLElement, TerminalDockProps & { className?: s
   const chat = onTerminal && isChatMode
   const border = chat ? "border-gray-500" : "border-green-500/50"
 
-  // Which side has chips scrolled out of sight, for the fade in globals.css.
-  const chipsRef = useRef<HTMLDivElement>(null)
-  const [more, setMore] = useState<"start" | "end" | "both" | undefined>()
-  useEffect(() => {
-    const row = chipsRef.current
-    if (!row) return
-    const measure = () => {
-      const start = row.scrollLeft > 2
-      const end = row.scrollLeft + row.clientWidth < row.scrollWidth - 2
-      setMore(start && end ? "both" : start ? "start" : end ? "end" : undefined)
-    }
-    measure()
-    const observer = new ResizeObserver(measure)
-    observer.observe(row)
-    row.addEventListener("scroll", measure, { passive: true })
-    return () => {
-      observer.disconnect()
-      row.removeEventListener("scroll", measure)
-    }
-  }, [chips.length, activeTab, isChatMode])
-
   return (
     <nav
       ref={ref}
@@ -84,16 +67,16 @@ const TerminalDock = forwardRef<HTMLElement, TerminalDockProps & { className?: s
       className={`terminal-dock z-30 flex items-stretch gap-2 border-t ${border} ${chat ? "bg-gray-900" : "bg-black"} pl-2 pt-2 font-mono text-sm ${className}`}
       style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom, 0px))" }}
     >
-      {/* Scrolls sideways when the chips outgrow a small phone, with the edges
-          faded so the cut-off reads as "more this way". */}
-      <div ref={chipsRef} data-more={more} className="dock-chips flex min-w-0 flex-1 gap-2 overflow-x-auto overscroll-x-contain">
+      {/* The chips split the width evenly. The narrowest phones get smaller
+          text and padding so "projects" and "terminal" still fit whole. */}
+      <div className="flex min-w-0 flex-1 gap-1.5 max-[389px]:gap-1">
         {chips.map((chip) => (
           <button
             key={chip.label}
             type="button"
             aria-current={chip.current ? "page" : undefined}
             onClick={chip.onSelect}
-            className={`flex min-h-[44px] shrink-0 items-center rounded-md border px-3 transition-colors ${
+            className={`flex min-h-[44px] min-w-0 flex-1 basis-0 items-center justify-center rounded-md border px-1 text-[13px] transition-colors md:text-sm max-[389px]:px-0.5 max-[389px]:text-xs max-[339px]:px-0 ${
               chip.current
                 ? "border-green-400 bg-green-500/15 text-green-300"
                 : chat
@@ -101,8 +84,7 @@ const TerminalDock = forwardRef<HTMLElement, TerminalDockProps & { className?: s
                   : "border-green-500/40 text-green-400 active:bg-green-500/15"
             }`}
           >
-            {onTerminal && !chat && <span aria-hidden="true" className="mr-1 text-green-600">$</span>}
-            {chip.label}
+            <span className="truncate">{chip.label}</span>
           </button>
         ))}
       </div>
@@ -111,7 +93,7 @@ const TerminalDock = forwardRef<HTMLElement, TerminalDockProps & { className?: s
         onClick={onMore}
         aria-haspopup="dialog"
         aria-label="All commands"
-        className={`mr-2 flex min-h-[44px] w-11 shrink-0 items-center justify-center rounded-md border ${
+        className={`mr-2 flex min-h-[44px] w-11 shrink-0 max-[339px]:w-10 items-center justify-center rounded-md border ${
           chat ? "border-gray-600 text-gray-200 active:bg-gray-700" : "border-green-500/40 text-green-400 active:bg-green-500/15"
         }`}
       >

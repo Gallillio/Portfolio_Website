@@ -221,7 +221,7 @@ const StreamingMessage = React.forwardRef<StreamingMessageRef, StreamingMessageP
 
     return (
       <div className="font-mono mt-4">
-        <div className="whitespace-pre-wrap font-normal text-sm">
+        <div className="whitespace-pre-wrap [overflow-wrap:anywhere] font-normal text-sm">
           {renderTerminalMarkdown(
             text,
             <span className="text-purple-400">Gallillio Assistant: </span>
