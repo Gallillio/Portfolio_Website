@@ -100,24 +100,23 @@ export default function CommandSheet({ open, onClose, onRun, onPages }: CommandS
         ref={panelRef}
         className="sheet-panel absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-xl border border-b-0 border-green-500 bg-gray-950 font-mono text-green-400 shadow-2xl md:bottom-6 md:mx-auto md:max-w-xl md:rounded-xl md:border-b"
       >
-        <div className="shrink-0 border-b border-green-500/40 px-4 pb-3 pt-2">
-          {/* The handle and the title: a drag down on them closes the sheet. */}
-          <div {...dragHandlers} className="touch-none">
-            <div aria-hidden="true" className="mx-auto mb-2 h-1 w-10 rounded-full bg-green-500/40" />
-            <div className="flex items-center justify-between gap-3">
-              <h2 id={titleId} className="text-sm text-green-500">
-                <span className="text-green-600">$</span> run a command
-              </h2>
-              <button
-                type="button"
-                data-sheet-close
-                onClick={onClose}
-                aria-label="Close"
-                className="-mr-2 flex h-11 w-11 items-center justify-center rounded-md text-green-400 active:bg-green-500/15"
-              >
-                <X size={20} aria-hidden="true" />
-              </button>
-            </div>
+        {/* The handle, the title and the filter: a drag down anywhere on them
+            closes the sheet. */}
+        <div {...dragHandlers} className="sheet-grip shrink-0 touch-none border-b border-green-500/40 px-4 pb-3 pt-2">
+          <div aria-hidden="true" className="mx-auto mb-2 h-1 w-10 rounded-full bg-green-500/40" />
+          <div className="flex items-center justify-between gap-3">
+            <h2 id={titleId} className="text-sm text-green-500">
+              <span className="text-green-600">$</span> run a command
+            </h2>
+            <button
+              type="button"
+              data-sheet-close
+              onClick={onClose}
+              aria-label="Close"
+              className="-mr-2 flex h-11 w-11 items-center justify-center rounded-md text-green-400 active:bg-green-500/15"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
           </div>
           <label className="mt-2 flex min-h-[44px] items-center gap-2 rounded-md border border-green-500/40 px-3 focus-within:border-green-400">
             <Search size={16} aria-hidden="true" className="shrink-0 text-green-600" />

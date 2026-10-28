@@ -321,6 +321,15 @@ html::-webkit-scrollbar-thumb:hover {
 .sheet[data-dragging] .sheet-scrim {
   transition: none;
 }
+/* The parts of a sheet a finger drags. The :active rule matters on a phone
+   too: Chrome moves a touch onto the nearest thing that reacts to a press, so
+   without one a finger just inside the handle lands on the link beside it. */
+.sheet-grip {
+  cursor: grab;
+}
+.sheet-grip:active {
+  cursor: grabbing;
+}
 /* Less motion: a short fade where the menu is, no slide. A drag still
    follows the finger, since the visitor is moving it themselves. */
 @media (prefers-reduced-motion: reduce) {
