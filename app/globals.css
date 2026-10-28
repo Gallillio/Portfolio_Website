@@ -273,24 +273,6 @@ html::-webkit-scrollbar-thumb:hover {
   display: none;
 }
 
-/* The dock's chips scroll sideways on a small phone. The fade marks the side
-   with more (data-more, set by components/terminal-dock.tsx). */
-.dock-chips {
-  scrollbar-width: none;
-}
-.dock-chips::-webkit-scrollbar {
-  display: none;
-}
-.dock-chips[data-more="end"] {
-  mask-image: linear-gradient(90deg, #000 calc(100% - 2rem), transparent);
-}
-.dock-chips[data-more="start"] {
-  mask-image: linear-gradient(90deg, transparent, #000 2rem);
-}
-.dock-chips[data-more="both"] {
-  mask-image: linear-gradient(90deg, transparent, #000 2rem, #000 calc(100% - 2rem), transparent);
-}
-
 /* The phone's menus (components/command-sheet.tsx, components/page-menu.tsx)
    slide in from their edge on the curve of an iOS sheet while the page behind
    dims. [data-closed] is off-screen, where they open from and close to;
