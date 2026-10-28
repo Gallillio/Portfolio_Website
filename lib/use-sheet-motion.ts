@@ -154,6 +154,9 @@ export function useSheetMotion(open: boolean, onClose: () => void, edge: SheetEd
       // The X keeps its tap. The filter can start a drag too, so the sheet
       // isn't held by one thin strip; a tap on it still focuses it.
       if (e.button !== 0 || (e.target as HTMLElement).closest("button, a")) return
+      // A second finger mustn't take over a drag, or the first one's release
+      // would be ignored and leave the sheet where it was let go.
+      if (dragRef.current?.moved) return
       dragRef.current = { id: e.pointerId, startY: e.clientY, from: 0, at: 0, moved: false, samples: [] }
     },
     onPointerMove(e: PointerEvent<HTMLElement>) {

@@ -97,7 +97,7 @@ export default function CommandSheet({ open, onClose, onRun, onPages }: CommandS
       >
         {/* The handle, the title and the filter: a drag down anywhere on them
             closes the sheet. */}
-        <div {...dragHandlers} className="shrink-0 touch-none border-b border-green-500/40 px-4 pb-3 pt-2">
+        <div {...dragHandlers} className="sheet-grip shrink-0 touch-none border-b border-green-500/40 px-4 pb-3 pt-2">
           <div aria-hidden="true" className="mx-auto mb-2 h-1 w-10 rounded-full bg-green-500/40" />
           <div className="flex items-center justify-between gap-3">
             <h2 id={titleId} className="text-sm text-green-500">

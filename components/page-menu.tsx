@@ -34,7 +34,7 @@ export const PAGES = [
  *
  * A native <dialog> opened with showModal(), like the command sheet, and
  * closed by Back, Escape, the X, a tap outside it (the header too, where the
- * ☰ was) and a drag up on its handle.
+ * ☰ was) and a drag up on its handle or its title.
  */
 export default function PageMenu({ open, onClose, activeTab, isChatMode, onTab, anchorRef }: PageMenuProps) {
   const titleId = useId()
@@ -73,7 +73,8 @@ export default function PageMenu({ open, onClose, activeTab, isChatMode, onTab, 
           ref={panelRef}
           className="sheet-panel pointer-events-auto flex max-h-full flex-col rounded-b-xl border border-t-0 border-green-500 bg-gray-950 font-mono text-green-400 shadow-2xl"
         >
-          <div className="flex shrink-0 items-center justify-between gap-3 pl-4 pr-2 pt-1">
+          {/* The title drags too, so the menu isn't held by its handle alone. */}
+          <div {...dragHandlers} className="sheet-grip flex shrink-0 touch-none items-center justify-between gap-3 pl-4 pr-2 pt-1">
             <h2 id={titleId} className="text-sm text-green-500">
               ~/portfolio
             </h2>
@@ -123,8 +124,9 @@ export default function PageMenu({ open, onClose, activeTab, isChatMode, onTab, 
             })}
           </ul>
 
-          {/* The handle: a drag up on it closes the menu. */}
-          <div {...dragHandlers} aria-hidden="true" className="shrink-0 touch-none px-4 pb-3 pt-2">
+          {/* The handle: a drag up on it, or on the title, closes the menu.
+              A finger's height, though the bar is thin. */}
+          <div {...dragHandlers} aria-hidden="true" className="sheet-grip flex min-h-[44px] shrink-0 touch-none items-center px-4">
             <div className="mx-auto h-1 w-10 rounded-full bg-green-500/40" />
           </div>
         </div>
