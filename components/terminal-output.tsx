@@ -1,14 +1,97 @@
 import type { Command, CommandResponse } from "@/lib/types"
-import { useCallback } from "react"
+import { useCallback, type ReactNode } from "react"
 import { availableCommands } from "@/lib/commands"
 import { cv } from "@/lib/profile-extras"
 import { Tooltip } from "@/components/ui/tooltip"
-import { COARSE_POINTER, useMediaQuery } from "@/lib/media"
+import { COARSE_POINTER, prefersReducedMotion, useMediaQuery } from "@/lib/media"
+import { tabScroller } from "@/lib/scroll"
 
 interface TerminalOutputProps {
   history: Array<Command & CommandResponse>
   onCommandClick?: (command: string) => void
   isChatMode?: boolean
+  /** Rendered at the end of the last block: the answer still being written. */
+  liveTail?: ReactNode
+}
+
+type Entry = { item: Command & CommandResponse; index: number }
+
+/**
+ * The history as blocks, one per command: its output, and in chat the answer,
+ * any "^C answer stopped" and the follow-ups, which arrive as entries without
+ * a command of their own. What comes before the first command (the welcome
+ * banner) is a block without one.
+ */
+function toBlocks(history: Array<Command & CommandResponse>): Entry[][] {
+  const blocks: Entry[][] = []
+  history.forEach((item, index) => {
+    if (item.command || blocks.length === 0) blocks.push([])
+    blocks[blocks.length - 1].push({ item, index })
+  })
+  return blocks
+}
+
+// 24-hour, like a shell prompt's clock.
+const clock = (timestamp: Date | string | undefined) => {
+  if (!timestamp) return ""
+  const date = new Date(timestamp)
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
+}
+
+/**
+ * The line that opens a command's block: ── $ projects ────── 18:25 ──.
+ *
+ * Answers used to run straight into each other, the next "$ command" in the
+ * same green as the output above it, so after scrolling up there was nowhere
+ * obvious to stop. The rule marks where each one starts. It sticks to the top
+ * of the transcript while its block scrolls past (.transcript-sticky in
+ * globals.css), so a long answer still says what asked for it, and a tap goes
+ * back to its start. That is Warp's sticky command header and VS Code's
+ * terminal sticky scroll.
+ */
+function CommandRule({ command, timestamp, isChatMode }: { command: string; timestamp?: Date; isChatMode: boolean }) {
+  const rule = isChatMode ? "border-gray-500/60" : "border-green-500/40"
+  const time = clock(timestamp)
+  return (
+    <button
+      type="button"
+      title={command}
+      onClick={(event) => {
+        // Not the transcript's click-to-focus: on a phone that opens the keyboard.
+        event.stopPropagation()
+        const block = event.currentTarget.closest<HTMLElement>("[data-block]")
+        const scroller = tabScroller(block?.closest<HTMLElement>("[data-terminal-scroll]"))
+        if (!block || !scroller) return
+        scroller.el.scrollTo({ top: scroller.topFor(block), behavior: prefersReducedMotion() ? "auto" : "smooth" })
+      }}
+      className={`transcript-sticky sticky z-10 flex w-full items-center gap-2 py-1.5 text-left font-mono ${
+        isChatMode ? "bg-gray-900" : "bg-black"
+      }`}
+    >
+      <span className="sr-only">Back to the start of </span>
+      <span aria-hidden="true" className={`w-3 shrink-0 border-t ${rule}`} />
+      <span aria-hidden="true" className={isChatMode ? "text-blue-400" : "text-green-500"}>
+        $
+      </span>
+      {/* dir="auto": an Arabic message reads right-to-left, with its
+          punctuation in place, while the $ stays on the left. Two lines at
+          most, so a long question pinned at the top doesn't cover the answer. */}
+      <span
+        dir="auto"
+        className={`line-clamp-2 min-w-0 font-semibold [overflow-wrap:anywhere] ${isChatMode ? "text-gray-100" : "text-green-300"}`}
+      >
+        {command}
+      </span>
+      <span aria-hidden="true" className={`min-w-4 flex-1 border-t ${rule}`} />
+      {time && (
+        <span className={`shrink-0 text-xs tabular-nums ${isChatMode ? "text-gray-500" : "text-green-600"}`}>
+          <span className="sr-only">, run at </span>
+          {time}
+        </span>
+      )}
+      <span aria-hidden="true" className={`w-3 shrink-0 border-t ${rule}`} />
+    </button>
+  )
 }
 
 const linkColor = (isChatMode?: boolean) => (isChatMode ? "text-blue-400" : "text-green-400")
@@ -163,7 +246,7 @@ const PhoneLink = ({ phone, isChatMode }: { phone: string; isChatMode?: boolean 
   )
 }
 
-export default function TerminalOutput({ history, onCommandClick, isChatMode = false }: TerminalOutputProps) {
+export default function TerminalOutput({ history, onCommandClick, isChatMode = false, liveTail }: TerminalOutputProps) {
   const renderLine = (line: React.ReactNode, index: number) => {
     if (typeof line === 'string') {
       // Check for email tags <email>...</email>
@@ -278,34 +361,41 @@ export default function TerminalOutput({ history, onCommandClick, isChatMode = f
     return line
   }
 
+  const blocks = toBlocks(history)
+
   return (
-    <div className="space-y-4">
-      {history.map((item, index) => (
-        <div key={index} className="font-mono">
-          {item.command && (
-            <div className="flex items-start">
-              <span className="text-green-500 mr-1">$</span>
-              {/* dir="auto": an Arabic message reads right-to-left, with its
-                  punctuation in place, while the $ stays on the left. */}
-              <span dir="auto" className="min-w-0 text-green-300 whitespace-pre-wrap [overflow-wrap:anywhere]">{item.command}</span>
-            </div>
-          )}
-          <div className={`mt-1 whitespace-pre-wrap ${item.isError ? "text-red-500" : "text-green-400"}`}>
-            {/* Check if this is a chat response (no command but has output) */}
-            {!item.command && item.output.length > 0 && 
-              item.output[0] !== "Processing your request..." && 
-              typeof item.output[0] !== 'object' && // Don't show AI: for components like AsciiArt
-              isChatMode && (
-              <div className="flex items-start mb-1">
-                <span className="text-blue-400 mr-2 font-bold">AI:</span>
+    <div>
+      {blocks.map((block, blockIndex) => {
+        const head = block[0].item
+        return (
+          <section
+            key={block[0].index}
+            data-block
+            className={`scroll-mt-2 space-y-4 ${blockIndex > 0 ? "mt-8" : ""}`}
+          >
+            {head.command && <CommandRule command={head.command} timestamp={head.timestamp} isChatMode={isChatMode} />}
+            {block.map(({ item, index }) => (
+              <div key={index} className="font-mono">
+                <div className={`whitespace-pre-wrap ${item.isError ? "text-red-500" : "text-green-400"}`}>
+                  {/* Check if this is a chat response (no command but has output) */}
+                  {!item.command && item.output.length > 0 &&
+                    item.output[0] !== "Processing your request..." &&
+                    typeof item.output[0] !== 'object' && // Don't show AI: for components like AsciiArt
+                    isChatMode && (
+                    <div className="flex items-start mb-1">
+                      <span className="text-blue-400 mr-2 font-bold">AI:</span>
+                    </div>
+                  )}
+                  {item.output.map((line, lineIndex) => (
+                    <div key={lineIndex} className={isFrameLine(line) ? "terminal-frame" : undefined}>{renderLine(line, index)}</div>
+                  ))}
+                </div>
               </div>
-            )}
-            {item.output.map((line, lineIndex) => (
-              <div key={lineIndex} className={isFrameLine(line) ? "terminal-frame" : undefined}>{renderLine(line, index)}</div>
             ))}
-          </div>
-        </div>
-      ))}
+            {blockIndex === blocks.length - 1 && liveTail}
+          </section>
+        )
+      })}
     </div>
   )
 }

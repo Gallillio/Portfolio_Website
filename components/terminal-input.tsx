@@ -241,15 +241,17 @@ const TerminalInput = React.forwardRef<TerminalInputRef, TerminalInputProps>(({ 
       return
     }
 
-    // Handle up/down arrows for command history
-    if (e.key === "ArrowUp" && isSingleLine()) {
+    // Handle up/down arrows for command history. With Cmd or Ctrl held they
+    // step between command blocks instead (components/terminal.tsx).
+    const stepsBlocks = e.metaKey || e.ctrlKey
+    if (e.key === "ArrowUp" && isSingleLine() && !stepsBlocks) {
       e.preventDefault()
       if (historyIndex < commandHistory.length - 1) {
         const newIndex = historyIndex + 1
         setHistoryIndex(newIndex)
         setInput(commandHistory[commandHistory.length - 1 - newIndex])
       }
-    } else if (e.key === "ArrowDown" && isSingleLine()) {
+    } else if (e.key === "ArrowDown" && isSingleLine() && !stepsBlocks) {
       e.preventDefault()
       if (historyIndex > 0) {
         const newIndex = historyIndex - 1

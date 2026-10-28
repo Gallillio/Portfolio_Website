@@ -32,5 +32,18 @@ export function tabScroller(box: HTMLElement | null | undefined) {
       const pinned = page ? parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0 : 0
       return target.getBoundingClientRect().top - origin + el.scrollTop - parseFloat(getComputedStyle(target).scrollMarginTop) - pinned
     },
+    /** The furthest it can scroll down. */
+    get bottom() {
+      return el.scrollHeight - el.clientHeight
+    },
   }
+}
+
+/**
+ * The terminal transcript's command blocks, oldest first: one per command,
+ * holding its output (components/terminal-output.tsx).
+ */
+export function transcriptBlocks(inside: Element | null | undefined): HTMLElement[] {
+  const box = inside?.closest<HTMLElement>("[data-terminal-scroll]")
+  return box ? Array.from(box.querySelectorAll<HTMLElement>("[data-block]")) : []
 }

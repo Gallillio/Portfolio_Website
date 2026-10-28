@@ -237,6 +237,14 @@ html::-webkit-scrollbar-thumb:hover {
   }
 }
 
+/* A command's rule in the transcript (components/terminal-output.tsx) pins to
+   the top edge of the box that scrolls it: sticky offsets count from inside the
+   box's padding (pt-6), so this takes it back, or answers would show through
+   above the pinned rule. A phone moves it under its header below. */
+.transcript-sticky {
+  top: -1.5rem;
+}
+
 /* A phone: the terminal is the page, and the page scrolls (components/terminal.tsx). */
 @media (max-width: 767px) {
   /* Jumps to an anchor and scrollIntoView stop clear of the pinned header,
@@ -256,6 +264,17 @@ html::-webkit-scrollbar-thumb:hover {
   @media (max-height: 500px) {
     .terminal-header {
       top: calc(-1 * var(--terminal-title-h, 0px));
+    }
+  }
+
+  /* A command's rule (components/terminal-output.tsx) pins just under the
+     header, which here is the page's, not the transcript box's. */
+  .transcript-sticky {
+    top: var(--terminal-header-h, 0px);
+  }
+  @media (max-height: 500px) {
+    .transcript-sticky {
+      top: calc(var(--terminal-header-h, 0px) - var(--terminal-title-h, 0px));
     }
   }
 
