@@ -76,7 +76,7 @@ const TerminalDock = forwardRef<HTMLElement, TerminalDockProps & { className?: s
             type="button"
             aria-current={chip.current ? "page" : undefined}
             onClick={chip.onSelect}
-            className={`flex min-h-[44px] min-w-0 flex-1 basis-0 items-center justify-center rounded-md border px-1 text-[13px] transition-colors max-[389px]:px-0.5 max-[389px]:text-xs max-[339px]:px-0 ${
+            className={`flex min-h-[44px] min-w-0 flex-1 basis-0 items-center justify-center rounded-md border px-1 text-[13px] transition-colors md:text-sm max-[389px]:px-0.5 max-[389px]:text-xs max-[339px]:px-0 ${
               chip.current
                 ? "border-green-400 bg-green-500/15 text-green-300"
                 : chat
