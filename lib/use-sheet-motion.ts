@@ -148,14 +148,13 @@ export function useSheetMotion(open: boolean, onClose: () => void, edge: SheetEd
     if (scrimRef.current) scrimRef.current.style.opacity = ""
   }
 
-  /** For the sheet's handle: the part a finger drags. */
+  /** For the sheet's handle, or the header around it: the part a finger drags. */
   const dragHandlers = {
     onPointerDown(e: PointerEvent<HTMLElement>) {
-      // The X and the filter keep their taps.
-      if (e.button !== 0 || (e.target as HTMLElement).closest("button, input, label, a")) return
+      // The X keeps its tap. The filter can start a drag too, so the sheet
+      // isn't held by one thin strip; a tap on it still focuses it.
+      if (e.button !== 0 || (e.target as HTMLElement).closest("button, a")) return
       dragRef.current = { id: e.pointerId, startY: e.clientY, from: 0, at: 0, moved: false, samples: [] }
-      // A finger stays with the handle by itself; a mouse has to be told.
-      e.currentTarget.setPointerCapture(e.pointerId)
     },
     onPointerMove(e: PointerEvent<HTMLElement>) {
       const drag = dragRef.current
@@ -165,6 +164,9 @@ export function useSheetMotion(open: boolean, onClose: () => void, edge: SheetEd
       if (!drag.moved) {
         if (Math.abs(e.clientY - drag.startY) < SLOP) return
         drag.moved = true
+        // Only now, so a tap is left alone. A finger stays with what it
+        // pressed by itself; a mouse has to be told.
+        e.currentTarget.setPointerCapture(e.pointerId)
         // Pick it up where it is, even mid-slide. Read that before
         // [data-dragging] stops the slide and snaps it to the end.
         drag.from = offset()
