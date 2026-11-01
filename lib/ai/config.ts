@@ -24,11 +24,17 @@ export const SUPPORTS_SYSTEM_INSTRUCTION = true;
 // worked for seven messages starts failing on the eighth.
 export const MAX_HISTORY_TURNS = 6;
 
-// Free-tier input tokens per minute for this model. Google no longer publishes
-// per-model free limits; this matches what production hit on 2026-10-28 (two
-// ~6.7k-token requests fit in a minute, a third was refused). lib/ai/quota.ts
-// replaces it with the quotaValue from a real 429 once it has seen one.
-export const FREE_TIER_INPUT_TPM = 15_000;
+// Free-tier input tokens per minute for this model, read from a real 429 on
+// 2026-11-01: "generate_content_free_tier_input_token_count, limit: 16000".
+// Google no longer publishes per-model free limits, and implicit prompt caching
+// does not reduce what counts. lib/ai/quota.ts adopts the limit from any later
+// 429, so this is only the starting value.
+export const FREE_TIER_INPUT_TPM = 16_000;
+
+// Google's free endpoint sends nothing until the first word is ready, and that
+// wait swung from 1.3s to 10.5s across identical healthy requests (2026-11-01).
+// Each attempt gets this long for response headers before it counts as a hang.
+export const FIRST_BYTE_TIMEOUT_MS = 25_000;
 
 // Input guards — these cap cost per request, which matters more than the
 // request counter in lib/ai/rate-limit.ts.

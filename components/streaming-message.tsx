@@ -37,6 +37,8 @@ const CATCHUP = 2
 // throttled (backgrounded, or an unfocused window in some browsers). Draw the
 // rest immediately rather than leave finish() pending and the input locked.
 const FRAME_STALL_MS = 1000
+/** Healthy first words arrived in 1.3–10.5s in testing; past this, explain the wait. */
+const SLOW_HINT_MS = 7000
 
 /**
  * Drain rate scales with how much text is waiting. Short answers type at a
@@ -217,6 +219,19 @@ const StreamingMessage = React.forwardRef<StreamingMessageRef, StreamingMessageP
       },
     }))
 
+    // Google's free endpoint can take 10s or more to send its first word. Past
+    // a normal wait, say so, so silence doesn't read as a broken chat.
+    const waiting = active && text === ""
+    const [slow, setSlow] = useState(false)
+    useEffect(() => {
+      if (!waiting) {
+        setSlow(false)
+        return
+      }
+      const timer = setTimeout(() => setSlow(true), SLOW_HINT_MS)
+      return () => clearTimeout(timer)
+    }, [waiting])
+
     if (!active && !text) return null
 
     return (
@@ -228,6 +243,11 @@ const StreamingMessage = React.forwardRef<StreamingMessageRef, StreamingMessageP
           )}
           {active && <span className="terminal-cursor ml-0.5">▋</span>}
         </div>
+        {waiting && slow && (
+          <div className="mt-2 text-sm text-gray-500" role="status">
+            The free Gemini API is slow right now. Still waiting for an answer...
+          </div>
+        )}
       </div>
     )
   }

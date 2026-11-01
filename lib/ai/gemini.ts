@@ -8,6 +8,7 @@
 
 import type { ChatMessage } from "@/lib/types";
 import {
+  FIRST_BYTE_TIMEOUT_MS,
   GEMINI_MODEL,
   GENERATION_CONFIG,
   MAX_HISTORY_TURNS,
@@ -26,7 +27,21 @@ const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
  * The route turns the 429 into a countdown instead.
  */
 const RETRYABLE_STATUS = new Set([500, 502, 503, 504]);
-const MAX_ATTEMPTS = 3;
+/**
+ * One retry, not two. Each attempt resends the whole ~6k-token prompt against a
+ * 16k-tokens-per-minute free cap, so a second retry could spend the minute's
+ * budget on a single visitor's question. The route can also veto the one retry
+ * (beforeRetry) when its quota ledger has no room left for it.
+ */
+const MAX_ATTEMPTS = 2;
+
+/** No response headers within FIRST_BYTE_TIMEOUT_MS on one attempt. */
+export class FirstByteTimeoutError extends Error {
+  constructor() {
+    super(`No response from the model within ${FIRST_BYTE_TIMEOUT_MS}ms`);
+    this.name = "FirstByteTimeoutError";
+  }
+}
 
 export class UpstreamError extends Error {
   constructor(
@@ -120,23 +135,37 @@ function sleep(ms: number, signal: AbortSignal): Promise<void> {
  */
 export async function fetchGeminiStream(
   payload: unknown,
-  opts: { signal: AbortSignal; apiKey: string; requestId: string }
+  opts: { signal: AbortSignal; apiKey: string; requestId: string; beforeRetry?: () => boolean }
 ): Promise<Response> {
   const url = `${ENDPOINT}/${GEMINI_MODEL}:streamGenerateContent?alt=sse`;
   let lastError: UpstreamError | undefined;
 
   for (let attempt = 0; ; attempt++) {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // Header rather than a query param, so the key stays out of upstream
-        // access logs and out of error strings.
-        "x-goog-api-key": opts.apiKey,
-      },
-      body: JSON.stringify(payload),
-      signal: opts.signal,
-    });
+    // Per attempt, so a fast 500 followed by a slow-but-healthy retry is not cut
+    // off by a clock that started on the first attempt. Cleared once headers
+    // arrive, so it can never cut a stream that has started.
+    const firstByte = new AbortController();
+    const firstByteTimer = setTimeout(() => firstByte.abort(), FIRST_BYTE_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Header rather than a query param, so the key stays out of upstream
+          // access logs and out of error strings.
+          "x-goog-api-key": opts.apiKey,
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.any([opts.signal, firstByte.signal]),
+      });
+    } catch (error) {
+      // A hang is not retried: Google may still be processing (and counting) it.
+      if (firstByte.signal.aborted && !opts.signal.aborted) throw new FirstByteTimeoutError();
+      throw error;
+    } finally {
+      clearTimeout(firstByteTimer);
+    }
 
     if (response.ok) {
       if (!response.body) {
@@ -171,6 +200,7 @@ export async function fetchGeminiStream(
     if (!RETRYABLE_STATUS.has(response.status) || attempt >= MAX_ATTEMPTS - 1) {
       throw lastError;
     }
+    if (opts.beforeRetry && !opts.beforeRetry()) throw lastError;
 
     await sleep(backoffMs(attempt, response.headers.get("retry-after")), opts.signal);
   }
