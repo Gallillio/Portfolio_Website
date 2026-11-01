@@ -92,8 +92,15 @@ export function parseQuotaError(body: string): QuotaInfo {
     const seconds = /retry in (\d+(?:\.\d+)?)\s*s/i.exec(message);
     if (seconds) retryDelayMs = Math.round(Number(seconds[1]) * 1000);
   }
+  // The message names the metric and cap too ("...input_token_count, limit: 16000"),
+  // which covers a body whose QuotaFailure lacks quotaValue.
+  if (limit === undefined) {
+    const cap = /limit:\s*(\d+)/i.exec(message);
+    if (cap && Number(cap[1]) > 0) limit = Number(cap[1]);
+  }
+  if (!quotaId && /quota exceeded for metric/i.test(message)) quotaId = message;
 
-  const id = quotaId.toLowerCase();
+  const id = quotaId.toLowerCase().replace(/[\s_-]/g, "");
   const scope: QuotaScope = /perday/.test(id) ? "per-day" : /perminute/.test(id) ? "per-minute" : detectQuotaScope(body);
   const metric = /token/.test(id) ? "input-tokens" : /request/.test(id) ? "requests" : "unknown";
 

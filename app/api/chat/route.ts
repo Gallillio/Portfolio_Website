@@ -11,7 +11,7 @@ import type { ChatMessage } from "@/lib/types";
 import type { ChatErrorBody, ChatErrorCode, ChatStreamFrame, ChatUsage } from "@/lib/ai/protocol";
 import { encodeSSE, parseSSE } from "@/lib/ai/sse";
 import { checkRateLimit, clientKey } from "@/lib/ai/rate-limit";
-import { buildPayload, fetchGeminiStream, UpstreamError } from "@/lib/ai/gemini";
+import { buildPayload, fetchGeminiStream, FirstByteTimeoutError, UpstreamError } from "@/lib/ai/gemini";
 import { admit, noteUpstream429, release, settle, type QuotaScope } from "@/lib/ai/quota";
 import { MAX_MESSAGE_CHARS, MAX_TOTAL_HISTORY_CHARS } from "@/lib/ai/config";
 
@@ -21,12 +21,6 @@ export const maxDuration = 60;
 
 /** Whole-request budget. */
 const REQUEST_TIMEOUT_MS = 45_000;
-/**
- * No response headers from Google within this long means the free endpoint is
- * stuck. Production saw calls sit the full 45s and then fail; a visitor should
- * hear about that in seconds, not watch a thinking indicator for most of a minute.
- */
-const FIRST_BYTE_TIMEOUT_MS = 15_000;
 /** Idle-between-deltas budget. Catches a hung upstream that the overall timeout would sit on. */
 const STALL_TIMEOUT_MS = 20_000;
 
@@ -288,24 +282,28 @@ export async function POST(request: Request): Promise<Response> {
     console.log("[chat] held back by quota ledger", { requestId, ...admission });
     return quotaResponse(admission.scope, admission.retryAfterMs);
   }
-  const { reservation } = admission;
+  // One per attempt. A retry resends the full prompt, so it has to fit in the
+  // minute's budget too, and it is only made when it does.
+  const reservations = [admission.reservation];
+  const beforeRetry = () => {
+    const retry = admit(payloadChars);
+    if (retry.ok) reservations.push(retry.reservation);
+    return retry.ok;
+  };
 
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
-  // Cleared as soon as headers arrive, so it can never cut a stream that started.
-  const firstByte = new AbortController();
-  const firstByteTimer = setTimeout(() => firstByte.abort(), FIRST_BYTE_TIMEOUT_MS);
-  const signal = AbortSignal.any([request.signal, timeout, firstByte.signal]);
+  const signal = AbortSignal.any([request.signal, timeout]);
 
   let upstream: Response;
   try {
-    upstream = await fetchGeminiStream(payload, { signal, apiKey, requestId });
+    upstream = await fetchGeminiStream(payload, { signal, apiKey, requestId, beforeRetry });
   } catch (error) {
     if (error instanceof UpstreamError) {
-      // Google answered with an error, so it generated nothing. A timeout or a
-      // visitor leaving keeps the reservation: Google may already be counting it.
-      release(reservation);
-
       if (error.status === 429) {
+        // Refused outright, so nothing was counted. Every other failure keeps
+        // its reservations: a 500, a hang or a visitor leaving may still have
+        // been charged against the minute by Google.
+        reservations.forEach(release);
         const { retryAfterMs, scope } = noteUpstream429(
           error.quota ?? { scope: "per-minute", metric: "unknown" }
         );
@@ -327,8 +325,8 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
-    if (timeout.aborted || firstByte.signal.aborted) {
-      console.error("[chat] upstream timed out", { requestId, firstByte: firstByte.signal.aborted });
+    if (timeout.aborted || error instanceof FirstByteTimeoutError) {
+      console.error("[chat] upstream timed out", { requestId, firstByte: error instanceof FirstByteTimeoutError });
       return errorResponse(504, "TIMEOUT", "The assistant took too long to respond.", {
         retryable: true,
       });
@@ -341,12 +339,10 @@ export async function POST(request: Request): Promise<Response> {
     return errorResponse(500, "UNKNOWN", "Something went wrong reaching the assistant.", {
       retryable: true,
     });
-  } finally {
-    clearTimeout(firstByteTimer);
   }
 
   const stream = toClientStream(upstream.body as ReadableStream<Uint8Array>, requestId, (usage) =>
-    settle(reservation, usage.input, payloadChars)
+    settle(reservations[reservations.length - 1], usage.input, payloadChars)
   );
 
   return new Response(stream, {
