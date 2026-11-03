@@ -42,3 +42,6 @@ yarn-error.log*
 next-env.d.ts
 CLAUDE.md
 /docs
+
+# local Claude Code permissions (per machine)
+.claude/settings.local.json

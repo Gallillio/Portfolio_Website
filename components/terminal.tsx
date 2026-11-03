@@ -228,9 +228,11 @@ function TerminalContent(): React.ReactNode {
     window.addEventListener('contact-email-clicked', handleContactEmailClicked);
     
     // Listen for postMessage events
+    // Only this page posts these messages to itself. Without the check, any page
+    // that opened or framed the site could drive its tabs.
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'switch-tab' && event.data.tabName) {
-        console.log('Terminal received postMessage to switch tab:', event.data.tabName);
+      if (event.origin !== window.location.origin || event.source !== window) return;
+      if (event.data && event.data.type === 'switch-tab' && typeof event.data.tabName === 'string') {
         setActiveTab(event.data.tabName);
       } else if (event.data && event.data.type === 'contact-email-clicked') {
         handleContactEmailClicked();
@@ -723,7 +725,7 @@ function TerminalContent(): React.ReactNode {
               type: 'navigate-about-section', 
               sectionId: response.timelineSection,
               shouldScrollToNav: true
-            }, '*')
+            }, window.location.origin)
           } catch (error) {
             console.error(`Error navigating to ${response.timelineSection} section:`, error)
           }

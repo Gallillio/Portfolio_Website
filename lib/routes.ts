@@ -16,12 +16,17 @@ export function tabForPath(pathname: string): string | null {
 }
 
 /** The address of a tab; tabs without a page of their own live at /. */
-export const pathForTab = (tab: string): string => TAB_PATHS[tab] ?? "/"
+export const pathForTab = (tab: string): string => (Object.hasOwn(TAB_PATHS, tab) ? TAB_PATHS[tab] : "/")
 
 /** The slug in /projects/<slug>, or null. */
 export function projectSlugForPath(pathname: string): string | null {
   const match = pathname.match(/^\/projects\/([^/]+)\/?$/)
-  return match ? decodeURIComponent(match[1]) : null
+  if (!match) return null
+  try {
+    return decodeURIComponent(match[1])
+  } catch {
+    return null // A malformed escape such as "%E0" names no project.
+  }
 }
 
 export const projectPath = (slug: string): string => `/projects/${slug}`

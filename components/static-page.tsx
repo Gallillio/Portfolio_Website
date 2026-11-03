@@ -2,6 +2,7 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 import { format, parseISO } from "date-fns"
 import { cv, contentUpdated } from "@/lib/profile-extras"
+import { jsonLdHtml } from "@/lib/seo"
 
 const NAV = [
   { href: "/", label: "Terminal" },
@@ -67,5 +68,5 @@ export function Section({ title, children }: { title: string; children: ReactNod
 }
 
 export function JsonLd({ data }: { data: object }) {
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdHtml(data) }} />
 }

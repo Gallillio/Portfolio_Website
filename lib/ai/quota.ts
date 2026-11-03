@@ -125,12 +125,21 @@ const MAX_COOLDOWN_MS = 65_000;
 export interface Reservation {
   at: number;
   tokens: number;
+  /** Who made the request (lib/ai/rate-limit.ts clientKey), for the per-client share. */
+  client: string;
 }
 
 const ledger: Reservation[] = [];
 let learnedLimit: number | undefined;
-/** Measured in production: 6,695 tokens for about 26k characters of payload. */
+/**
+ * Tokens per character of prompt TEXT (not of the JSON payload, whose escaping a
+ * client controls: one U+0001 is six JSON characters but a single token).
+ * Measured in production: 6,695 tokens for about 26k characters.
+ */
 let tokensPerChar = 0.26;
+/** One odd answer must not swing every later estimate, so recalibration is clamped. */
+const MIN_TOKENS_PER_CHAR = 0.15;
+const MAX_TOKENS_PER_CHAR = 0.5;
 let cooldown: { until: number; scope: QuotaScope } | undefined;
 
 export type Admission =
@@ -141,12 +150,36 @@ function prune(now: number): void {
   while (ledger.length > 0 && ledger[0].at <= now - WINDOW_MS) ledger.shift();
 }
 
+/** When enough of `entries` (oldest first) will have aged out for `estimate` to fit under `cap`. */
+function waitUntilFits(entries: Reservation[], used: number, estimate: number, cap: number, now: number): number {
+  let fitsAt = now;
+  for (const entry of entries) {
+    if (used + estimate <= cap) break;
+    used -= entry.tokens;
+    fitsAt = entry.at + WINDOW_MS;
+  }
+  return Math.max(1_000, fitsAt - now);
+}
+
 /**
- * Decide whether a request of `payloadChars` fits in the current minute. On
+ * Decide whether a request of `textChars` fits in the current minute. On
  * success the estimate is reserved, so two visitors arriving together cannot
  * both slip under a cap that only one of them fits.
+ *
+ * Fairness: the free tier fits only about two questions a minute across every
+ * visitor, so one client must not be able to hold the whole window. A client
+ * that already holds reservations may hold at most `limit - floor`, where
+ * `floorChars` is the smallest possible request (the system prompt). That
+ * always leaves room for one fresh visitor's question. A client's first request
+ * in the window is admitted whenever it fits globally, so a single long
+ * conversation never gets stuck.
  */
-export function admit(payloadChars: number, now = Date.now()): Admission {
+export function admit(
+  textChars: number,
+  client: string,
+  floorChars: number,
+  now = Date.now()
+): Admission {
   if (cooldown && cooldown.until > now) {
     return { ok: false, retryAfterMs: cooldown.until - now, scope: cooldown.scope };
   }
@@ -154,33 +187,40 @@ export function admit(payloadChars: number, now = Date.now()): Admission {
   prune(now);
 
   const limit = (learnedLimit ?? FREE_TIER_INPUT_TPM) * HEADROOM;
-  const estimate = Math.ceil(payloadChars * tokensPerChar);
-  let used = ledger.reduce((sum, entry) => sum + entry.tokens, 0);
+  const estimate = Math.ceil(textChars * tokensPerChar);
 
-  if (used + estimate > limit) {
-    // Walk forward until enough old entries have aged out for this one to fit.
-    let fitsAt = now;
-    for (const entry of ledger) {
-      if (used + estimate <= limit) break;
-      used -= entry.tokens;
-      fitsAt = entry.at + WINDOW_MS;
-    }
-    // A single request larger than the whole cap never fits; let Google judge it.
-    if (used + estimate <= limit) {
-      return { ok: false, retryAfterMs: Math.max(1_000, fitsAt - now), scope: "per-minute" };
+  // A request larger than the whole minute can never fit. Refuse it instead of
+  // reserving it: reserving it is what let one request lock out every visitor.
+  if (estimate > limit) {
+    return { ok: false, retryAfterMs: WINDOW_MS, scope: "per-minute" };
+  }
+
+  const mine = ledger.filter((entry) => entry.client === client);
+  if (mine.length > 0) {
+    const clientCap = Math.max(limit * 0.4, limit - Math.ceil(floorChars * tokensPerChar));
+    const mineUsed = mine.reduce((sum, entry) => sum + entry.tokens, 0);
+    if (mineUsed + estimate > clientCap) {
+      return { ok: false, retryAfterMs: waitUntilFits(mine, mineUsed, estimate, clientCap, now), scope: "per-minute" };
     }
   }
 
-  const reservation = { at: now, tokens: estimate };
+  const used = ledger.reduce((sum, entry) => sum + entry.tokens, 0);
+  if (used + estimate > limit) {
+    return { ok: false, retryAfterMs: waitUntilFits(ledger, used, estimate, limit, now), scope: "per-minute" };
+  }
+
+  const reservation = { at: now, tokens: estimate, client };
   ledger.push(reservation);
   return { ok: true, reservation };
 }
 
 /** Replace the estimate with what Google actually counted, and recalibrate. */
-export function settle(reservation: Reservation, inputTokens: number, payloadChars: number): void {
+export function settle(reservation: Reservation, inputTokens: number, textChars: number): void {
   if (inputTokens <= 0) return;
   reservation.tokens = inputTokens;
-  if (payloadChars > 0) tokensPerChar = inputTokens / payloadChars;
+  if (textChars > 0) {
+    tokensPerChar = Math.min(MAX_TOKENS_PER_CHAR, Math.max(MIN_TOKENS_PER_CHAR, inputTokens / textChars));
+  }
 }
 
 /** The request never reached the model (refused, timed out, failed), so it cost nothing. */

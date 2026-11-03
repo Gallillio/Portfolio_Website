@@ -60,6 +60,21 @@ function systemText(): string {
   return `${SYSTEM_INSTRUCTION}\n\n<portfolio_data>\n${PORTFOLIO_CONTEXT}\n</portfolio_data>`;
 }
 
+/**
+ * Characters of prompt text a request sends: what Google counts tokens from.
+ * Used for the quota estimate instead of the JSON payload length, because a
+ * client controls how much JSON escaping its text expands into.
+ */
+export function promptTextChars(message: string, history: ChatMessage[]): number {
+  const recent = history.slice(-MAX_HISTORY_TURNS);
+  return systemText().length + recent.reduce((sum, m) => sum + m.content.length, 0) + message.length;
+}
+
+/** The smallest request there is: the system prompt alone. */
+export function systemTextChars(): number {
+  return systemText().length;
+}
+
 export function buildPayload(message: string, history: ChatMessage[]): unknown {
   const recent = history.slice(-MAX_HISTORY_TURNS);
   const historyContents = recent.map((m) => ({

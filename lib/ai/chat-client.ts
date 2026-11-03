@@ -4,6 +4,7 @@ import type { ChatMessage } from "@/lib/types";
 import type { ChatErrorBody, ChatErrorCode, ChatStreamFrame } from "@/lib/ai/protocol";
 import { isChatErrorCode } from "@/lib/ai/protocol";
 import { parseSSE } from "@/lib/ai/sse";
+import { MAX_HISTORY_TURNS } from "@/lib/ai/config";
 
 export class ChatError extends Error {
   constructor(
@@ -42,7 +43,8 @@ export async function streamChat(
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: args.message, conversationHistory: args.history }),
+      // The server only ever uses the last few turns, so only those are sent.
+      body: JSON.stringify({ message: args.message, conversationHistory: args.history.slice(-MAX_HISTORY_TURNS) }),
       signal: args.signal,
     });
 

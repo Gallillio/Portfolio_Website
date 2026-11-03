@@ -173,7 +173,7 @@ const TabLink = ({ tabName, displayName, isChatMode }: { tabName: string; displa
             type: 'navigate-about-section',
             sectionId: tabName,
             shouldScrollToNav: true  // Add flag to indicate scrolling to navbar
-          }, '*')
+          }, window.location.origin)
         } catch (error) {
           console.error(`Error navigating to ${tabName} section:`, error)
         }
@@ -330,7 +330,7 @@ export default function TerminalOutput({ history, onCommandClick, isChatMode = f
       }
 
       // Handle URLs without prefix
-      if (line.startsWith('http') || line.startsWith('https')) {
+      if (/^https?:\/\//.test(line)) {
         return <TerminalLink key={index} href={line} isChatMode={isChatMode} />
       }
 

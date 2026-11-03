@@ -39,7 +39,10 @@ export const FIRST_BYTE_TIMEOUT_MS = 25_000;
 // Input guards — these cap cost per request, which matters more than the
 // request counter in lib/ai/rate-limit.ts.
 export const MAX_MESSAGE_CHARS = 1000;
-export const MAX_TOTAL_HISTORY_CHARS = 12000;
+// Sized so the largest legitimate request (system prompt, message and history,
+// about 8.8k tokens) still leaves room in the 16k-per-minute budget for another
+// visitor's first question (about 6k tokens). See admit() in lib/ai/quota.ts.
+export const MAX_TOTAL_HISTORY_CHARS = 10000;
 
 export const GENERATION_CONFIG = {
   temperature: 1,
