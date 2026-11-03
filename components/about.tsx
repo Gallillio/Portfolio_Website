@@ -120,10 +120,11 @@ export default function About() {
 
   // Listen for navigation messages from the terminal
   useEffect(() => {
+    // Only this page posts these messages to itself; ignore any other window.
     const handleSectionNavigation = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.source !== window) return;
       if (event.data && event.data.type === 'navigate-about-section') {
         const sectionId = event.data.sectionId;
-        console.log('About component received navigation request to section:', sectionId);
         if (sectionId && typeof sectionId === 'string') {
           setActiveTab(sectionId);
           
@@ -231,7 +232,7 @@ export default function About() {
       
       try {
         // First try to use window.parent to affect the parent terminal
-        window.parent.postMessage({ type: 'switch-tab', tabName: tab }, '*');
+        window.parent.postMessage({ type: 'switch-tab', tabName: tab }, window.location.origin);
         
         // As a fallback, also dispatch a custom event
         const event = new CustomEvent('switch-terminal-tab', {

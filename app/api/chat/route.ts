@@ -11,9 +11,16 @@ import type { ChatMessage } from "@/lib/types";
 import type { ChatErrorBody, ChatErrorCode, ChatStreamFrame, ChatUsage } from "@/lib/ai/protocol";
 import { encodeSSE, parseSSE } from "@/lib/ai/sse";
 import { checkRateLimit, clientKey } from "@/lib/ai/rate-limit";
-import { buildPayload, fetchGeminiStream, FirstByteTimeoutError, UpstreamError } from "@/lib/ai/gemini";
+import {
+  buildPayload,
+  fetchGeminiStream,
+  FirstByteTimeoutError,
+  promptTextChars,
+  systemTextChars,
+  UpstreamError,
+} from "@/lib/ai/gemini";
 import { admit, noteUpstream429, release, settle, type QuotaScope } from "@/lib/ai/quota";
-import { MAX_MESSAGE_CHARS, MAX_TOTAL_HISTORY_CHARS } from "@/lib/ai/config";
+import { MAX_HISTORY_TURNS, MAX_MESSAGE_CHARS, MAX_TOTAL_HISTORY_CHARS } from "@/lib/ai/config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,6 +30,12 @@ export const maxDuration = 60;
 const REQUEST_TIMEOUT_MS = 45_000;
 /** Idle-between-deltas budget. Catches a hung upstream that the overall timeout would sit on. */
 const STALL_TIMEOUT_MS = 20_000;
+/**
+ * The client sends at most MAX_HISTORY_TURNS turns, each at most one answer
+ * long, so a legitimate body is well under this. The platform's own cap is far
+ * larger, and parsing is the first work an anonymous request costs.
+ */
+const MAX_BODY_BYTES = 256_000;
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -90,9 +103,12 @@ function validate(raw: unknown): ValidBody | string {
     return "Field 'conversationHistory' must be an array when present.";
   }
 
+  // Only the last few turns are ever sent upstream, so only those are read.
+  // Walking back from the newest keeps the most recent turns when the
+  // character budget runs out, rather than the oldest ones.
   const history: ChatMessage[] = [];
   let totalChars = 0;
-  for (const entry of conversationHistory) {
+  for (const entry of conversationHistory.slice(-MAX_HISTORY_TURNS).reverse()) {
     if (typeof entry !== "object" || entry === null) {
       return "Each 'conversationHistory' entry must be an object.";
     }
@@ -108,7 +124,7 @@ function validate(raw: unknown): ValidBody | string {
     history.push({ role, content });
   }
 
-  return { message: trimmed, conversationHistory: history };
+  return { message: trimmed, conversationHistory: history.reverse() };
 }
 
 interface GeminiPart {
@@ -132,11 +148,19 @@ interface GeminiChunk {
 function toClientStream(
   upstream: ReadableStream<Uint8Array>,
   requestId: string,
-  onUsage: (usage: ChatUsage) => void
+  onUsage: (usage: ChatUsage) => void,
+  onCancel: () => void
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
+  // Set when the visitor goes away. Enqueueing after that throws, so every
+  // write checks it, and the upstream read is aborted rather than left running.
+  let closed = false;
 
   return new ReadableStream<Uint8Array>({
+    cancel() {
+      closed = true;
+      onCancel();
+    },
     async start(controller) {
       let sawText = false;
       let finishReason: string | undefined;
@@ -144,7 +168,14 @@ function toClientStream(
       let stallTimer: ReturnType<typeof setTimeout> | undefined;
       let stalled = false;
 
-      const send = (frame: ChatStreamFrame) => controller.enqueue(encoder.encode(encodeSSE(frame)));
+      const send = (frame: ChatStreamFrame) => {
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(encodeSSE(frame)));
+        } catch {
+          closed = true;
+        }
+      };
 
       const resetStall = () => {
         if (stallTimer) clearTimeout(stallTimer);
@@ -157,7 +188,7 @@ function toClientStream(
         resetStall();
 
         for await (const payload of parseSSE(upstream)) {
-          if (stalled) break;
+          if (stalled || closed) break;
 
           let chunk: GeminiChunk;
           try {
@@ -219,6 +250,7 @@ function toClientStream(
         if (usage) onUsage(usage);
         console.log("[chat] completed", { requestId, finishReason, usage, sawText });
       } catch (error) {
+        if (closed) return; // The visitor left; the aborted upstream read is expected.
         console.error("[chat] stream failed", { requestId, error });
         send({
           type: "error",
@@ -228,22 +260,84 @@ function toClientStream(
         });
       } finally {
         if (stallTimer) clearTimeout(stallTimer);
-        controller.close();
+        if (!closed) {
+          closed = true;
+          controller.close();
+        }
       }
     },
   });
 }
 
+function isSameOrigin(request: Request): boolean {
+  const origin = request.headers.get("origin");
+  if (!origin) return true;
+  let originHost: string;
+  try {
+    originHost = new URL(origin).host;
+  } catch {
+    return false;
+  }
+  return originHost === request.headers.get("host") || originHost === request.headers.get("x-forwarded-host");
+}
+
+/** The body as text, or null once it passes `maxBytes`, without reading the rest. */
+async function readBodyCapped(request: Request, maxBytes: number): Promise<string | null> {
+  const declared = Number(request.headers.get("content-length"));
+  if (Number.isFinite(declared) && declared > maxBytes) return null;
+  if (!request.body) return "";
+
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+  return new TextDecoder().decode(Buffer.concat(chunks));
+}
+
 export async function POST(request: Request): Promise<Response> {
   const requestId = crypto.randomUUID();
 
-  if (!request.headers.get("content-type")?.includes("application/json")) {
+  // The media type itself, not a substring: "text/plain;application/json"
+  // contains the words but is a type a cross-site form may send unannounced.
+  const contentType = request.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+  if (contentType !== "application/json") {
     return errorResponse(415, "BAD_REQUEST", "Content-Type must be application/json.");
+  }
+
+  // Browsers send Origin on every POST. Only this site's own pages may use the
+  // chat; a request with no Origin (curl, a server) is not a browser being
+  // borrowed by another site, and the per-client limits below still apply.
+  if (!isSameOrigin(request)) {
+    return errorResponse(403, "BAD_REQUEST", "Cross-site requests are not accepted.");
+  }
+
+  // Rate limit before reading the body, so a refused client costs no parsing.
+  const client = clientKey(request);
+  const limit = await checkRateLimit(client);
+  if (!limit.ok) {
+    return errorResponse(429, "RATE_LIMITED", "Too many messages. Give it a moment.", {
+      retryable: true,
+      retryAfterMs: limit.retryAfterSec * 1000,
+    });
+  }
+
+  const text = await readBodyCapped(request, MAX_BODY_BYTES);
+  if (text === null) {
+    return errorResponse(413, "BAD_REQUEST", "Request body is too large.");
   }
 
   let raw: unknown;
   try {
-    raw = await request.json();
+    raw = JSON.parse(text);
   } catch {
     return errorResponse(400, "BAD_REQUEST", "Request body is not valid JSON.");
   }
@@ -251,14 +345,6 @@ export async function POST(request: Request): Promise<Response> {
   const validated = validate(raw);
   if (typeof validated === "string") {
     return errorResponse(400, "BAD_REQUEST", validated);
-  }
-
-  const limit = await checkRateLimit(clientKey(request));
-  if (!limit.ok) {
-    return errorResponse(429, "RATE_LIMITED", "Too many messages. Give it a moment.", {
-      retryable: true,
-      retryAfterMs: limit.retryAfterSec * 1000,
-    });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -272,12 +358,13 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const payload = buildPayload(validated.message, validated.conversationHistory);
-  const payloadChars = JSON.stringify(payload).length;
+  const textChars = promptTextChars(validated.message, validated.conversationHistory);
+  const floorChars = systemTextChars();
 
   // Refuse here, instantly and with an exact wait, when the request cannot fit
   // in this minute's free-tier budget. Calling Google anyway would only buy the
   // visitor a slower 429.
-  const admission = admit(payloadChars);
+  const admission = admit(textChars, client, floorChars);
   if (!admission.ok) {
     console.log("[chat] held back by quota ledger", { requestId, ...admission });
     return quotaResponse(admission.scope, admission.retryAfterMs);
@@ -286,13 +373,15 @@ export async function POST(request: Request): Promise<Response> {
   // minute's budget too, and it is only made when it does.
   const reservations = [admission.reservation];
   const beforeRetry = () => {
-    const retry = admit(payloadChars);
+    const retry = admit(textChars, client, floorChars);
     if (retry.ok) reservations.push(retry.reservation);
     return retry.ok;
   };
 
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
-  const signal = AbortSignal.any([request.signal, timeout]);
+  // Aborted when the visitor stops reading the answer, so the upstream read stops too.
+  const streamAbort = new AbortController();
+  const signal = AbortSignal.any([request.signal, timeout, streamAbort.signal]);
 
   let upstream: Response;
   try {
@@ -341,8 +430,11 @@ export async function POST(request: Request): Promise<Response> {
     });
   }
 
-  const stream = toClientStream(upstream.body as ReadableStream<Uint8Array>, requestId, (usage) =>
-    settle(reservations[reservations.length - 1], usage.input, payloadChars)
+  const stream = toClientStream(
+    upstream.body as ReadableStream<Uint8Array>,
+    requestId,
+    (usage) => settle(reservations[reservations.length - 1], usage.input, textChars),
+    () => streamAbort.abort()
   );
 
   return new Response(stream, {

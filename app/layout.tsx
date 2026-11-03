@@ -7,7 +7,7 @@ import AchievementNotificationProvider from "@/components/achievement-notificati
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/react"
 import { links } from "@/lib/profile-data";
-import { NAME, SITE_TITLE, HOME_TITLE, SITE_DESCRIPTION, OG_IMAGE, siteJsonLd } from "@/lib/seo";
+import { NAME, SITE_TITLE, HOME_TITLE, SITE_DESCRIPTION, OG_IMAGE, siteJsonLd, jsonLdHtml } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -98,7 +98,7 @@ export default function RootLayout({
         {/* schema.org WebSite and Person, so search engines can tie the site to the LinkedIn and GitHub profiles. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdHtml(siteJsonLd) }}
         />
         <AchievementsProvider>
           <AchievementNotificationProvider>

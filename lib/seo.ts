@@ -202,3 +202,12 @@ export function projectJsonLd(project: Project & { slug: string }) {
     isPartOf: { "@id": WEBSITE_ID },
   }
 }
+
+/**
+ * JSON for an inline <script type="application/ld+json">. JSON.stringify leaves
+ * "<" alone, so a value containing "</script>" would end the tag early and the
+ * rest would run as HTML; escaping it keeps the JSON identical to a parser.
+ */
+export function jsonLdHtml(data: object): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c")
+}
