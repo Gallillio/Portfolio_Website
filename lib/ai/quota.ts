@@ -229,6 +229,17 @@ export function release(reservation: Reservation): void {
   if (index !== -1) ledger.splice(index, 1);
 }
 
+/**
+ * Keep the reservation in the minute's budget but stop counting it against the
+ * client. For failures on Google's side (a hang, a 5xx): the visitor did nothing
+ * wrong and should be able to retry at once. A visitor who walks away keeps the
+ * charge, since cancelling on purpose is how one client could otherwise hold
+ * more than its share.
+ */
+export function unattribute(reservation: Reservation): void {
+  reservation.client = "";
+}
+
 /** Turn Google's 429 into a cooldown for this instance. Returns how long to wait. */
 export function noteUpstream429(info: QuotaInfo, now = Date.now()): { retryAfterMs: number; scope: QuotaScope } {
   // retryDelay has been seen reading "1s" on a per-day cap, so the daily wait

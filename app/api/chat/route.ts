@@ -19,7 +19,7 @@ import {
   systemTextChars,
   UpstreamError,
 } from "@/lib/ai/gemini";
-import { admit, noteUpstream429, release, settle, type QuotaScope } from "@/lib/ai/quota";
+import { admit, noteUpstream429, release, settle, unattribute, type QuotaScope } from "@/lib/ai/quota";
 import { MAX_HISTORY_TURNS, MAX_MESSAGE_CHARS, MAX_TOTAL_HISTORY_CHARS } from "@/lib/ai/config";
 
 export const runtime = "nodejs";
@@ -399,6 +399,7 @@ export async function POST(request: Request): Promise<Response> {
         return quotaResponse(scope, retryAfterMs, error.detail);
       }
       if (error.status === 503 || error.status === 500 || error.status === 504) {
+        reservations.forEach(unattribute);
         return errorResponse(
           503,
           "UPSTREAM_UNAVAILABLE",
@@ -415,6 +416,7 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     if (timeout.aborted || error instanceof FirstByteTimeoutError) {
+      reservations.forEach(unattribute);
       console.error("[chat] upstream timed out", { requestId, firstByte: error instanceof FirstByteTimeoutError });
       return errorResponse(504, "TIMEOUT", "The assistant took too long to respond.", {
         retryable: true,
