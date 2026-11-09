@@ -63,6 +63,14 @@ const nextConfig: NextConfig = {
         destination: "/projects/data-visualizer-tool",
         permanent: true,
       },
+      // The Academy waitlist used to live at gallillio.com/en and /ar. That
+      // domain now redirects here, so its old links 404ed; send them on to the
+      // waitlist's new home.
+      {
+        source: "/:locale(en|ar)",
+        destination: "https://academy.gallillio.com/:locale",
+        permanent: true,
+      },
     ];
   },
 };
