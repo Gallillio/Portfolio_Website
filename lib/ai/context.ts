@@ -99,7 +99,7 @@ function projectText(p: (typeof projects)[number]): string {
 }
 
 /**
- * Roles whose work is also written up as a project (ISYS -> SIA, ESLSCA -> the
+ * Roles whose work is also written up as a project (ESLSCA -> the
  * admissions chatbot) used to send the same facts twice. Bullets fully covered
  * by the project's text are dropped here; the lead line, which ties the role to
  * the project, always stays. Only the model's copy changes, never the page.
@@ -137,7 +137,7 @@ export function buildPortfolioContext(): string {
     section(
       "Highlights",
       [
-        // Item 1 already says SIA is his main work and where it is described.
+        // Item 1 already says the ISYS assistant is his main work and where it is described.
         "Ranked by Ahmed: use this order for his most impressive work, and the periods for recent work.",
         ...highlights.map((h, i) => `${i + 1}. ${h.title} (${h.period}): ${h.pointer}`),
       ].join("\n")

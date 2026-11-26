@@ -6,7 +6,7 @@ import { PROJECTS_TITLE, pageMetadata, breadcrumbJsonLd } from "@/lib/seo"
 export const metadata = pageMetadata({
   title: PROJECTS_TITLE,
   description:
-    "Projects by Ahmed Galal Elzeky: SIA, an enterprise AI assistant at ISYS, the Comic Spot storefront, the Lango app, and earlier AI and web work.",
+    "Projects by Ahmed Galal Elzeky: the Comic Spot storefront, the Lango app, and earlier AI and web work.",
   path: "/projects",
 })
 

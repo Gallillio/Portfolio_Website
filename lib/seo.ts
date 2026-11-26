@@ -14,10 +14,10 @@ export const NAME = "Ahmed Galal Elzeky"
 // in a browser tab or a shared link.
 export const SITE_TITLE = `${NAME} · ${title}`
 export const SITE_DESCRIPTION =
-  "AI Engineer in Cairo building enterprise LLM systems: RAG, agents and model routing. Founding engineer on SIA at ISYS, an IBM partner."
+  "AI Engineer in Cairo building enterprise LLM systems: RAG, agents and model routing. Founding engineer on an enterprise AI assistant at ISYS, an IBM partner."
 
 // New filename on purpose: social networks cache preview images by URL.
-export const OG_IMAGE = { url: "/og-2026.png", width: 1200, height: 630, alt: SITE_TITLE }
+export const OG_IMAGE = { url: "/og-2026-11.png", width: 1200, height: 630, alt: SITE_TITLE }
 
 // Page titles. Each route's metadata uses them, and so does the terminal when it
 // changes the address in the browser without loading a new page, so the browser
@@ -167,7 +167,7 @@ export const aboutPageJsonLd = {
   mainEntity: personRef,
 }
 
-/** Breadcrumb trail from the home page, e.g. Home › Projects › SIA. */
+/** Breadcrumb trail from the home page, e.g. Home › Projects › Comic Spot. */
 export function breadcrumbJsonLd(trail: { name: string; path: string }[]) {
   return {
     "@context": "https://schema.org",

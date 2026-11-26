@@ -13,8 +13,8 @@ export const headline = "AI Engineer | LLMs | RAG | Agentic Systems | Arabic NLP
 // shows as much as fits beside the profile card (three lines on phones) before
 // "Read More", so lead with the strongest sentence.
 export const bio: string[] = [
-  "Enterprise generative AI, built end to end. At ISYS, an IBM partner, I'm a founding engineer on SIA: a multi-tenant AI assistant on 22 microservices, live for about 70 staff and sized for a 1,000-seat client rollout.",
-  "The results I measure: answer-confidence scoring raised from AUROC 0.35 to 0.994, answers that cite their source page where none of 1,614 did before, and IBM watsonx, Claude and OpenAI behind one interface with automatic failover and a router that runs helper tasks 3.5 to 4 times cheaper. I also trained Vodafone's engineering team on IBM watsonx.ai and pitch SIA to C-suite audiences.",
+  "Enterprise generative AI, built end to end. At ISYS, an IBM partner, I'm a founding engineer on a multi-tenant enterprise AI assistant on 22 microservices, live for about 70 staff and sized for a 1,000-seat client rollout.",
+  "The results I measure: answer-confidence scoring raised from AUROC 0.35 to 0.994, answers that cite their source page where none of 1,614 did before, and IBM watsonx, Claude and OpenAI behind one interface with automatic failover and a router that runs helper tasks 3.5 to 4 times cheaper. I also trained Vodafone's engineering team on IBM watsonx.ai and pitch the assistant to C-suite audiences.",
   "Beyond ISYS: freelance builds such as Comic Spot (comicspot.co) and Lango, my language-learning app for iOS and Android, co-authored Arabic LLM reasoning research published by Elsevier, and Arabic tech videos for 37K followers.",
 ];
 
@@ -57,7 +57,7 @@ export const availability = "Cairo, Egypt (UTC+2/+3) · Open to remote and reloc
 // engines and AI assistants lift sentences about a person to quote. First-person
 // copy ("I build...") does not say who "I" is once it is quoted alone.
 export const introduction: string[] = [
-  "Ahmed Galal Elzeky is an AI Engineer in Cairo, Egypt, who builds enterprise LLM systems: retrieval-augmented generation (RAG), agents and model routing. At Intelligent Systems (ISYS), an IBM partner, he is a founding engineer on SIA, an AI assistant live for about 70 staff.",
+  "Ahmed Galal Elzeky is an AI Engineer in Cairo, Egypt, who builds enterprise LLM systems: retrieval-augmented generation (RAG), agents and model routing. At Intelligent Systems (ISYS), an IBM partner, he is a founding engineer on an enterprise AI assistant live for about 70 staff.",
   "He co-authored research on multi-hop Arabic LLM reasoning, published by Elsevier in Procedia Computer Science, and holds the Microsoft Certified: Azure AI Engineer Associate certification.",
 ];
 
@@ -65,7 +65,7 @@ export const introduction: string[] = [
 // show it as "Last updated", and the sitemap and structured data repeat it, so
 // bump it with any content change. A build date would claim changes that never
 // happened, and search engines learn to ignore a date that always moves.
-export const contentUpdated = "2026-10-27";
+export const contentUpdated = "2026-11-26";
 
 export interface Highlight {
   title: string;
@@ -78,9 +78,9 @@ export interface Highlight {
 // Ahmed's own ranking, used by the chatbot for "most impressive" and "recent" questions.
 export const highlights: Highlight[] = [
   {
-    title: "SIA at Intelligent Systems (ISYS)",
+    title: "Enterprise AI assistant at Intelligent Systems (ISYS)",
     period: "Feb. 2025 - Present",
-    pointer: "His main work and largest system, where he is a founding engineer; details under Projects (SIA, with a case study) and the AI Engineer role in Professional Experience.",
+    pointer: "His main work and largest system, where he is a founding engineer; details under the AI Engineer role in Professional Experience.",
   },
   {
     title: "Comic Spot",

@@ -27,8 +27,8 @@ const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1
 /**
  * A project's full write-up, shown in the Projects tab in place of the cards at
  * /projects/<slug>. The server renders it for that address too, so search engines
- * and AI assistants read the same text a visitor does. SIA's case study, once a
- * pop-up, is the #case-study part of its write-up.
+ * and AI assistants read the same text a visitor does. A case study, when a
+ * project has one, is the #case-study part of its write-up.
  */
 export default function ProjectDetail({
   project,
@@ -50,7 +50,7 @@ export default function ProjectDetail({
   // The same placeholder rules as the cards: "#" and joke strings are not links.
   const demo = project.demo_available && project.demo?.startsWith("http") ? project.demo : undefined
   const code = project.code_available && project.github?.startsWith("http") ? project.github : undefined
-  // SIA lists its diagrams among the screenshots too; show each image once.
+  // A project may list its diagrams among the screenshots too; show each image once.
   const images = [...project.images, ...(study?.diagrams ?? [])].filter(
     (image, index, all) => image.src !== "/in-development.png" && all.findIndex((other) => other.src === image.src) === index
   )

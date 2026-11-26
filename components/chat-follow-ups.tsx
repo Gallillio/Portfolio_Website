@@ -22,8 +22,8 @@ interface ChatFollowUpsProps {
  */
 const TOPICS: { match: RegExp; questions: string[] }[] = [
   {
-    match: /\b(sia|isys|intelligent systems|watsonx|enterprise)\b/i,
-    questions: ["What did he build at ISYS?", "Which AI providers does SIA use?", "What are his other projects?"],
+    match: /\b(isys|intelligent systems|watsonx|enterprise)\b/i,
+    questions: ["What did he build at ISYS?", "Which AI providers does his ISYS assistant use?", "What are his other projects?"],
   },
   {
     match: /\b(project|built|build|app|comic spot|lango|gptube|swipelabs)\b/i,
@@ -39,7 +39,7 @@ const TOPICS: { match: RegExp; questions: string[] }[] = [
   },
   {
     match: /\b(contact|email|phone|hire|reach)\b/i,
-    questions: ["What is SIA and what did he build?", "What has he built recently?", "What are his strongest skills?"],
+    questions: ["What did he build at ISYS?", "What has he built recently?", "What are his strongest skills?"],
   },
 ]
 
